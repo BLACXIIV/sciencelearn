@@ -4,19 +4,22 @@ import { signOut } from "../services/auth";
 
 // Add entries here to extend the sidebar — no layout changes needed.
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", end: true },
-  { to: "/lessons", label: "Manage Lessons", end: false },
+  { to: "/teacher", label: "Dashboard", end: true },
+  { to: "/teacher/lessons", label: "Manage Lessons", end: false },
 ];
 
-/** Authenticated shell: sidebar nav + header + routed content. Rendered inside RequireTeacher. */
+/** Staff shell: sidebar nav + header + routed content. Rendered inside RequireTeacher. */
 export default function AppLayout() {
   const { profile } = useAuth();
+  const items = profile?.role === "admin"
+    ? [...NAV_ITEMS, { to: "/teacher/users", label: "Users", end: false }]
+    : NAV_ITEMS;
   return (
     <div className="shell">
       <aside>
-        <h2>ScienceLearn</h2>
+        <h2><span className="brand-mark">⚛</span>ScienceLearn</h2>
         <nav>
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end}>{item.label}</NavLink>
           ))}
         </nav>

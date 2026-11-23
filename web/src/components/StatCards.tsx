@@ -5,7 +5,10 @@ export default function StatCards({ stats }: { stats: StatItem[] }) {
   return (
     <section className="stats">
       {stats.map((s) => (
-        <div key={s.label} className="card stat"><span>{s.label}</span><strong>{s.value}</strong></div>
+        <div key={s.label} className="card stat">
+          {s.icon && <span className="stat-ico" style={{ background: `${s.color}22` }}>{s.icon}</span>}
+          <span>{s.label}</span><strong>{s.value}</strong>
+        </div>
       ))}
     </section>
   );

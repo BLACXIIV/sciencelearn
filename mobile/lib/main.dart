@@ -16,6 +16,11 @@ import 'features/account/account_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/review/review_screen.dart';
 import 'features/shell.dart';
+import 'features/teacher/teacher_shell.dart';
+import 'features/teacher/teacher_dashboard_screen.dart';
+import 'features/teacher/teacher_lessons_screen.dart';
+import 'features/teacher/students_screen.dart';
+import 'features/teacher/users_screen.dart';
 
 // flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
 // (same project as web/.env's VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY)
@@ -77,6 +82,28 @@ final _router = GoRouter(
     GoRoute(
       path: '/quiz/:id',
       builder: (_, s) => QuizRunnerScreen(id: s.pathParameters['id']!, title: s.uri.queryParameters['t'] ?? 'Quiz'),
+    ),
+    // Teacher/admin portal — same features as the web staff portal.
+    // Branch indexes: 0 dashboard, 1 lessons, 2 students, 3 users, 4 account.
+    StatefulShellRoute.indexedStack(
+      builder: (_, __, shell) => TeacherShell(shell: shell),
+      branches: [
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/teacher', builder: (_, __) => const TeacherDashboardScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/teacher/lessons', builder: (_, __) => const TeacherLessonsScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/teacher/students', builder: (_, __) => const StudentsScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/teacher/users', builder: (_, __) => const UsersScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/teacher/account', builder: (_, __) => const AccountScreen()),
+        ]),
+      ],
     ),
   ],
 );

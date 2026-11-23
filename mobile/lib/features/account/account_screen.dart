@@ -19,6 +19,11 @@ class AccountScreen extends StatelessWidget {
         const AppCard(child: ListTile(leading: Icon(Icons.account_balance), title: Text('With the support of'), subtitle: Text('The Notre Dame of Isulan, Inc.'))),
         const SizedBox(height: 8),
         const AppCard(child: ListTile(leading: Icon(Icons.menu_book), title: Text('References'), subtitle: Text('DepEd MATATAG Curriculum, Trusted Scientific Resources'))),
+        const SizedBox(height: 20),
+        Center(
+          child: Text('— Together for a Brighter Future —',
+              style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        ),
         const SizedBox(height: 24),
         OutlinedButton.icon(
           icon: const Icon(Icons.logout),

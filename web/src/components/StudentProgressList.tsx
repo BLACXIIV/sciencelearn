@@ -5,6 +5,7 @@ export default function StudentProgressList({ students }: { students: StudentPro
     <div className="card">
       {students.map((s) => (
         <div key={s.student_id} className="perf">
+          <span className="avatar">{(s.full_name || "?")[0].toUpperCase()}</span>
           <span>{s.full_name}</span>
           <div className="bar"><div style={{ width: `${s.lessons_pct}%` }} /></div>
           <span>{s.lessons_pct}%</span>

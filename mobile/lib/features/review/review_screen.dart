@@ -29,6 +29,7 @@ class ReviewScreen extends ConsumerWidget {
         children: [
           for (final t in tiles)
             AppCard(
+              color: pastelBg(context, t.$3),
               onTap: t.$4,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Icon(t.$2, size: 44, color: t.$3),

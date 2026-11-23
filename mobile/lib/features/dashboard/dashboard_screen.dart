@@ -70,7 +70,7 @@ class DashboardScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(8),
                   onTap: () => const ['/lessons', '/progress', '/account'].contains(it.$4) ? context.go(it.$4) : context.push(it.$4),
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(it.$2, color: it.$3, size: 30),
+                    iconChip(context, it.$2, it.$3, size: 46, iconSize: 26),
                     const SizedBox(height: 6),
                     Text(it.$1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                   ]),
@@ -78,8 +78,13 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Text('Recent Activity', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            const Text('Recent Activity', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            TextButton(
+              onPressed: () => context.go('/progress'),
+              child: Text('View All', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            ),
+          ]),
           if (recent.hasValue && (recent.valueOrNull ?? const <Json>[]).isEmpty)
             const AppCard(child: EmptyState(icon: Icons.history, title: 'No activity yet', message: 'Open a lesson to get started.')),
           for (final r in recent.valueOrNull ?? const <Json>[])

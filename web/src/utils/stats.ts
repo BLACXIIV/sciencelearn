@@ -3,6 +3,8 @@ import type { StudentProgress } from "../types";
 export interface StatItem {
   label: string;
   value: string | number;
+  icon?: string;
+  color?: string;
 }
 
 /** Derives the dashboard stat cards from raw progress rows. Pure — safe to unit test. */
@@ -13,9 +15,9 @@ export function computeClassStats(students: StudentProgress[], completedLessons:
   const gain = both.length ? Math.round(both.reduce((a, s) => a + (s.post_score! - s.pre_score!), 0) / both.length) : 0;
 
   return [
-    { label: "Total Students", value: students.length },
-    { label: "Completed Lessons", value: completedLessons },
-    { label: "Average Score", value: `${avg}%` },
-    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%` },
+    { label: "Total Students", value: students.length, icon: "👥", color: "#2563eb" },
+    { label: "Completed Lessons", value: completedLessons, icon: "✅", color: "#15803d" },
+    { label: "Average Score", value: `${avg}%`, icon: "📊", color: "#d97706" },
+    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%`, icon: "📈", color: "#7c3aed" },
   ];
 }

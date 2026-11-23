@@ -17,6 +17,20 @@ class AppColors {
 Color adaptiveColor(BuildContext context, Color light, Color dark) =>
     Theme.of(context).brightness == Brightness.dark ? dark : light;
 
+/// Soft tinted background behind a colored icon (mockup's pastel tiles/chips).
+/// Light: c at ~14%. Dark: stronger alpha so the tint survives on dark surfaces.
+Color pastelBg(BuildContext context, Color c) => c.withValues(
+    alpha: Theme.of(context).brightness == Brightness.dark ? 0.30 : 0.14);
+
+/// Rounded pastel icon container used on tiles, list rows, and stat cards.
+Widget iconChip(BuildContext context, IconData icon, Color color,
+        {double size = 42, double iconSize = 24}) =>
+    Container(
+      width: size, height: size,
+      decoration: BoxDecoration(color: pastelBg(context, color), borderRadius: BorderRadius.circular(12)),
+      child: Icon(icon, color: color, size: iconSize),
+    );
+
 ThemeData buildTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(
     seedColor: AppColors.blue,

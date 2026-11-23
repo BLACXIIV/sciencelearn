@@ -50,4 +50,49 @@ export interface ClassDashboard {
   completedLessons: number;
 }
 
+// ---------- Student portal ----------
+
+/** lessons row joined with the caller's own lesson_progress (0 or 1 rows). */
+export type LessonWithProgress = Lesson & { lesson_progress: { percent: number }[] };
+
+export type AssessmentKind =
+  | "pre_test" | "post_test" | "topic_quiz" | "problem_solving" | "final_challenge" | "practice";
+
+export interface Assessment {
+  id: string;
+  lesson_id: string | null;
+  kind: AssessmentKind;
+  title: string;
+  description: string;
+  time_limit_sec: number | null;
+  is_published: boolean;
+  created_at: string;
+}
+
+/** questions_public shape — correct_index is never exposed to students. */
+export interface QuizQuestion {
+  id: string;
+  assessment_id: string;
+  prompt: string;
+  choices: string[];
+  position: number;
+}
+
+export interface AttemptResult {
+  attempt_id: string;
+  score: number;
+  correct: number;
+  total: number;
+}
+
+export interface RecentActivity {
+  percent: number;
+  updated_at: string;
+  lessons: { title: string } | null;
+}
+
+export interface Flashcard { id: string; lesson_id: string | null; front: string; back: string }
+export interface Formula { id: string; lesson_id: string | null; title: string; expression: string; notes: string | null }
+export interface KeyTerm { id: string; lesson_id: string | null; term: string; definition: string }
+
 export type R2Folder = "thumbnails" | "lessons" | "avatars";

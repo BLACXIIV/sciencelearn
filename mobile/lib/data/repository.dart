@@ -55,6 +55,44 @@ class Repo {
   Future<List<Json>> formulas() async => List<Json>.from(await sb.from('formulas').select());
   Future<List<Json>> keyTerms() async => List<Json>.from(await sb.from('key_terms').select());
 
+  // ---------- teacher portal ----------
+
+  /// All lessons (staff bypass the is_published filter via RLS).
+  Future<List<Json>> allLessons() async =>
+      List<Json>.from(await sb.from('lessons').select().order('position'));
+
+  Future<void> createLesson(String title, String subject, String objectives) async {
+    final existing = await sb.from('lessons').select('id');
+    await sb.from('lessons').insert({
+      'title': title,
+      'subject': subject,
+      'objectives': objectives,
+      'position': existing.length + 1,
+      'is_published': false,
+      'created_by': uid,
+    });
+  }
+
+  Future<void> setPublished(String lessonId, bool publish) async =>
+      await sb.from('lessons').update({'is_published': publish}).eq('id', lessonId);
+
+  /// Every student's progress row (teachers read all via RLS).
+  Future<List<Json>> classProgress() async =>
+      List<Json>.from(await sb.from('v_student_progress').select().order('full_name'));
+
+  /// Count of fully completed lesson_progress rows (dashboard stat).
+  Future<int> completedLessonsCount() async =>
+      (await sb.from('lesson_progress').select('lesson_id').eq('percent', 100)).length;
+
+  // ---------- admin ----------
+
+  Future<List<Json>> allProfiles() async =>
+      List<Json>.from(await sb.from('profiles').select('id, full_name, role').order('full_name'));
+
+  /// Change a user's role. Needs the "profiles admin write" policy (0004).
+  Future<void> setRole(String userId, String role) async =>
+      await sb.from('profiles').update({'role': role}).eq('id', userId);
+
   /// Signed GET URL for a Cloudflare R2 object (via Supabase Edge Function).
   Future<String?> signedUrl(String? key) async {
     if (key == null || key.isEmpty) return null;
@@ -70,3 +108,11 @@ final recentProvider = FutureProvider((ref) => ref.read(repoProvider).recentActi
 final subjectProvider = StateProvider<String?>((_) => null);
 final lessonsProvider = FutureProvider((ref) =>
     ref.read(repoProvider).lessons(subject: ref.watch(subjectProvider)));
+
+// teacher portal
+final classProgressProvider = FutureProvider((ref) => ref.read(repoProvider).classProgress());
+final completedCountProvider = FutureProvider((ref) => ref.read(repoProvider).completedLessonsCount());
+final allLessonsProvider = FutureProvider((ref) => ref.read(repoProvider).allLessons());
+
+// admin
+final profilesProvider = FutureProvider((ref) => ref.read(repoProvider).allProfiles());

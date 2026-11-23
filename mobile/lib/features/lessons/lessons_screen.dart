@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,11 +58,7 @@ class LessonsScreen extends ConsumerWidget {
                   return AppCard(
                     onTap: () => context.push('/lesson/${l['id']}'),
                     child: Row(children: [
-                      Container(
-                        width: 64, height: 64,
-                        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(12)),
-                        child: Icon(Icons.science, size: 30, color: Theme.of(context).colorScheme.onPrimaryContainer),
-                      ),
+                      _LessonThumb(thumbKey: l['thumbnail_key'] as String?),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -81,6 +78,39 @@ class LessonsScreen extends ConsumerWidget {
           ),
         ),
       ]),
+    );
+  }
+}
+
+/// Lesson thumbnail — resolves the R2 object key to a signed URL, then caches
+/// the image. Falls back to the science icon when there is no image.
+class _LessonThumb extends ConsumerWidget {
+  final String? thumbKey;
+  const _LessonThumb({required this.thumbKey});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final repo = ref.read(repoProvider);
+    Widget fallback() => Container(
+          width: 64, height: 64,
+          decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(12)),
+          child: Icon(Icons.science, size: 30, color: scheme.onPrimaryContainer),
+        );
+    if (thumbKey == null || thumbKey!.isEmpty) return fallback();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: FutureBuilder<String?>(
+        future: repo.signedUrl(thumbKey),
+        builder: (_, snap) => snap.data == null
+            ? fallback()
+            : CachedNetworkImage(
+                imageUrl: snap.data!,
+                width: 64, height: 64, fit: BoxFit.cover,
+                placeholder: (_, __) => fallback(),
+                errorWidget: (_, __, ___) => fallback(),
+              ),
+      ),
     );
   }
 }
