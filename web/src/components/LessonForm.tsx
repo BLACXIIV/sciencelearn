@@ -29,13 +29,19 @@ export default function LessonForm({ onCreate, pending, error }: Props) {
   return (
     <form className="card form" onSubmit={onSubmit}>
       <h3>New lesson</h3>
-      <input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-      <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
-        {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
-      </select>
-      <textarea placeholder="Objectives" value={objectives} onChange={(e) => setObjectives(e.target.value)} />
-      <label>Thumbnail <input type="file" accept="image/*" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} /></label>
-      <label>Material (PDF/video) <input type="file" onChange={(e) => setMaterial(e.target.files?.[0] ?? null)} /></label>
+      <label className="field"><span>Title</span>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+      </label>
+      <label className="field"><span>Subject</span>
+        <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
+          {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      </label>
+      <label className="field"><span>Objectives</span>
+        <textarea value={objectives} onChange={(e) => setObjectives(e.target.value)} />
+      </label>
+      <label className="field"><span>Thumbnail</span> <input type="file" accept="image/*" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} /></label>
+      <label className="field"><span>Material (PDF/video)</span> <input type="file" onChange={(e) => setMaterial(e.target.files?.[0] ?? null)} /></label>
       <button disabled={pending}>{pending ? "Uploading…" : "Create lesson"}</button>
       {Boolean(error) && <p className="err">{String(error)}</p>}
     </form>

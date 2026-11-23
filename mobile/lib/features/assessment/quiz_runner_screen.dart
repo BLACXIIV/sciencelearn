@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme.dart';
 import '../../data/repository.dart';
 
 class QuizRunnerScreen extends ConsumerStatefulWidget {
@@ -22,7 +23,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
       body: _result != null
           ? Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.emoji_events, size: 72, color: Colors.amber),
+                const Icon(Icons.emoji_events, size: 72, color: AppColors.orange),
                 Text('${_result!['score']}%', style: Theme.of(context).textTheme.displayMedium),
                 Text('${_result!['correct']} / ${_result!['total']} correct'),
                 const SizedBox(height: 16),
@@ -37,6 +38,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
               builder: (context, snap) {
                 if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                 final qs = snap.data!;
+                final answered = _answers.length;
                 return ListView(padding: const EdgeInsets.all(16), children: [
                   for (var i = 0; i < qs.length; i++) ...[
                     Text('${i + 1}. ${qs[i]['prompt']}', style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -50,13 +52,20 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                     ),
                     const Divider(),
                   ],
+                  const SizedBox(height: 4),
+                  Text('$answered of ${qs.length} answered',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 8),
                   FilledButton(
-                    onPressed: _busy ? null : () async {
+                    onPressed: (_busy || answered < qs.length) ? null : () async {
                       setState(() => _busy = true);
                       final r = await repo.submit(widget.id, _answers);
                       setState(() { _result = r; _busy = false; });
                     },
-                    child: const Text('Submit'),
+                    child: _busy
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Submit Answers'),
                   ),
                 ]);
               },

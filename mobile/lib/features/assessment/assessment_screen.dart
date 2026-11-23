@@ -23,11 +23,11 @@ class AssessmentScreen extends ConsumerWidget {
                   child: AppCard(
                     onTap: () => context.push('/quiz/${a['id']}?t=${Uri.encodeComponent(a['title'])}'),
                     child: Row(children: [
-                      Icon(_icon(a['kind']), color: AppColors.blue),
+                      Icon(_icon(a['kind']), color: adaptiveColor(context, AppColors.teal, const Color(0xFF2DD4BF))),
                       const SizedBox(width: 12),
                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(a['title'], style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text(a['description'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                        Text(a['description'] ?? '', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ])),
                       const Icon(Icons.chevron_right),
                     ]),

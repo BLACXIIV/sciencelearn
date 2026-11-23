@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signInWithPassword } from "../services/auth";
 
 export default function Login() {
@@ -22,10 +22,18 @@ export default function Login() {
     <form className="card login" onSubmit={submit}>
       <h1>ScienceLearn</h1>
       <p>Teacher Portal</p>
-      <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+      <label className="field"><span>Email</span>
+        <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      </label>
+      <label className="field"><span>Password</span>
+        <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+      </label>
       {err && <p className="err">{err}</p>}
       <button>Sign in</button>
+      <Link to="/signup" className="btn-secondary">Create an account</Link>
+      <div className="links">
+        <Link to="/forgot-password">Forgot password?</Link>
+      </div>
     </form>
   );
 }

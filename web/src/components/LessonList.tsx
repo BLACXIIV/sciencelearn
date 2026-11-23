@@ -12,9 +12,10 @@ export default function LessonList({ lessons, onTogglePublish }: Props) {
       {lessons.map((l) => (
         <div key={l.id} className="perf">
           <span>{l.title} <small>({l.subject})</small></span>
-          <button onClick={() => onTogglePublish(l)}>{l.is_published ? "Unpublish" : "Publish"}</button>
+          <button className="secondary" onClick={() => onTogglePublish(l)}>{l.is_published ? "Unpublish" : "Publish"}</button>
         </div>
       ))}
+      {lessons.length === 0 && <p className="empty">No lessons yet — create the first one above.</p>}
     </div>
   );
 }

@@ -29,3 +29,30 @@ export async function signInWithPassword(email: string, password: string): Promi
 export const signOut = (): Promise<void> => supabase.auth.signOut().then(({ error }) => {
   if (error) throw error;
 });
+
+/** Creates an account (DB trigger assigns role=student).
+ *  Returns true when a session was issued (email confirmation disabled),
+ *  false when the user must confirm their email first. */
+export async function signUp(email: string, password: string, fullName: string, role: string): Promise<boolean> {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName, role }, emailRedirectTo: window.location.origin },
+  });
+  if (error) throw error;
+  return data.session !== null;
+}
+
+/** Emails a password-reset link that lands on /reset-password. */
+export async function sendPasswordReset(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  if (error) throw error;
+}
+
+/** Called from /reset-password once the recovery link has established a session. */
+export async function updatePassword(newPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}

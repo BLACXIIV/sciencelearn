@@ -24,16 +24,17 @@ class ProgressScreen extends ConsumerWidget {
             SizedBox(
               width: 110, height: 110,
               child: Stack(alignment: Alignment.center, children: [
-                CircularProgressIndicator(value: overall / 100, strokeWidth: 12, color: AppColors.green, backgroundColor: const Color(0xFFE2E8F0)),
+                CircularProgressIndicator(value: overall / 100, strokeWidth: 12, color: AppColors.success,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest),
                 Column(mainAxisSize: MainAxisSize.min, children: [
                   Text('${overall.round()}%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-                  const Text('Overall', style: TextStyle(fontSize: 11)),
+                  const Text('Overall', style: TextStyle(fontSize: 12)),
                 ]),
               ]),
             ),
             const SizedBox(width: 20),
             Expanded(child: Column(children: [
-              _row('Lessons', lessons, AppColors.green),
+              _row('Lessons', lessons, AppColors.success),
               _row('Quizzes', quizzes, AppColors.blue),
               _row('Post-Test', post?.toDouble() ?? 0, AppColors.orange),
             ])),
@@ -48,10 +49,10 @@ class ProgressScreen extends ConsumerWidget {
               height: 140,
               child: Row(crossAxisAlignment: CrossAxisAlignment.end, mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 _col('Pre-Test', pre?.toDouble() ?? 0, AppColors.blue),
-                _col('Post-Test', post?.toDouble() ?? 0, AppColors.green),
+                _col('Post-Test', post?.toDouble() ?? 0, AppColors.success),
                 if (gain != null)
                   Text('${gain >= 0 ? '+' : ''}$gain% Gain',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.green)),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.success)),
               ]),
             ),
           ]),
@@ -72,6 +73,6 @@ class ProgressScreen extends ConsumerWidget {
         Text('${v.round()}%'),
         Container(width: 48, height: v * 1.0, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(6))),
         const SizedBox(height: 4),
-        Text(l, style: const TextStyle(fontSize: 11)),
+        Text(l, style: const TextStyle(fontSize: 12)),
       ]);
 }

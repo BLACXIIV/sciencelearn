@@ -16,19 +16,19 @@ class DashboardScreen extends ConsumerWidget {
     final pct = ((prog.valueOrNull?['lessons_pct'] ?? 0) as num).toDouble();
 
     final items = <(String, IconData, Color, String)>[
-      ('My Lessons', Icons.menu_book, AppColors.blue, '/lessons'),
-      ('Assessment Center', Icons.fact_check, Colors.teal, '/assessments'),
-      ('Review Center', Icons.star, AppColors.orange, '/review'),
-      ('Progress Tracker', Icons.bar_chart, AppColors.green, '/progress'),
-      ('Credits', Icons.info, AppColors.blue, '/more'),
+      ('My Lessons', Icons.menu_book, adaptiveColor(context, AppColors.blue, const Color(0xFF8FB4F8)), '/lessons'),
+      ('Assessment Center', Icons.fact_check, adaptiveColor(context, AppColors.teal, const Color(0xFF2DD4BF)), '/assessments'),
+      ('Review Center', Icons.style, adaptiveColor(context, AppColors.purple, const Color(0xFFB794F6)), '/review'),
+      ('Progress Tracker', Icons.bar_chart, adaptiveColor(context, AppColors.success, const Color(0xFF4ADE80)), '/progress'),
+      ('Account', Icons.person, adaptiveColor(context, AppColors.navy, const Color(0xFF8FB4F8)), '/account'),
     ];
 
     return ListView(padding: EdgeInsets.zero, children: [
       Container(
-        padding: const EdgeInsets.fromLTRB(20, 56, 20, 24),
-        decoration: const BoxDecoration(
-          color: AppColors.navy,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 20, 20, 24),
+        decoration: BoxDecoration(
+          color: adaptiveColor(context, AppColors.navy, AppColors.navyDark),
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
         ),
         child: Row(children: [
           const CircleAvatar(radius: 28, child: Icon(Icons.person)),
@@ -68,11 +68,11 @@ class DashboardScreen extends ConsumerWidget {
               for (final it in items)
                 AppCard(
                   padding: const EdgeInsets.all(8),
-                  onTap: () => const ['/lessons', '/progress', '/more'].contains(it.$4) ? context.go(it.$4) : context.push(it.$4),
+                  onTap: () => const ['/lessons', '/progress', '/account'].contains(it.$4) ? context.go(it.$4) : context.push(it.$4),
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(it.$2, color: it.$3, size: 30),
                     const SizedBox(height: 6),
-                    Text(it.$1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+                    Text(it.$1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                   ]),
                 ),
             ],
@@ -80,11 +80,13 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(height: 20),
           const Text('Recent Activity', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
+          if (recent.hasValue && (recent.valueOrNull ?? const <Json>[]).isEmpty)
+            const AppCard(child: EmptyState(icon: Icons.history, title: 'No activity yet', message: 'Open a lesson to get started.')),
           for (final r in recent.valueOrNull ?? const <Json>[])
             AppCard(
               child: Row(children: [
                 Icon(r['percent'] == 100 ? Icons.check_circle : Icons.timelapse,
-                    color: r['percent'] == 100 ? AppColors.green : AppColors.orange),
+                    color: r['percent'] == 100 ? AppColors.success : AppColors.orange),
                 const SizedBox(width: 10),
                 Expanded(child: Text('${r['lessons']?['title'] ?? 'Lesson'}\n${r['percent'] == 100 ? 'Completed' : 'In progress'} • ${r['percent']}%')),
               ]),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme.dart';
 
@@ -12,17 +13,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _pass = TextEditingController();
   bool _busy = false;
+  bool _obscure = true;
   String? _err;
 
-  Future<void> _go({required bool signUp}) async {
+  Future<void> _signIn() async {
     setState(() { _busy = true; _err = null; });
     try {
-      final auth = Supabase.instance.client.auth;
-      if (signUp) {
-        await auth.signUp(email: _email.text.trim(), password: _pass.text, data: {'full_name': _email.text.split('@').first});
-      } else {
-        await auth.signInWithPassword(email: _email.text.trim(), password: _pass.text);
-      }
+      await Supabase.instance.client.auth
+          .signInWithPassword(email: _email.text.trim(), password: _pass.text);
     } on AuthException catch (e) {
       setState(() => _err = e.message);
     } finally {
@@ -44,16 +42,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.science, size: 56, color: AppColors.blue),
+                    Icon(Icons.science, size: 56, color: Theme.of(context).colorScheme.primary),
                     Text('ScienceLearn', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
                     const Text('Learn • Explore • Excel'),
                     const SizedBox(height: 20),
-                    TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress),
-                    TextField(controller: _pass, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-                    if (_err != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_err!, style: const TextStyle(color: Colors.red))),
+                    AutofillGroup(child: Column(children: [
+                      TextField(
+                        controller: _email,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        textInputAction: TextInputAction.next,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _pass,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                            tooltip: _obscure ? 'Show password' : 'Hide password',
+                            onPressed: () => setState(() => _obscure = !_obscure),
+                          ),
+                        ),
+                        obscureText: _obscure,
+                        autofillHints: const [AutofillHints.password],
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _busy ? null : _signIn(),
+                      ),
+                    ])),
+                    if (_err != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_err!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
                     const SizedBox(height: 16),
-                    FilledButton(onPressed: _busy ? null : () => _go(signUp: false), child: const Text('Sign in')),
-                    TextButton(onPressed: _busy ? null : () => _go(signUp: true), child: const Text('Create student account')),
+                    FilledButton(onPressed: _busy ? null : _signIn, child: const Text('Sign in')),
+                    TextButton(onPressed: _busy ? null : () => context.push('/signup'), child: const Text('Create an account')),
                   ]),
                 ),
               ),

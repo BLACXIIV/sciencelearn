@@ -17,7 +17,7 @@ class ReviewScreen extends ConsumerWidget {
     final tiles = <(String, IconData, Color, VoidCallback)>[
       ('Flashcards', Icons.style, AppColors.purple,
           () => open('Flashcards', repo.flashcards(), (r) => r['front'], (r) => r['back'])),
-      ('Formula Guide', Icons.functions, AppColors.green,
+      ('Formula Guide', Icons.functions, AppColors.teal,
           () => open('Formula Guide', repo.formulas(), (r) => r['title'], (r) => r['expression'])),
       ('Key Terms', Icons.lightbulb, AppColors.orange,
           () => open('Key Terms', repo.keyTerms(), (r) => r['term'], (r) => r['definition'])),
@@ -54,7 +54,9 @@ class _ListPage extends StatelessWidget {
           future: future,
           builder: (_, snap) => AsyncView<List<Json>>(
             snap: snap,
-            builder: (rows) => ListView.separated(
+            builder: (rows) => rows.isEmpty
+                ? const EmptyState(icon: Icons.inbox_outlined, title: 'Nothing here yet', message: 'Check back soon.')
+                : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: rows.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
