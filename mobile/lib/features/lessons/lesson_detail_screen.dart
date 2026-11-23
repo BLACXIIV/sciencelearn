@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/icons.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
@@ -28,7 +29,7 @@ class LessonDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   if (l['content_key'] != null)
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.open_in_new),
+                      icon: const Icon(AppIcons.openExternal),
                       label: const Text('Open lesson material'),
                       onPressed: () async {
                         final url = await repo.signedUrl(l['content_key']); // R2 signed URL

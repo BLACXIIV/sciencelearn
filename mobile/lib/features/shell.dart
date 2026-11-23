@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../core/icons.dart';
 import '../core/widgets.dart';
 import '../data/repository.dart';
 
@@ -12,14 +13,14 @@ class Shell extends StatelessWidget {
   Widget build(BuildContext context) => RoleGate(
         child: Scaffold(
           body: shell,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: shell.currentIndex,
-            onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-              NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Lessons'),
-              NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: 'Progress'),
-              NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Account'),
+          bottomNavigationBar: IslandNavBar(
+            currentIndex: shell.currentIndex,
+            onSelect: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+            items: const [
+              (icon: AppIcons.home, label: 'Home'),
+              (icon: AppIcons.lessons, label: 'Lessons'),
+              (icon: AppIcons.progress, label: 'Progress'),
+              (icon: AppIcons.account, label: 'Account'),
             ],
           ),
         ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/icons.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import 'lesson_activities_screen.dart';
 
 /// Mirrors Manage Lessons on web: create form + publish/unpublish list.
 /// Thumbnail/material file upload stays web-only (no file picker on mobile yet).
@@ -78,10 +80,12 @@ class _TeacherLessonsState extends ConsumerState<TeacherLessonsScreen> {
           error: (e, _) => ErrorState(onRetry: () => ref.invalidate(allLessonsProvider)),
           data: (rows) => Column(children: [
             if (rows.isEmpty)
-              const AppCard(child: EmptyState(icon: Icons.menu_book_outlined, title: 'No lessons yet',
+              const AppCard(child: EmptyState(icon: AppIcons.lessons, title: 'No lessons yet',
                   message: 'Create the first one above.')),
             for (final l in rows)
               AppCard(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => LessonActivitiesScreen(lesson: l))),
                 child: Row(children: [
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('${l['title']}', style: const TextStyle(fontWeight: FontWeight.w600)),

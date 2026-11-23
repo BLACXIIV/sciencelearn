@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/icons.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
@@ -16,7 +17,7 @@ class StudentsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(onRetry: () => ref.invalidate(classProgressProvider)),
         data: (rows) => rows.isEmpty
-            ? const EmptyState(icon: Icons.groups_outlined, title: 'No students yet')
+            ? const EmptyState(icon: AppIcons.students, title: 'No students yet')
             : ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: rows.length,

@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/icons.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
@@ -44,7 +46,7 @@ class LessonsScreen extends ConsumerWidget {
               child: rows.isEmpty
                   ? ListView(children: const [
                       SizedBox(height: 80),
-                      EmptyState(icon: Icons.menu_book_outlined, title: 'No lessons here yet',
+                      EmptyState(icon: AppIcons.lessons, title: 'No lessons here yet',
                           message: 'Try another subject, or check back soon.'),
                     ])
                   : ListView.separated(
@@ -69,7 +71,7 @@ class LessonsScreen extends ConsumerWidget {
                           Row(children: [Expanded(child: Bar(pct / 100)), const SizedBox(width: 8), Text('$pct%')]),
                         ]),
                       ),
-                      const Icon(Icons.chevron_right),
+                      const Icon(AppIcons.chevron, color: AppColors.muted),
                     ]),
                   );
                 },
@@ -90,12 +92,11 @@ class _LessonThumb extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
     final repo = ref.read(repoProvider);
     Widget fallback() => Container(
           width: 64, height: 64,
-          decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(12)),
-          child: Icon(Icons.science, size: 30, color: scheme.onPrimaryContainer),
+          decoration: BoxDecoration(color: AppColors.surface2, borderRadius: BorderRadius.circular(12)),
+          child: const Icon(AppIcons.science, size: 30, color: AppColors.muted),
         );
     if (thumbKey == null || thumbKey!.isEmpty) return fallback();
     return ClipRRect(

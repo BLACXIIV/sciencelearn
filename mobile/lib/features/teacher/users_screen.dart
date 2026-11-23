@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/icons.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
@@ -18,7 +19,7 @@ class UsersScreen extends ConsumerWidget {
     if (me.valueOrNull?['role'] != 'admin') {
       return const Scaffold(
         appBar: null,
-        body: EmptyState(icon: Icons.lock_outline, title: 'Admins only'),
+        body: EmptyState(icon: AppIcons.lock, title: 'Admins only'),
       );
     }
 
@@ -58,7 +59,7 @@ class UsersScreen extends ConsumerWidget {
                     for (final r in _roles)
                       PopupMenuItem(value: r, child: Text(r == u['role'] ? '$r ✓' : r)),
                   ],
-                  child: const Icon(Icons.edit_outlined),
+                  child: const Icon(AppIcons.edit),
                 ),
               ]),
             );

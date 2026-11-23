@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/icons.dart';
 import '../../core/theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) => Scaffold(
         body: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [AppColors.navy, AppColors.blue], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            gradient: LinearGradient(colors: [AppColors.bg, AppColors.surface2], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           ),
           child: Center(
             child: SingleChildScrollView(
@@ -42,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.science, size: 56, color: Theme.of(context).colorScheme.primary),
+                    const EmojiIcon(AppEmoji.science, size: 72),
                     Text('ScienceLearn', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
                     const Text('Learn • Explore • Excel'),
                     const SizedBox(height: 20),
@@ -60,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           suffixIcon: IconButton(
-                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                            icon: Icon(_obscure ? AppIcons.show : AppIcons.hide),
                             tooltip: _obscure ? 'Show password' : 'Hide password',
                             onPressed: () => setState(() => _obscure = !_obscure),
                           ),

@@ -1,9 +1,10 @@
+import type { IconName } from "../components/icons";
 import type { StudentProgress } from "../types";
 
 export interface StatItem {
   label: string;
   value: string | number;
-  icon?: string;
+  icon?: IconName;
   color?: string;
 }
 
@@ -15,9 +16,9 @@ export function computeClassStats(students: StudentProgress[], completedLessons:
   const gain = both.length ? Math.round(both.reduce((a, s) => a + (s.post_score! - s.pre_score!), 0) / both.length) : 0;
 
   return [
-    { label: "Total Students", value: students.length, icon: "👥", color: "#2563eb" },
-    { label: "Completed Lessons", value: completedLessons, icon: "✅", color: "#15803d" },
-    { label: "Average Score", value: `${avg}%`, icon: "📊", color: "#d97706" },
-    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%`, icon: "📈", color: "#7c3aed" },
+    { label: "Total Students", value: students.length, icon: "students", color: "#4c8dff" },
+    { label: "Completed Lessons", value: completedLessons, icon: "done", color: "#3ecf8e" },
+    { label: "Average Score", value: `${avg}%`, icon: "progress", color: "#f5a623" },
+    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%`, icon: "gain", color: "#9b7bff" },
   ];
 }

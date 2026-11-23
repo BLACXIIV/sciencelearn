@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Lesson } from "../types";
 
 interface Props {
@@ -12,10 +13,11 @@ export default function LessonList({ lessons, onTogglePublish }: Props) {
       {lessons.map((l) => (
         <div key={l.id} className="perf">
           <span>{l.title} <small>({l.subject})</small></span>
+          <Link className="link-btn" to={`/teacher/lessons/${l.id}/activities`}>Activities</Link>
           <button className="secondary" onClick={() => onTogglePublish(l)}>{l.is_published ? "Unpublish" : "Publish"}</button>
         </div>
       ))}
-      {lessons.length === 0 && <p className="empty">No lessons yet — create the first one above.</p>}
+      {lessons.length === 0 && <p className="empty">No lessons yet, create the first one above.</p>}
     </div>
   );
 }

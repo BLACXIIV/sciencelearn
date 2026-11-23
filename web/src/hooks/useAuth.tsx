@@ -3,8 +3,8 @@ import type { Session } from "@supabase/supabase-js";
 import type { Profile } from "../types";
 import { fetchProfile, getSession, onAuthStateChange } from "../services/auth";
 
-type Ctx = { session: Session | null; profile: Profile | null; loading: boolean };
-const AuthCtx = createContext<Ctx>({ session: null, profile: null, loading: true });
+type Ctx = { session: Session | null; profile: Profile | null; loading: boolean; refreshProfile: () => Promise<void> };
+const AuthCtx = createContext<Ctx>({ session: null, profile: null, loading: true, refreshProfile: async () => {} });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -24,6 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((p) => { setProfile(p); setLoading(false); });
   }, [session]);
 
-  return <AuthCtx.Provider value={{ session, profile, loading }}>{children}</AuthCtx.Provider>;
+  const refreshProfile = async () => {
+    if (!session) return;
+    const p = await fetchProfile(session.user.id).catch(() => null);
+    setProfile(p);
+  };
+
+  return <AuthCtx.Provider value={{ session, profile, loading, refreshProfile }}>{children}</AuthCtx.Provider>;
 }
 export const useAuth = () => useContext(AuthCtx);

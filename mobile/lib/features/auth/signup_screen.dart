@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/icons.dart';
 import '../../core/theme.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) => Scaffold(
         body: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [AppColors.navy, AppColors.blue], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            gradient: LinearGradient(colors: [AppColors.bg, AppColors.surface2], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           ),
           child: Center(
             child: SingleChildScrollView(
@@ -68,7 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
   Widget _checkEmail(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.mark_email_read_outlined, size: 48, color: Theme.of(context).colorScheme.primary),
+        const Icon(AppIcons.mailVerified, size: 48, color: AppColors.blue),
         const SizedBox(height: 8),
         Text('Check your email', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
@@ -79,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ]);
 
   Widget _form(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.science, size: 56, color: Theme.of(context).colorScheme.primary),
+        const EmojiIcon(AppEmoji.science, size: 72),
         Text('ScienceLearn', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
         const Text('Create your account'),
         const SizedBox(height: 20),
@@ -103,7 +104,7 @@ class _SignupScreenState extends State<SignupScreen> {
           TextField(
             controller: _pass,
             decoration: _fieldDeco('Password', suffix: IconButton(
-              icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+              icon: Icon(_obscure ? AppIcons.show : AppIcons.hide),
               tooltip: _obscure ? 'Show password' : 'Hide password',
               onPressed: () => setState(() => _obscure = !_obscure),
             )),
@@ -131,8 +132,8 @@ class _SignupScreenState extends State<SignupScreen> {
           width: double.infinity,
           child: SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'student', label: Text('Student'), icon: Icon(Icons.school_outlined)),
-              ButtonSegment(value: 'teacher', label: Text('Teacher'), icon: Icon(Icons.co_present_outlined)),
+              ButtonSegment(value: 'student', label: Text('Student'), icon: Icon(AppIcons.school)),
+              ButtonSegment(value: 'teacher', label: Text('Teacher'), icon: Icon(AppIcons.presentation)),
             ],
             selected: {_role},
             onSelectionChanged: (s) => setState(() => _role = s.first),

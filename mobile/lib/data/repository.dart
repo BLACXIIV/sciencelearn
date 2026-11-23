@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -47,7 +48,7 @@ class Repo {
   Future<List<Json>> questions(String assessmentId) async => List<Json>.from(
       await sb.from('questions_public').select().eq('assessment_id', assessmentId).order('position'));
 
-  Future<Json> submit(String assessmentId, Map<String, int> answers) async =>
+  Future<Json> submit(String assessmentId, Map<String, dynamic> answers) async =>
       Map<String, dynamic>.from(
           await sb.rpc('submit_attempt', params: {'p_assessment': assessmentId, 'p_answers': answers}));
 
@@ -84,6 +85,39 @@ class Repo {
   Future<int> completedLessonsCount() async =>
       (await sb.from('lesson_progress').select('lesson_id').eq('percent', 100)).length;
 
+  // ---------- activity builder (teacher) ----------
+
+  /// Assessments attached to a lesson, published or not (staff bypass via RLS).
+  Future<List<Json>> lessonAssessments(String lessonId) async => List<Json>.from(
+      await sb.from('assessments').select().eq('lesson_id', lessonId).order('created_at'));
+
+  Future<Json> createAssessment(String lessonId, String kind, String title, String desc) async =>
+      Map<String, dynamic>.from(await sb.from('assessments').insert({
+        'lesson_id': lessonId, 'kind': kind, 'title': title, 'description': desc,
+      }).select().single());
+
+  Future<void> setAssessmentPublished(String id, bool published) async =>
+      await sb.from('assessments').update({'is_published': published}).eq('id', id);
+
+  Future<void> deleteAssessment(String id) async =>
+      await sb.from('assessments').delete().eq('id', id);
+
+  /// Full questions incl. answer keys — teacher policy only, never student-visible.
+  Future<List<Json>> questionsFull(String assessmentId) async => List<Json>.from(
+      await sb.from('questions').select().eq('assessment_id', assessmentId).order('position'));
+
+  Future<void> upsertQuestion(Json q) async {
+    final id = q.remove('id');
+    if (id != null) {
+      await sb.from('questions').update(q).eq('id', id);
+    } else {
+      await sb.from('questions').insert(q);
+    }
+  }
+
+  Future<void> deleteQuestion(String id) async =>
+      await sb.from('questions').delete().eq('id', id);
+
   // ---------- admin ----------
 
   Future<List<Json>> allProfiles() async =>
@@ -92,6 +126,22 @@ class Repo {
   /// Change a user's role. Needs the "profiles admin write" policy (0004).
   Future<void> setRole(String userId, String role) async =>
       await sb.from('profiles').update({'role': role}).eq('id', userId);
+
+  /// Uploads an avatar image to R2 via presigned PUT; returns the object key.
+  Future<String> uploadAvatar(List<int> bytes, String filename, String contentType) async {
+    final res = await sb.functions.invoke('r2-presign', body: {
+      'action': 'put', 'folder': 'avatars', 'filename': filename, 'contentType': contentType,
+    });
+    final url = (res.data as Map)['url'] as String;
+    final key = (res.data as Map)['key'] as String;
+    final put = await http.put(Uri.parse(url), body: bytes, headers: {'Content-Type': contentType});
+    if (put.statusCode >= 300) throw Exception('Upload failed (${put.statusCode})');
+    return key;
+  }
+
+  /// Stores the avatar's R2 object key on the user's own profile row.
+  Future<void> setAvatar(String key) async =>
+      await sb.from('profiles').update({'avatar_url': key}).eq('id', uid);
 
   /// Signed GET URL for a Cloudflare R2 object (via Supabase Edge Function).
   Future<String?> signedUrl(String? key) async {

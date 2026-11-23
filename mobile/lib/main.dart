@@ -114,8 +114,9 @@ class ScienceLearnApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp.router(
         title: 'ScienceLearn',
         debugShowCheckedModeBanner: false,
-        theme: buildTheme(Brightness.light),
+        theme: buildTheme(Brightness.dark),
         darkTheme: buildTheme(Brightness.dark),
+        themeMode: ThemeMode.dark,
         routerConfig: _router,
       );
 }

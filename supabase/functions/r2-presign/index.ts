@@ -40,10 +40,19 @@ Deno.serve(async (req) => {
   }
 
   if (action === "put") {
-    const { data: isTeacher } = await supabase.rpc("is_teacher");
-    if (!isTeacher) return json({ error: "forbidden" }, 403);
+    // avatars/ is open to every signed-in user (profile photos are self-owned);
+    // all other folders stay teacher-only.
+    const safeFolder = String(folder).replace(/[^\w-]/g, "_");
+    if (safeFolder !== "avatars") {
+      const { data: isTeacher } = await supabase.rpc("is_teacher");
+      if (!isTeacher) return json({ error: "forbidden" }, 403);
+    } else if (contentType && !String(contentType).startsWith("image/")) {
+      return json({ error: "avatars must be images" }, 400);
+    }
     const safe = String(filename).replace(/[^\w.\-]/g, "_");
-    const newKey = `${folder}/${crypto.randomUUID()}-${safe}`;
+    const newKey = safeFolder === "avatars"
+      ? `avatars/${user.id}/${crypto.randomUUID()}-${safe}`
+      : `${safeFolder}/${crypto.randomUUID()}-${safe}`;
     const url = await getSignedUrl(
       s3,
       new PutObjectCommand({ Bucket, Key: newKey, ContentType: contentType }),

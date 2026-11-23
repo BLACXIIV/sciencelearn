@@ -10,6 +10,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import ManageLessons from "./pages/ManageLessons";
+import LessonActivities from "./pages/LessonActivities";
 import Users from "./pages/Users";
 import StudentHome from "./pages/student/Home";
 import StudentLessons from "./pages/student/Lessons";
@@ -50,6 +51,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/teacher" element={<Dashboard />} />
           <Route path="/teacher/lessons" element={<ManageLessons />} />
+          <Route path="/teacher/lessons/:lessonId/activities" element={<LessonActivities />} />
           <Route path="/teacher/users" element={<Users />} />
         </Route>
       </Route>

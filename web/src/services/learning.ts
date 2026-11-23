@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import type {
-  Assessment, AttemptResult, Flashcard, Formula, KeyTerm, QuizQuestion,
+  AnswerValue, Assessment, AttemptResult, Flashcard, Formula, KeyTerm, QuizQuestion,
   Lesson, LessonWithProgress, RecentActivity, StudentProgress, Subject,
 } from "../types";
 
@@ -63,7 +63,7 @@ export async function fetchQuestions(assessmentId: string): Promise<QuizQuestion
   return (data ?? []) as QuizQuestion[];
 }
 
-export async function submitAttempt(assessmentId: string, answers: Record<string, number>): Promise<AttemptResult> {
+export async function submitAttempt(assessmentId: string, answers: Record<string, AnswerValue>): Promise<AttemptResult> {
   const { data, error } = await supabase
     .rpc("submit_attempt", { p_assessment: assessmentId, p_answers: answers });
   if (error) throw error;

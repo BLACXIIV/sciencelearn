@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchLesson, setLessonProgress } from "../../services/learning";
 import { getR2Url } from "../../services/storage";
+import { I } from "../../components/icons";
 
 export default function StudentLessonDetail() {
   const { id = "" } = useParams();
@@ -41,7 +42,9 @@ export default function StudentLessonDetail() {
       <hr />
       <p className="lesson-content">{l.content_md}</p>
       {l.content_key && (
-        <button className="secondary" onClick={openMaterial}>Open lesson material ↗</button>
+        <button className="secondary" onClick={openMaterial}>
+          Open lesson material <I name="openExternal" size={16} />
+        </button>
       )}{" "}
       <button onClick={() => complete.mutate()} disabled={complete.isPending}>
         {complete.isPending ? "Saving…" : "Mark as completed"}

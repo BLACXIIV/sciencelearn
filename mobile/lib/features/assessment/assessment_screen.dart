@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/icons.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
@@ -33,7 +34,7 @@ class AssessmentScreen extends ConsumerWidget {
               const Text('Quizzes & Exercises', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               if (quizzes.isEmpty)
-                const AppCard(child: EmptyState(icon: Icons.fact_check_outlined, title: 'No quizzes published yet')),
+                const AppCard(child: EmptyState(icon: AppIcons.assessment, title: 'No quizzes published yet')),
               for (final a in quizzes)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -46,7 +47,7 @@ class AssessmentScreen extends ConsumerWidget {
                         Text(a['title'], style: const TextStyle(fontWeight: FontWeight.w700)),
                         Text(a['description'] ?? '', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ])),
-                      const Icon(Icons.chevron_right),
+                      const Icon(AppIcons.chevron, color: AppColors.muted),
                     ]),
                   ),
                 ),
@@ -58,11 +59,11 @@ class AssessmentScreen extends ConsumerWidget {
   }
 
   IconData _icon(String kind) => switch (kind) {
-        'pre_test' => Icons.assignment_outlined,
-        'post_test' => Icons.emoji_events_outlined,
-        'problem_solving' => Icons.extension,
-        'final_challenge' => Icons.check_circle_outline,
-        _ => Icons.help_outline,
+        'pre_test' => AppIcons.preTest,
+        'post_test' => AppIcons.postTest,
+        'problem_solving' => AppIcons.puzzle,
+        'final_challenge' => AppIcons.award,
+        _ => AppIcons.quiz,
       };
 
   Color _color(String kind) => switch (kind) {
@@ -84,7 +85,7 @@ class _TestTile extends StatelessWidget {
       color: pastelBg(context, color),
       onTap: () => context.push('/quiz/${a['id']}?t=${Uri.encodeComponent(a['title'])}'),
       child: Column(children: [
-        Icon(isPre ? Icons.assignment_outlined : Icons.emoji_events_outlined, size: 34, color: color),
+        EmojiIcon(isPre ? AppEmoji.preTest : AppEmoji.postTest, size: 40),
         const SizedBox(height: 6),
         Text(isPre ? 'Pre-Test' : 'Post-Test', style: const TextStyle(fontWeight: FontWeight.w700)),
         Text(isPre ? 'Before Learning' : 'After Learning',

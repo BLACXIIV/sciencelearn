@@ -7,6 +7,7 @@ export interface Profile {
   id: string;
   full_name: string;
   role: Role;
+  avatar_url: string | null;
 }
 
 export const SUBJECTS = ["Physics", "Chemistry", "Earth Science"] as const;
@@ -69,19 +70,32 @@ export interface Assessment {
   created_at: string;
 }
 
-/** questions_public shape — correct_index is never exposed to students. */
+export type QuestionType = "multiple_choice" | "true_false" | "fill_blank" | "enumeration" | "identification";
+
+/** questions_public shape — answer keys are never exposed to students. */
 export interface QuizQuestion {
   id: string;
   assessment_id: string;
+  qtype: QuestionType;
   prompt: string;
-  choices: string[];
+  choices: string[] | null;
+  meta: { n?: number };
   position: number;
 }
+
+/** Full questions row for the teacher builder — includes the answer key. */
+export interface Question extends QuizQuestion {
+  correct_index: number | null;
+  answer: { correct?: boolean; accepted?: string[]; items?: string[]; ordered?: boolean; partial?: boolean } | null;
+  explanation: string;
+}
+
+/** Student answer payload per question id, keyed by qtype. */
+export type AnswerValue = { i: number } | { b: boolean } | { t: string } | { items: string[] };
 
 export interface AttemptResult {
   attempt_id: string;
   score: number;
-  correct: number;
   total: number;
 }
 

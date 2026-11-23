@@ -13,7 +13,7 @@ export const onAuthStateChange = (cb: (session: Session | null) => void): Subscr
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name, role, avatar_url")
     .eq("id", userId)
     .single();
   if (error) throw error;

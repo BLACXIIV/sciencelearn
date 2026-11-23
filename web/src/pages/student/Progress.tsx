@@ -1,23 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/useAuth";
+import Ring from "../../components/Ring";
 import { fetchMyProgress } from "../../services/learning";
-
-function Ring({ pct }: { pct: number }) {
-  const r = 52;
-  const circ = 2 * Math.PI * r;
-  return (
-    <svg width="130" height="130" viewBox="0 0 130 130" className="ring">
-      <circle cx="65" cy="65" r={r} fill="none" stroke="#e2e8f0" strokeWidth="12" />
-      <circle
-        cx="65" cy="65" r={r} fill="none" stroke="#15803d" strokeWidth="12" strokeLinecap="round"
-        strokeDasharray={circ} strokeDashoffset={circ * (1 - Math.min(pct, 100) / 100)}
-        transform="rotate(-90 65 65)"
-      />
-      <text x="65" y="62" textAnchor="middle" className="ring-pct">{Math.round(pct)}%</text>
-      <text x="65" y="80" textAnchor="middle" className="ring-label">Overall</text>
-    </svg>
-  );
-}
 
 export default function StudentProgress() {
   const { session } = useAuth();
@@ -35,32 +19,60 @@ export default function StudentProgress() {
   const overall = (lessons + quizzes + (post ?? 0)) / 3;
   const gain = pre != null && post != null ? Math.round(post - pre) : null;
 
+  const rings = [
+    { label: "Lessons", pct: lessons, color: "#f5c518" },
+    { label: "Quizzes", pct: quizzes, color: "#4c8dff" },
+    { label: "Pre-Test", pct: pre ?? 0, color: "#f0759c" },
+    { label: "Post-Test", pct: post ?? 0, color: "#2ed3b7" },
+  ];
+
   return (
     <>
-      <div className="card ring-wrap">
-        <Ring pct={overall} />
-        <div className="prow-list">
-          <div className="prow"><span><i className="legend-dot" style={{ background: "#15803d" }} />Lessons</span><strong>{Math.round(lessons)}%</strong></div>
-          <div className="prow"><span><i className="legend-dot" style={{ background: "#2563eb" }} />Quizzes</span><strong>{Math.round(quizzes)}%</strong></div>
-          <div className="prow"><span><i className="legend-dot" style={{ background: "#d97706" }} />Post-Test</span><strong>{post == null ? "–" : `${Math.round(post)}%`}</strong></div>
-        </div>
+      <h2 style={{ marginBottom: 0 }}>Overall Progress</h2>
+      <strong className="big-num">{Math.round(overall)}%</strong>
+      <div className="card rings-row" style={{ marginTop: 12 }}>
+        {rings.map((r) => (
+          <div key={r.label} className="ring-item">
+            <Ring pct={r.pct} color={r.color} />
+            <small className="ring-label" style={{ fill: "none" }}>{r.label}</small>
+          </div>
+        ))}
       </div>
 
+      <h3>Score breakdown</h3>
       <div className="card">
-        <h3>Assessment Results</h3>
-        <div className="cols">
-          <div className="col">
-            <small>{Math.round(pre ?? 0)}%</small>
-            <div className="bar-v" style={{ height: `${Math.max(pre ?? 0, 2)}%`, background: "#2563eb" }} />
-            <small>Pre-Test</small>
-          </div>
-          <div className="col">
-            <small>{Math.round(post ?? 0)}%</small>
-            <div className="bar-v" style={{ height: `${Math.max(post ?? 0, 2)}%`, background: "#15803d" }} />
-            <small>Post-Test</small>
-          </div>
-          {gain != null && <strong className="gain">{gain >= 0 ? "+" : ""}{gain}% Gain</strong>}
+        <div className="brow">
+          <i className="b-dot" style={{ background: "#f5c518" }} />
+          <span className="b-pct">{Math.round(lessons)}%</span>
+          <span className="b-label">Lessons completed</span>
+          <span className="b-val">{Math.round(lessons)} / 100</span>
         </div>
+        <div className="brow">
+          <i className="b-dot" style={{ background: "#4c8dff" }} />
+          <span className="b-pct">{Math.round(quizzes)}%</span>
+          <span className="b-label">Quiz average</span>
+          <span className="b-val">{quizzes > 0 ? Math.round(quizzes) : "-"}</span>
+        </div>
+        <div className="brow">
+          <i className="b-dot" style={{ background: "#f0759c" }} />
+          <span className="b-pct">{pre == null ? "-" : `${Math.round(pre)}%`}</span>
+          <span className="b-label">Pre-Test</span>
+          <span className="b-val">{pre == null ? "-" : Math.round(pre)}</span>
+        </div>
+        <div className="brow">
+          <i className="b-dot" style={{ background: "#2ed3b7" }} />
+          <span className="b-pct">{post == null ? "-" : `${Math.round(post)}%`}</span>
+          <span className="b-label">Post-Test</span>
+          <span className="b-val">{post == null ? "-" : Math.round(post)}</span>
+        </div>
+        {gain != null && (
+          <div className="brow">
+            <i className="b-dot" style={{ background: "#3ecf8e" }} />
+            <span className="b-pct" />
+            <span className="b-label">Learning gain</span>
+            <span className="b-val" style={{ color: "#3ecf8e" }}>{gain >= 0 ? "+" : ""}{gain}%</span>
+          </div>
+        )}
       </div>
     </>
   );

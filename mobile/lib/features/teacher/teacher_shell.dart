@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/icons.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
@@ -30,24 +31,20 @@ class TeacherShell extends ConsumerWidget {
 
     // Branch indexes visible as tabs; admins also get Users.
     final visible = role == 'admin' ? const [0, 1, 2, 3, 4] : const [0, 1, 2, 4];
-    const labels = ['Dashboard', 'Lessons', 'Students', 'Users', 'Account'];
-    const icons = [
-      (Icons.dashboard_outlined, Icons.dashboard),
-      (Icons.menu_book_outlined, Icons.menu_book),
-      (Icons.groups_outlined, Icons.groups),
-      (Icons.manage_accounts_outlined, Icons.manage_accounts),
-      (Icons.person_outline, Icons.person),
+    const items = [
+      (icon: AppIcons.dashboard, label: 'Dashboard'),
+      (icon: AppIcons.lessons, label: 'Lessons'),
+      (icon: AppIcons.students, label: 'Students'),
+      (icon: AppIcons.userAdmin, label: 'Users'),
+      (icon: AppIcons.account, label: 'Account'),
     ];
 
     return Scaffold(
       body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: visible.indexOf(shell.currentIndex).clamp(0, visible.length - 1),
-        onDestinationSelected: (i) => shell.goBranch(visible[i], initialLocation: visible[i] == shell.currentIndex),
-        destinations: [
-          for (final b in visible)
-            NavigationDestination(icon: Icon(icons[b].$1), selectedIcon: Icon(icons[b].$2), label: labels[b]),
-        ],
+      bottomNavigationBar: IslandNavBar(
+        currentIndex: visible.indexOf(shell.currentIndex).clamp(0, visible.length - 1),
+        onSelect: (i) => shell.goBranch(visible[i], initialLocation: visible[i] == shell.currentIndex),
+        items: [for (final b in visible) items[b]],
       ),
     );
   }

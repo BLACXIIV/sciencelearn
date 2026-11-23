@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/icons.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
@@ -33,11 +34,21 @@ class TeacherDashboardScreen extends ConsumerWidget {
               : (both.fold<num>(0, (a, s) => a + ((s['post_score'] as num) - (s['pre_score'] as num))) /
                       both.length)
                   .round();
+          num? avgOf(String key) {
+            final have = rows.map((s) => s[key] as num?).whereType<num>().toList();
+            return have.isEmpty ? null : have.fold<num>(0, (a, b) => a + b) / have.length;
+          }
+          final classRings = <(String, double, Color)>[
+            ('Lessons', (avgOf('lessons_pct') ?? 0) / 100, AppColors.yellow),
+            ('Quizzes', (avgOf('quizzes_pct') ?? 0) / 100, AppColors.blue),
+            ('Pre-Test', (avgOf('pre_score') ?? 0) / 100, AppColors.pink),
+            ('Post-Test', (avgOf('post_score') ?? 0) / 100, AppColors.teal),
+          ];
           final stats = <(String, String, IconData, Color)>[
-            ('Total Students', '${rows.length}', Icons.groups_outlined, AppColors.blue),
-            ('Completed Lessons', '${completed.valueOrNull ?? 0}', Icons.check_circle_outline, AppColors.success),
-            ('Average Score', '$avg%', Icons.bar_chart, AppColors.orange),
-            ('Class Gain', '${gain >= 0 ? '+' : ''}$gain%', Icons.trending_up, AppColors.purple),
+            ('Total Students', '${rows.length}', AppIcons.students, AppColors.blue),
+            ('Completed Lessons', '${completed.valueOrNull ?? 0}', AppIcons.done, AppColors.success),
+            ('Average Score', '$avg%', AppIcons.progress, AppColors.orange),
+            ('Class Gain', '${gain >= 0 ? '+' : ''}$gain%', AppIcons.gain, AppColors.purple),
           ];
 
           return ListView(padding: const EdgeInsets.all(16), children: [
@@ -57,10 +68,26 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 20),
+            const Text('Class Averages', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            AppCard(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+              child: rows.isEmpty
+                  ? const EmptyState(icon: AppIcons.students, title: 'No student data yet')
+                  : Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                      for (final r in classRings)
+                        Column(children: [
+                          RingChart(r.$2, color: r.$3, size: 56, stroke: 6),
+                          const SizedBox(height: 6),
+                          Text(r.$1, style: const TextStyle(fontSize: 11, color: AppColors.muted)),
+                        ]),
+                    ]),
+            ),
+            const SizedBox(height: 20),
             const Text('Student Performance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             if (rows.isEmpty)
-              const AppCard(child: EmptyState(icon: Icons.groups_outlined, title: 'No students yet')),
+              const AppCard(child: EmptyState(icon: AppIcons.students, title: 'No students yet')),
             for (final s in rows)
               AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

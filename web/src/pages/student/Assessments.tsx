@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { E, I } from "../../components/icons";
 import { fetchAssessments } from "../../services/learning";
 import type { Assessment } from "../../types";
 
@@ -21,7 +21,7 @@ function Tile({ a }: { a: Assessment }) {
         <strong>{a.title}</strong>
         <small>{a.description}</small>
       </span>
-      <span className="chev">›</span>
+      <span className="chev"><I name="chevron" size={20} /></span>
     </Link>
   );
 }
@@ -43,9 +43,8 @@ export default function StudentAssessments() {
           {tests.map((a) => {
             const isPre = a.kind === "pre_test";
             return (
-              <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`}
-                className="tile" style={{ "--tile-bg": isPre ? "#dbeafe" : "#fef3c7" } as CSSProperties}>
-                <span className="glyph">{isPre ? "📋" : "🏆"}</span>
+              <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="tile">
+                <E name={isPre ? "preTest" : "postTest"} size={44} />
                 <strong>{isPre ? "Pre-Test" : "Post-Test"}</strong>
                 <small>{isPre ? "Before Learning" : "After Learning"}</small>
               </Link>
