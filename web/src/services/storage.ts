@@ -1,7 +1,11 @@
-import { supabase } from "./supabase";
+import { supabase } from "../lib/supabase";
+import type { R2Folder } from "../types";
+
+// Cloudflare R2 access gateway. The r2-presign edge function is the only way
+// in or out of the bucket — keys never touch the client.
 
 /** Upload a file to Cloudflare R2 via a presigned PUT URL. Returns the R2 object key. */
-export async function uploadToR2(file: File, folder: "thumbnails" | "lessons" | "avatars"): Promise<string> {
+export async function uploadToR2(file: File, folder: R2Folder): Promise<string> {
   const { data, error } = await supabase.functions.invoke("r2-presign", {
     body: { action: "put", folder, filename: file.name, contentType: file.type },
   });
