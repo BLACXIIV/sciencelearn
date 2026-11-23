@@ -2,17 +2,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Lesson, NewLessonInput } from "../types";
 import { createLesson, fetchLessons, setLessonPublished } from "../services/lessons";
 
-const KEY = ["lessons"];
-
-/** Lesson list + the mutations that operate on it. Components stay free of query/service details. */
-export function useLessons() {
+/** Class-scoped lesson list + the mutations that operate on it. */
+export function useLessons(classId: string) {
   const qc = useQueryClient();
+  const KEY = ["lessons", classId];
   const invalidate = () => qc.invalidateQueries({ queryKey: KEY });
 
-  const lessons = useQuery({ queryKey: KEY, queryFn: fetchLessons });
+  const lessons = useQuery({ queryKey: KEY, queryFn: () => fetchLessons(classId) });
 
   const create = useMutation({
-    mutationFn: (input: NewLessonInput) => createLesson(input, (lessons.data?.length ?? 0) + 1),
+    mutationFn: (input: NewLessonInput) =>
+      createLesson(classId, input, (lessons.data?.length ?? 0) + 1),
     onSuccess: invalidate,
   });
 

@@ -1,12 +1,10 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPublishedLessons } from "../../services/learning";
+import { fetchClass } from "../../services/classes";
 import { getR2Url } from "../../services/storage";
 import { I } from "../../components/icons";
-import { SUBJECTS, type Subject } from "../../types";
 
-/** R2 thumbnail — resolves the object key to a signed URL; icon box otherwise. */
 function LessonThumb({ thumbKey }: { thumbKey: string | null }) {
   const url = useQuery({
     queryKey: ["r2-url", thumbKey],
@@ -18,27 +16,30 @@ function LessonThumb({ thumbKey }: { thumbKey: string | null }) {
   return <img className="thumb" src={url.data} alt="" loading="lazy" />;
 }
 
-export default function StudentLessons() {
-  const [subject, setSubject] = useState<Subject | null>(null);
+/** Student view of one class: its published lessons with progress. */
+export default function StudentClassDetail() {
+  const { id = "" } = useParams();
+  const cls = useQuery({ queryKey: ["class", id], queryFn: () => fetchClass(id) });
   const lessons = useQuery({
-    queryKey: ["pub-lessons", subject],
-    queryFn: () => fetchPublishedLessons(subject),
+    queryKey: ["pub-lessons", "class", id],
+    queryFn: () => fetchPublishedLessons(null, id),
   });
 
   return (
     <>
-      <div className="chips">
-        {[null, ...SUBJECTS].map((s) => (
-          <button key={s ?? "all"} className={`chip ${subject === s ? "active" : ""}`} onClick={() => setSubject(s)}>
-            {s ?? "All"}
-          </button>
-        ))}
+      <div className="card">
+        <div className="perf">
+          <span>
+            <strong>{cls.data?.name ?? "Class"}</strong>
+            <small className="kind">Code: {cls.data?.code ?? "…"}</small>
+          </span>
+        </div>
       </div>
 
       {lessons.isLoading && <p className="empty">Loading lessons…</p>}
       {lessons.error && <p className="err">{String(lessons.error)}</p>}
       {lessons.data?.length === 0 && (
-        <div className="card"><p className="empty">No lessons here yet, try another subject, or check back soon.</p></div>
+        <div className="card"><p className="empty">No lessons here yet, your teacher has not published any for this class.</p></div>
       )}
       {lessons.data?.map((l) => {
         const pct = l.lesson_progress[0]?.percent ?? 0;
@@ -57,6 +58,7 @@ export default function StudentLessons() {
           </Link>
         );
       })}
+      <p className="empty"><Link to="/student/classes">← Back to My Classes</Link></p>
     </>
   );
 }

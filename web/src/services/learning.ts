@@ -24,8 +24,9 @@ export async function fetchRecentActivity(uid: string): Promise<RecentActivity[]
   return (data ?? []) as unknown as RecentActivity[];
 }
 
-export async function fetchPublishedLessons(subject?: Subject | null): Promise<LessonWithProgress[]> {
+export async function fetchPublishedLessons(subject?: Subject | null, classId?: string): Promise<LessonWithProgress[]> {
   let q = supabase.from("lessons").select("*, lesson_progress(percent)").eq("is_published", true);
+  if (classId) q = q.eq("class_id", classId);
   if (subject) q = q.eq("subject", subject);
   const { data, error } = await q.order("position");
   if (error) throw error;
@@ -56,6 +57,20 @@ export async function fetchAssessments(): Promise<Assessment[]> {
   return (data ?? []) as Assessment[];
 }
 
+/** assessment_id -> latest released score for this student.
+ *  RLS only returns released attempts, so withheld scores never reach the client. */
+export async function fetchMyAttemptScores(uid: string): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("attempts").select("assessment_id, score, submitted_at")
+    .eq("student_id", uid).order("submitted_at");
+  if (error) throw error;
+  const m: Record<string, number> = {};
+  for (const r of data ?? []) {
+    if (r.score != null) m[r.assessment_id as string] = r.score as number;
+  }
+  return m;
+}
+
 export async function fetchQuestions(assessmentId: string): Promise<QuizQuestion[]> {
   const { data, error } = await supabase
     .from("questions_public").select("*").eq("assessment_id", assessmentId).order("position");
@@ -67,7 +82,18 @@ export async function submitAttempt(assessmentId: string, answers: Record<string
   const { data, error } = await supabase
     .rpc("submit_attempt", { p_assessment: assessmentId, p_answers: answers });
   if (error) throw error;
-  return data as AttemptResult;
+  const r = data as AttemptResult & { error?: string };
+  if (r?.error) throw new Error(r.error);
+  return r;
+}
+
+/** Published activities inside one lesson (student view, RLS hides drafts). */
+export async function fetchLessonActivities(lessonId: string): Promise<Assessment[]> {
+  const { data, error } = await supabase
+    .from("assessments").select("*").eq("lesson_id", lessonId)
+    .eq("is_published", true).order("created_at");
+  if (error) throw error;
+  return (data ?? []) as Assessment[];
 }
 
 export async function fetchFlashcards(): Promise<Flashcard[]> {

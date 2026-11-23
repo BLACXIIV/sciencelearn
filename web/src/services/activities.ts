@@ -26,6 +26,16 @@ export async function setAssessmentPublished(id: string, published: boolean): Pr
   if (error) throw error;
 }
 
+export async function setScoreRelease(id: string, mode: "immediate" | "manual"): Promise<void> {
+  const { error } = await supabase.from("assessments").update({ release_scores: mode }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function releaseScores(id: string): Promise<void> {
+  const { error } = await supabase.from("assessments").update({ scores_released: true }).eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteAssessment(id: string): Promise<void> {
   const { error } = await supabase.from("assessments").delete().eq("id", id);
   if (error) throw error;

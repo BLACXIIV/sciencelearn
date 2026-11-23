@@ -13,8 +13,11 @@ class Repo {
   Future<Json?> myProgress() async =>
       await sb.from('v_student_progress').select().eq('student_id', uid).maybeSingle();
 
-  Future<List<Json>> lessons({String? subject}) async {
+  /// Published lessons the student can see (own classes + legacy shared).
+  /// Pass classId to scope to one class.
+  Future<List<Json>> lessons({String? subject, String? classId}) async {
     var q = sb.from('lessons').select('*, lesson_progress(percent)').eq('is_published', true);
+    if (classId != null) q = q.eq('class_id', classId);
     if (subject != null) q = q.eq('subject', subject);
     return List<Json>.from(await q.order('position'));
   }
@@ -48,9 +51,16 @@ class Repo {
   Future<List<Json>> questions(String assessmentId) async => List<Json>.from(
       await sb.from('questions_public').select().eq('assessment_id', assessmentId).order('position'));
 
-  Future<Json> submit(String assessmentId, Map<String, dynamic> answers) async =>
-      Map<String, dynamic>.from(
-          await sb.rpc('submit_attempt', params: {'p_assessment': assessmentId, 'p_answers': answers}));
+  /// Published activities inside one lesson (student view, RLS hides drafts).
+  Future<List<Json>> lessonActivities(String lessonId) async => List<Json>.from(await sb
+      .from('assessments').select().eq('lesson_id', lessonId).eq('is_published', true).order('created_at'));
+
+  Future<Json> submit(String assessmentId, Map<String, dynamic> answers) async {
+    final r = Map<String, dynamic>.from(
+        await sb.rpc('submit_attempt', params: {'p_assessment': assessmentId, 'p_answers': answers}));
+    if (r['error'] != null) throw Exception(r['error']);
+    return r;
+  }
 
   Future<List<Json>> flashcards() async => List<Json>.from(await sb.from('flashcards').select());
   Future<List<Json>> formulas() async => List<Json>.from(await sb.from('formulas').select());
@@ -62,9 +72,10 @@ class Repo {
   Future<List<Json>> allLessons() async =>
       List<Json>.from(await sb.from('lessons').select().order('position'));
 
-  Future<void> createLesson(String title, String subject, String objectives) async {
-    final existing = await sb.from('lessons').select('id');
+  Future<void> createLesson(String classId, String title, String subject, String objectives) async {
+    final existing = await sb.from('lessons').select('id').eq('class_id', classId);
     await sb.from('lessons').insert({
+      'class_id': classId,
       'title': title,
       'subject': subject,
       'objectives': objectives,
@@ -99,6 +110,30 @@ class Repo {
   Future<void> setAssessmentPublished(String id, bool published) async =>
       await sb.from('assessments').update({'is_published': published}).eq('id', id);
 
+  /// 'immediate' = score shows after submit; 'manual' = teacher releases it.
+  Future<void> setScoreRelease(String id, String mode) async =>
+      await sb.from('assessments').update({'release_scores': mode}).eq('id', id);
+
+  /// Teacher releases scores for a manual-release assessment.
+  Future<void> releaseScores(String id) async =>
+      await sb.from('assessments').update({'scores_released': true}).eq('id', id);
+
+  /// assessment_id -> latest released score for the current student.
+  /// RLS only returns released attempts, so hidden scores never reach the app.
+  Future<Map<String, num>> myAttemptScores() async {
+    final rows = await sb
+        .from('attempts')
+        .select('assessment_id, score, submitted_at')
+        .eq('student_id', uid)
+        .order('submitted_at');
+    final m = <String, num>{};
+    for (final r in rows) {
+      final s = r['score'] as num?;
+      if (s != null) m['${r['assessment_id']}'] = s;
+    }
+    return m;
+  }
+
   Future<void> deleteAssessment(String id) async =>
       await sb.from('assessments').delete().eq('id', id);
 
@@ -117,6 +152,54 @@ class Repo {
 
   Future<void> deleteQuestion(String id) async =>
       await sb.from('questions').delete().eq('id', id);
+
+  // ---------- classes ----------
+
+  /// Teacher's own classes with enrollments (status counted client-side).
+  Future<List<Json>> myClasses() async => List<Json>.from(await sb
+      .from('classes')
+      .select('id, name, code, join_policy, enrollments(status)')
+      .eq('teacher_id', uid)
+      .order('created_at'));
+
+  Future<Json> createClass(String name, String joinPolicy) async =>
+      Map<String, dynamic>.from(await sb.from('classes')
+          .insert({'name': name, 'teacher_id': uid, 'join_policy': joinPolicy})
+          .select().single());
+
+  /// Roster for a class: student rows with enrollment status.
+  Future<List<Json>> classMembers(String classId) async => List<Json>.from(await sb
+      .from('enrollments')
+      .select('student_id, status, profiles(full_name)')
+      .eq('class_id', classId));
+
+  Future<void> approveMember(String classId, String studentId) async => await sb
+      .from('enrollments').update({'status': 'active'})
+      .eq('class_id', classId).eq('student_id', studentId);
+
+  /// Reject a pending request or remove an enrolled student.
+  Future<void> removeMember(String classId, String studentId) async => await sb
+      .from('enrollments').delete()
+      .eq('class_id', classId).eq('student_id', studentId);
+
+  Future<void> deleteClass(String id) async =>
+      await sb.from('classes').delete().eq('id', id);
+
+  /// Lessons in one class (teacher view: includes drafts).
+  Future<List<Json>> classLessons(String classId) async => List<Json>.from(await sb
+      .from('lessons').select().eq('class_id', classId).order('created_at'));
+
+  /// Student: classes they belong to (status = active | pending).
+  Future<List<Json>> enrolledClasses() async => List<Json>.from(
+      await sb.from('enrollments').select('class_id, status, classes(name, code)'));
+
+  /// Redeem a class code -> {name, status}. Throws on invalid code.
+  Future<Json> joinClass(String code) async {
+    final r = Map<String, dynamic>.from(
+        await sb.rpc('join_class', params: {'p_code': code}));
+    if (r['error'] != null) throw Exception(r['error']);
+    return r;
+  }
 
   // ---------- admin ----------
 
@@ -152,17 +235,46 @@ class Repo {
 }
 
 final repoProvider = Provider((_) => Repo());
-final meProvider = FutureProvider((ref) => ref.read(repoProvider).me());
-final progressProvider = FutureProvider((ref) => ref.read(repoProvider).myProgress());
-final recentProvider = FutureProvider((ref) => ref.read(repoProvider).recentActivity());
+
+/// Emits on every auth change; user-scoped providers watch it so a sign-out
+/// + sign-in as a different user never shows the previous user's data.
+final authChangesProvider = StreamProvider(
+    (ref) => Supabase.instance.client.auth.onAuthStateChange.map((e) => e.event));
+
+final meProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).me();
+});
+final progressProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).myProgress();
+});
+final recentProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).recentActivity();
+});
 final subjectProvider = StateProvider<String?>((_) => null);
-final lessonsProvider = FutureProvider((ref) =>
-    ref.read(repoProvider).lessons(subject: ref.watch(subjectProvider)));
+final lessonsProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).lessons(subject: ref.watch(subjectProvider));
+});
 
 // teacher portal
-final classProgressProvider = FutureProvider((ref) => ref.read(repoProvider).classProgress());
-final completedCountProvider = FutureProvider((ref) => ref.read(repoProvider).completedLessonsCount());
-final allLessonsProvider = FutureProvider((ref) => ref.read(repoProvider).allLessons());
+final classProgressProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).classProgress();
+});
+final completedCountProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).completedLessonsCount();
+});
+final allLessonsProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).allLessons();
+});
 
 // admin
-final profilesProvider = FutureProvider((ref) => ref.read(repoProvider).allProfiles());
+final profilesProvider = FutureProvider((ref) {
+  ref.watch(authChangesProvider);
+  return ref.read(repoProvider).allProfiles();
+});

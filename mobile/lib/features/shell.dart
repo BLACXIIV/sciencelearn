@@ -18,7 +18,7 @@ class Shell extends StatelessWidget {
             onSelect: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
             items: const [
               (icon: AppIcons.home, label: 'Home'),
-              (icon: AppIcons.lessons, label: 'Lessons'),
+              (icon: AppIcons.students, label: 'Classes'),
               (icon: AppIcons.progress, label: 'Progress'),
               (icon: AppIcons.account, label: 'Account'),
             ],

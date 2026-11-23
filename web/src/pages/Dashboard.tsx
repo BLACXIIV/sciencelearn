@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { useClassDashboard } from "../hooks/useClassDashboard";
+import { fetchMyClasses } from "../services/classes";
 import Ring from "../components/Ring";
 import StatCards from "../components/StatCards";
 import StudentProgressList from "../components/StudentProgressList";
@@ -37,13 +39,18 @@ function ClassChart({ students }: { students: StudentProgress[] }) {
 
 export default function Dashboard() {
   const { data, stats, isLoading, error } = useClassDashboard();
+  const classes = useQuery({ queryKey: ["my-classes"], queryFn: fetchMyClasses });
+  const allStats = [
+    ...stats,
+    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, color: "#f0759c" },
+  ];
 
   if (isLoading) return <p>Loading class dashboard…</p>;
   if (error) return <p className="err">{String(error)}</p>;
 
   return (
     <>
-      <StatCards stats={stats} />
+      <StatCards stats={allStats} />
       <ClassChart students={data?.students ?? []} />
       <h2>Student Performance</h2>
       <StudentProgressList students={data?.students ?? []} />

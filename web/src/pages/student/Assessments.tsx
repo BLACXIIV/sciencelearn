@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { E, I } from "../../components/icons";
-import { fetchAssessments } from "../../services/learning";
+import { fetchAssessments, fetchMyAttemptScores } from "../../services/learning";
+import { useAuth } from "../../hooks/useAuth";
 import type { Assessment } from "../../types";
 
 const KIND_LABEL: Record<string, string> = {
@@ -13,7 +14,7 @@ const KIND_LABEL: Record<string, string> = {
   practice: "PRACTICE",
 };
 
-function Tile({ a }: { a: Assessment }) {
+function Tile({ a, score }: { a: Assessment; score?: number }) {
   return (
     <Link to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="card lesson-row">
       <span className="kind">{KIND_LABEL[a.kind] ?? "QUIZ"}</span>
@@ -21,13 +22,17 @@ function Tile({ a }: { a: Assessment }) {
         <strong>{a.title}</strong>
         <small>{a.description}</small>
       </span>
+      {score != null && <span className="score-chip">{Math.round(score)}%</span>}
       <span className="chev"><I name="chevron" size={20} /></span>
     </Link>
   );
 }
 
 export default function StudentAssessments() {
+  const { session } = useAuth();
+  const uid = session?.user.id;
   const assessments = useQuery({ queryKey: ["assessments"], queryFn: fetchAssessments });
+  const scores = useQuery({ queryKey: ["my-attempt-scores"], queryFn: () => fetchMyAttemptScores(uid!), enabled: !!uid });
 
   if (assessments.isLoading) return <p>Loading assessments…</p>;
   if (assessments.error) return <p className="err">{String(assessments.error)}</p>;
@@ -53,7 +58,7 @@ export default function StudentAssessments() {
         </div>
       )}
       <h3>Quizzes & Exercises</h3>
-      {quizzes.map((a) => <Tile key={a.id} a={a} />)}
+      {quizzes.map((a) => <Tile key={a.id} a={a} score={scores.data?.[a.id]} />)}
       {quizzes.length === 0 && <p className="empty">No quizzes published yet.</p>}
     </>
   );

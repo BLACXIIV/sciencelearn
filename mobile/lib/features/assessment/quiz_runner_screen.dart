@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/icons.dart';
 import '../../core/theme.dart';
+import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
 class QuizRunnerScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
   final Map<String, List<TextEditingController>> _enumCtrl = {};
   Json? _result;
   bool _busy = false;
+  String? _err;
 
   @override
   void dispose() {
@@ -104,8 +106,19 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
           ? Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 const EmojiIcon(AppEmoji.postTest, size: 88),
-                Text('${_result!['score']}%', style: Theme.of(context).textTheme.displayMedium),
-                Text('${_result!['total']} questions'),
+                const SizedBox(height: 12),
+                if (_result!['score'] != null) ...[
+                  Text('${_result!['score']}%', style: Theme.of(context).textTheme.displayMedium),
+                  Text('${_result!['total']} questions'),
+                ] else ...[
+                  Text('Submitted!', style: Theme.of(context).textTheme.headlineSmall),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                    child: Text('Your score will appear once your teacher releases it.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppColors.muted)),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () { ref.invalidate(progressProvider); Navigator.of(context).pop(); },
@@ -119,11 +132,11 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                 if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                 final qs = snap.data!;
                 final answered = qs.where(_answered).length;
-                return ListView(padding: const EdgeInsets.all(16), children: [
+                return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
                   for (var i = 0; i < qs.length; i++) ...[
                     Text('${i + 1}. ${qs[i]['prompt']}', style: const TextStyle(fontWeight: FontWeight.w700)),
                     Text('${qs[i]['qtype']}'.replaceAll('_', ' '),
-                        style: const TextStyle(fontSize: 11, color: AppColors.muted)),
+                        style: TextStyle(fontSize: 11, color: AppColors.muted)),
                     const SizedBox(height: 6),
                     _input(qs[i]),
                     const Divider(height: 28),
@@ -135,15 +148,27 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                   const SizedBox(height: 8),
                   FilledButton(
                     onPressed: (_busy || answered < qs.length) ? null : () async {
-                      setState(() => _busy = true);
-                      final r = await repo.submit(widget.id, _answers);
-                      setState(() { _result = r; _busy = false; });
+                      setState(() { _busy = true; _err = null; });
+                      try {
+                        final r = await repo.submit(widget.id, _answers);
+                        setState(() => _result = r);
+                      } catch (e) {
+                        setState(() => _err = '$e'.replaceFirst('Exception: ', ''));
+                      } finally {
+                        if (mounted) setState(() => _busy = false);
+                      }
                     },
                     child: _busy
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Text('Submit Answers'),
                   ),
-                ]);
+                  if (_err != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(_err!, textAlign: TextAlign.center,
+                          style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    ),
+                ]));
               },
             ),
     );

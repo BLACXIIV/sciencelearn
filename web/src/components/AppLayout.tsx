@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import Avatar from "./Avatar";
+import TopNav from "./TopNav";
 import { I, type IconName } from "./icons";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
@@ -7,7 +7,7 @@ import { signOut } from "../services/auth";
 // Add entries here to extend the sidebar — no layout changes needed.
 const NAV_ITEMS: { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: "/teacher", label: "Dashboard", icon: "dashboard", end: true },
-  { to: "/teacher/lessons", label: "Manage Lessons", icon: "lessons", end: false },
+  { to: "/teacher/classes", label: "Classes", icon: "students", end: false },
 ];
 
 /** Staff shell: sidebar nav + header + routed content. Rendered inside RequireTeacher. */
@@ -30,8 +30,8 @@ export default function AppLayout() {
         <button type="button" className="nav-action" onClick={signOut}><I name="signOut" size={18} />Sign out</button>
       </aside>
       <main>
+        <TopNav />
         <header className="page-head">
-          <Avatar name={profile?.full_name ?? ""} avatarKey={profile?.avatar_url ?? null} size={44} />
           <div><h1>Good Day, {profile?.full_name}!</h1><p>Manage. Monitor. Support.</p></div>
         </header>
         <Outlet />

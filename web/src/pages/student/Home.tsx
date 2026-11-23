@@ -1,16 +1,62 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { E, I, type EmojiName } from "../../components/icons";
 import { useAuth } from "../../hooks/useAuth";
+import { fetchEnrolledClasses, joinClass } from "../../services/classes";
 import { fetchMyProgress, fetchRecentActivity } from "../../services/learning";
 
 const TILES: { to: string; label: string; emoji: EmojiName }[] = [
-  { to: "/student/lessons", label: "My Lessons", emoji: "lessons" },
+  { to: "/student/classes", label: "My Classes", emoji: "school" },
   { to: "/student/assessments", label: "Assessment Center", emoji: "assessment" },
   { to: "/student/review", label: "Review Center", emoji: "review" },
   { to: "/student/progress", label: "Progress Tracker", emoji: "progress" },
   { to: "/student/account", label: "Account", emoji: "account" },
 ];
+
+/** Join a class by code + see classes already joined. */
+function MyClasses() {
+  const qc = useQueryClient();
+  const enrolled = useQuery({ queryKey: ["enrolled"], queryFn: fetchEnrolledClasses });
+  const [code, setCode] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const join = useMutation({
+    mutationFn: () => joinClass(code),
+    onSuccess: (r) => {
+      setCode("");
+      setMsg(r.status === "pending"
+        ? `Request sent to ${r.name}, waiting for teacher approval`
+        : `Joined ${r.name}`);
+      qc.invalidateQueries({ queryKey: ["enrolled"] });
+    },
+    onError: (e) => setMsg(e instanceof Error ? e.message : String(e)),
+  });
+
+  return (
+    <div className="card">
+      <h3>My Classes</h3>
+      <div className="row-actions" style={{ marginTop: 0 }}>
+        <input className="text-answer" style={{ margin: 0, flex: 1, textTransform: "uppercase" }}
+          placeholder="Enter class code" maxLength={8}
+          value={code} onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && code.trim() && join.mutate()} />
+        <button disabled={join.isPending || !code.trim()} onClick={() => join.mutate()}>
+          {join.isPending ? "Joining…" : "Join"}
+        </button>
+      </div>
+      {msg && <p className={join.isError ? "err" : "empty-sm"} style={{ textAlign: "left" }}>{msg}</p>}
+      {enrolled.isLoading && <p className="empty">Loading…</p>}
+      {enrolled.data?.length === 0 && <p className="empty-sm" style={{ textAlign: "left" }}>Not in any class yet. Get a code from your teacher.</p>}
+      {enrolled.data?.map((e) => (
+        <div key={e.class_id} className="perf">
+          <span className="avatar">{(e.classes?.name || "?")[0].toUpperCase()}</span>
+          <span>{e.classes?.name}</span>
+          {e.status === "pending" && <small className="kind" style={{ color: "#f5a524" }}>Pending</small>}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function StudentHome() {
   const { session } = useAuth();
@@ -48,6 +94,9 @@ export default function StudentHome() {
           </Link>
         ))}
       </div>
+
+      <h3>My Classes</h3>
+      <MyClasses />
 
       <h3>Recent Activity</h3>
       <div className="card">

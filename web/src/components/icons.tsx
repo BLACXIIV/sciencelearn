@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Clock,
   CloudOff,
+  Copy,
   ExternalLink,
   Eye,
   FlaskConical,
@@ -35,6 +36,7 @@ import {
   Puzzle,
   RefreshCw,
   School,
+  Settings,
   Sigma,
   Timer,
   Trash2,
@@ -84,11 +86,13 @@ export const Icons = {
   delete: Trash2,
   chevron: ChevronRight,
   openExternal: ExternalLink,
+  copy: Copy,
   play: Play,
   add: Plus,
   tip: Lightbulb,
   pending: Timer,
   award: Award,
+  settings: Settings,
 } as const;
 
 export type IconName = keyof typeof Icons;

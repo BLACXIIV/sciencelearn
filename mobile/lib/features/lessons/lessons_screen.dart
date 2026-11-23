@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +18,7 @@ class LessonsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Lessons')),
-      body: Column(children: [
+      body: MaxWidth(child: Column(children: [
         SizedBox(
           height: 56,
           child: ListView(
@@ -60,7 +60,7 @@ class LessonsScreen extends ConsumerWidget {
                   return AppCard(
                     onTap: () => context.push('/lesson/${l['id']}'),
                     child: Row(children: [
-                      _LessonThumb(thumbKey: l['thumbnail_key'] as String?),
+                      LessonThumb(thumbKey: l['thumbnail_key'] as String?),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -71,7 +71,7 @@ class LessonsScreen extends ConsumerWidget {
                           Row(children: [Expanded(child: Bar(pct / 100)), const SizedBox(width: 8), Text('$pct%')]),
                         ]),
                       ),
-                      const Icon(AppIcons.chevron, color: AppColors.muted),
+                      Icon(AppIcons.chevron, color: AppColors.muted),
                     ]),
                   );
                 },
@@ -79,16 +79,16 @@ class LessonsScreen extends ConsumerWidget {
             ),
           ),
         ),
-      ]),
+      ])),
     );
   }
 }
 
-/// Lesson thumbnail — resolves the R2 object key to a signed URL, then caches
+/// Lesson thumbnail â€” resolves the R2 object key to a signed URL, then caches
 /// the image. Falls back to the science icon when there is no image.
-class _LessonThumb extends ConsumerWidget {
+class LessonThumb extends ConsumerWidget {
   final String? thumbKey;
-  const _LessonThumb({required this.thumbKey});
+  const LessonThumb({super.key, required this.thumbKey});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -96,7 +96,7 @@ class _LessonThumb extends ConsumerWidget {
     Widget fallback() => Container(
           width: 64, height: 64,
           decoration: BoxDecoration(color: AppColors.surface2, borderRadius: BorderRadius.circular(12)),
-          child: const Icon(AppIcons.science, size: 30, color: AppColors.muted),
+          child: Icon(AppIcons.science, size: 30, color: AppColors.muted),
         );
     if (thumbKey == null || thumbKey!.isEmpty) return fallback();
     return ClipRRect(

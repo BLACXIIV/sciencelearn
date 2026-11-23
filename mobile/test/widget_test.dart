@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sciencelearn/core/widgets.dart';
 import 'package:sciencelearn/data/repository.dart';
+import 'package:sciencelearn/features/landing/landing_screen.dart';
 import 'package:sciencelearn/features/shell.dart';
 
 Widget _gateApp(Map<String, dynamic>? profile, {bool fail = false}) => ProviderScope(
@@ -55,5 +56,49 @@ void main() {
     await tester.pump();
     expect(find.text("Couldn't load this right now"), findsOneWidget);
     expect(find.text('student app content'), findsNothing);
+  });
+
+  // IslandNavBar lives in Scaffold.bottomNavigationBar — an unbounded-height
+  // slot. It must keep its own height (stay at the bottom), never expand.
+  for (final size in [const Size(390, 844), const Size(1280, 800)]) {
+    testWidgets('IslandNavBar stays at the bottom at $size', (WidgetTester tester) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: const Text('body'),
+          bottomNavigationBar: IslandNavBar(
+            currentIndex: 0,
+            onSelect: (_) {},
+            items: const [
+              (icon: Icons.home, label: 'Home'),
+              (icon: Icons.person, label: 'Account'),
+            ],
+          ),
+        ),
+      ));
+
+      final bar = tester.getRect(find.byType(IslandNavBar));
+      // bottom edge sits at the bottom of the window
+      expect(bar.bottom, closeTo(size.height, 1));
+      // bar keeps its natural height, roughly icon + label + padding
+      expect(bar.height, lessThan(120));
+      // body gets real space, not squeezed to zero
+      expect(tester.getSize(find.text('body')).height, greaterThan(0));
+    });
+  }
+
+  // RenderFlex overflows surface as test failures — the landing CTA row
+  // must reflow on a narrow phone instead of spilling off the edge.
+  testWidgets('Landing screen lays out at narrow width without overflow', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const MaterialApp(home: LandingScreen()));
+    expect(find.text('ScienceLearn'), findsOneWidget);
+    expect(find.text('Create an account'), findsOneWidget);
   });
 }

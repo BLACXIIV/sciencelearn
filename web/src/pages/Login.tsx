@@ -22,8 +22,8 @@ export default function Login() {
     <form className="card login" onSubmit={submit}>
       <h1>ScienceLearn</h1>
       <p>Sign in to your portal</p>
-      <label className="field"><span>Email</span>
-        <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <label className="field"><span>Email or username</span>
+        <input type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </label>
       <label className="field"><span>Password</span>
         <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />

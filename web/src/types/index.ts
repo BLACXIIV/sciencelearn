@@ -15,6 +15,7 @@ export type Subject = (typeof SUBJECTS)[number];
 
 export interface Lesson {
   id: string;
+  class_id: string | null;
   subject: Subject;
   title: string;
   objectives: string;
@@ -67,6 +68,9 @@ export interface Assessment {
   description: string;
   time_limit_sec: number | null;
   is_published: boolean;
+  /** 'immediate' = score shown after submit; 'manual' = teacher releases. */
+  release_scores: "immediate" | "manual";
+  scores_released: boolean;
   created_at: string;
 }
 
@@ -95,8 +99,10 @@ export type AnswerValue = { i: number } | { b: boolean } | { t: string } | { ite
 
 export interface AttemptResult {
   attempt_id: string;
-  score: number;
+  /** null while the teacher holds scores back (manual release). */
+  score: number | null;
   total: number;
+  released: boolean;
 }
 
 export interface RecentActivity {

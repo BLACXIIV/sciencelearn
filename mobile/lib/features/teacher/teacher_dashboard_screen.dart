@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/icons.dart';
 import '../../core/theme.dart';
@@ -51,10 +51,10 @@ class TeacherDashboardScreen extends ConsumerWidget {
             ('Class Gain', '${gain >= 0 ? '+' : ''}$gain%', AppIcons.gain, AppColors.purple),
           ];
 
-          return ListView(padding: const EdgeInsets.all(16), children: [
-            GridView.count(
-              crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 1.6,
+          return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+            GridView.extent(
+              maxCrossAxisExtent: 260, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10, crossAxisSpacing: 10, mainAxisExtent: 96,
               children: [
                 for (final s in stats)
                   AppCard(child: Row(children: [
@@ -74,14 +74,16 @@ class TeacherDashboardScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
               child: rows.isEmpty
                   ? const EmptyState(icon: AppIcons.students, title: 'No student data yet')
-                  : Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                      for (final r in classRings)
-                        Column(children: [
-                          RingChart(r.$2, color: r.$3, size: 56, stroke: 6),
-                          const SizedBox(height: 6),
-                          Text(r.$1, style: const TextStyle(fontSize: 11, color: AppColors.muted)),
-                        ]),
-                    ]),
+                  : Wrap(
+                      alignment: WrapAlignment.spaceAround, runSpacing: 12,
+                      children: [
+                        for (final r in classRings)
+                          Column(children: [
+                            RingChart(r.$2, color: r.$3, size: 56, stroke: 6),
+                            const SizedBox(height: 6),
+                            Text(r.$1, style: TextStyle(fontSize: 11, color: AppColors.muted)),
+                          ]),
+                      ]),
             ),
             const SizedBox(height: 20),
             const Text('Student Performance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
@@ -98,11 +100,11 @@ class TeacherDashboardScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text('${((s['lessons_pct'] as num?) ?? 0).round()}%'),
                   ]),
-                  Text('Pre ${s['pre_score'] ?? '–'} → Post ${s['post_score'] ?? '–'}',
+                  Text('Pre ${s['pre_score'] ?? 'â€“'} â†’ Post ${s['post_score'] ?? 'â€“'}',
                       style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ]),
               ),
-          ]);
+          ]));
         },
       ),
     );

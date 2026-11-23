@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/icons.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
-/// Teacher activity builder for one lesson — mirrors web LessonActivities.
+/// Teacher activity builder for one lesson â€” mirrors web LessonActivities.
 /// Manage assessments (kind, publish, delete) and per-type questions.
 class LessonActivitiesScreen extends ConsumerStatefulWidget {
   final Json lesson;
@@ -169,7 +169,7 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
     final repo = ref.read(repoProvider);
     return Scaffold(
       appBar: AppBar(title: Text('Activities: ${widget.lesson['title']}')),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
+      body: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
         AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Text('New activity', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
@@ -204,20 +204,9 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
                   Row(children: [
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('${a['title']}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                      Text('${_kinds[a['kind']] ?? a['kind']}${a['is_published'] == true ? ' · published' : ' · draft'}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+                      Text('${_kinds[a['kind']] ?? a['kind']}${a['is_published'] == true ? ' Â· published' : ' Â· draft'}',
+                          style: TextStyle(fontSize: 12, color: AppColors.muted)),
                     ])),
-                    TextButton(
-                      onPressed: () => setState(() => _open = _open == a['id'] ? null : '${a['id']}'),
-                      child: Text(_open == a['id'] ? 'Close' : 'Questions'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        await repo.setAssessmentPublished('${a['id']}', a['is_published'] != true);
-                        setState(() => _refresh++);
-                      },
-                      child: Text(a['is_published'] == true ? 'Unpublish' : 'Publish'),
-                    ),
                     IconButton(
                       icon: const Icon(AppIcons.delete, size: 18),
                       onPressed: () async {
@@ -226,6 +215,29 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
                       },
                     ),
                   ]),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(spacing: 4, children: [
+                      TextButton(
+                        onPressed: () => setState(() => _open = _open == a['id'] ? null : '${a['id']}'),
+                        child: Text(_open == a['id'] ? 'Close' : 'Questions'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await repo.setAssessmentPublished('${a['id']}', a['is_published'] != true);
+                          setState(() => _refresh++);
+                        },
+                        child: Text(a['is_published'] == true ? 'Unpublish' : 'Publish'),
+                      ),
+                    ]),
+                  ),
+                  _ScoreRelease(
+                    mode: '${a['release_scores'] ?? 'immediate'}',
+                    released: a['scores_released'] == true,
+                    repo: repo,
+                    assessmentId: '${a['id']}',
+                    onChanged: () => setState(() => _refresh++),
+                  ),
                   if (_open == a['id'])
                     FutureBuilder<List<Json>>(
                       key: ValueKey('${a['id']}-$_refresh'),
@@ -240,7 +252,7 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
                           for (var i = 0; i < qs.data!.length; i++)
                             ListTile(
                               dense: true, contentPadding: EdgeInsets.zero,
-                              leading: Text('${i + 1}', style: const TextStyle(color: AppColors.muted)),
+                              leading: Text('${i + 1}', style: TextStyle(color: AppColors.muted)),
                               title: Text('${qs.data![i]['prompt']}', maxLines: 1, overflow: TextOverflow.ellipsis),
                               subtitle: Text('${qs.data![i]['qtype']}'.replaceAll('_', ' '),
                                   style: const TextStyle(fontSize: 11)),
@@ -268,6 +280,62 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
                 ])),
             ]);
           },
+        ),
+      ])),
+    );
+  }
+}
+
+/// Score visibility control: 'immediate' shows scores after submit,
+/// 'manual' keeps them hidden until the teacher releases.
+class _ScoreRelease extends StatelessWidget {
+  final String mode, assessmentId;
+  final bool released;
+  final Repo repo;
+  final VoidCallback onChanged;
+  const _ScoreRelease({required this.mode, required this.released,
+      required this.repo, required this.assessmentId, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final manual = mode == 'manual';
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(AppIcons.award, size: 14, color: AppColors.muted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              manual
+                  ? (released ? 'Scores released' : 'Scores hidden until you release them')
+                  : 'Students see scores right after submitting',
+              style: TextStyle(fontSize: 12, color: AppColors.muted),
+            ),
+          ),
+        ]),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Wrap(spacing: 4, children: [
+            TextButton(
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+              onPressed: () async {
+                await repo.setScoreRelease(assessmentId, manual ? 'immediate' : 'manual');
+                onChanged();
+              },
+              child: Text(manual ? 'Show after submit' : 'Release manually'),
+            ),
+            if (manual && !released)
+              TextButton(
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact,
+                    foregroundColor: AppColors.orange),
+                onPressed: () async {
+                  await repo.releaseScores(assessmentId);
+                  onChanged();
+                },
+                child: const Text('Release scores'),
+              ),
+          ]),
         ),
       ]),
     );

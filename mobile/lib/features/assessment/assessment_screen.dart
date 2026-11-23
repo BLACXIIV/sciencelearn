@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/icons.dart';
@@ -14,14 +14,19 @@ class AssessmentScreen extends ConsumerWidget {
     final repo = ref.read(repoProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Assessment Center')),
-      body: FutureBuilder<List<Json>>(
-        future: repo.assessments(['pre_test', 'post_test', 'topic_quiz', 'problem_solving', 'final_challenge']),
-        builder: (context, snap) => AsyncView<List<Json>>(
+      body: FutureBuilder<({List<Json> rows, Map<String, num> scores})>(
+        future: (() async => (
+          rows: await repo.assessments(['pre_test', 'post_test', 'topic_quiz', 'problem_solving', 'final_challenge']),
+          scores: await repo.myAttemptScores(),
+        ))(),
+        builder: (context, snap) => AsyncView<({List<Json> rows, Map<String, num> scores})>(
           snap: snap,
-          builder: (rows) {
+          builder: (data) {
+            final scores = data.scores;
+            final rows = data.rows;
             final tests = rows.where((a) => a['kind'] == 'pre_test' || a['kind'] == 'post_test').toList();
             final quizzes = rows.where((a) => a['kind'] != 'pre_test' && a['kind'] != 'post_test').toList();
-            return ListView(padding: const EdgeInsets.all(16), children: [
+            return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
               // Pre/Post as the mockup's two pastel hero tiles.
               if (tests.isNotEmpty)
                 Row(children: [
@@ -47,11 +52,13 @@ class AssessmentScreen extends ConsumerWidget {
                         Text(a['title'], style: const TextStyle(fontWeight: FontWeight.w700)),
                         Text(a['description'] ?? '', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ])),
-                      const Icon(AppIcons.chevron, color: AppColors.muted),
+                      if (scores.containsKey('${a['id']}'))
+                        _ScoreChip('${scores['${a['id']}']!.round()}%'),
+                      Icon(AppIcons.chevron, color: AppColors.muted),
                     ]),
                   ),
                 ),
-            ]);
+            ]));
           },
         ),
       ),
@@ -71,6 +78,21 @@ class AssessmentScreen extends ConsumerWidget {
         'final_challenge' => AppColors.orange,
         _ => AppColors.purple,
       };
+}
+
+class _ScoreChip extends StatelessWidget {
+  final String label;
+  const _ScoreChip(this.label);
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(right: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: pastelBg(context, AppColors.success),
+      borderRadius: BorderRadius.circular(99),
+    ),
+    child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.success)),
+  );
 }
 
 class _TestTile extends StatelessWidget {

@@ -20,9 +20,13 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
   return data as Profile;
 }
 
+/** Accepts a real email or a bare username ("test2" -> test2@sciencelearn.local). */
+const authEmail = (id: string): string =>
+  id.includes("@") ? id.trim() : `${id.trim()}@sciencelearn.local`;
+
 /** Resolves on success; rejects with the Supabase auth error on failure. */
 export async function signInWithPassword(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email: authEmail(email), password });
   if (error) throw error;
 }
 
@@ -35,7 +39,7 @@ export const signOut = (): Promise<void> => supabase.auth.signOut().then(({ erro
  *  false when the user must confirm their email first. */
 export async function signUp(email: string, password: string, fullName: string, role: string): Promise<boolean> {
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: authEmail(email),
     password,
     options: { data: { full_name: fullName, role }, emailRedirectTo: window.location.origin },
   });

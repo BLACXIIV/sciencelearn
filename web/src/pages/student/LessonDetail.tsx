@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/useAuth";
-import { fetchLesson, setLessonProgress } from "../../services/learning";
+import { fetchLesson, fetchLessonActivities, fetchMyAttemptScores, setLessonProgress } from "../../services/learning";
 import { getR2Url } from "../../services/storage";
 import { I } from "../../components/icons";
 
@@ -13,6 +13,8 @@ export default function StudentLessonDetail() {
   const uid = session?.user.id;
 
   const lesson = useQuery({ queryKey: ["lesson", id], queryFn: () => fetchLesson(id) });
+  const activities = useQuery({ queryKey: ["lesson-activities", id], queryFn: () => fetchLessonActivities(id) });
+  const scores = useQuery({ queryKey: ["my-attempt-scores"], queryFn: () => fetchMyAttemptScores(uid!), enabled: !!uid });
   const complete = useMutation({
     mutationFn: () => setLessonProgress(uid!, id, 100),
     onSuccess: async () => {
@@ -21,7 +23,7 @@ export default function StudentLessonDetail() {
         qc.invalidateQueries({ queryKey: ["my-progress"] }),
         qc.invalidateQueries({ queryKey: ["recent"] }),
       ]);
-      nav("/student/lessons");
+      nav(lesson.data?.class_id ? `/student/classes/${lesson.data.class_id}` : "/student/classes");
     },
   });
 
@@ -36,11 +38,28 @@ export default function StudentLessonDetail() {
 
   return (
     <article className="card">
-      <Link to="/student/lessons" className="link-btn">← Back to lessons</Link>
+      <Link to={l.class_id ? `/student/classes/${l.class_id}` : "/student/classes"} className="link-btn">← Back to class</Link>
       <h2>{l.title}</h2>
       <p><strong>Objectives:</strong> {l.objectives}</p>
       <hr />
       <p className="lesson-content">{l.content_md}</p>
+      {(activities.data?.length ?? 0) > 0 && (
+        <>
+          <hr />
+          <h3>Activities</h3>
+          {activities.data?.map((a) => (
+            <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="card lesson-row">
+              <span className="lesson-ico"><I name="quiz" size={22} /></span>
+              <span className="lesson-body">
+                <strong>{a.title}</strong>
+                <small>{a.description}</small>
+              </span>
+              {scores.data?.[a.id] != null && <span className="score-chip">{Math.round(scores.data[a.id])}%</span>}
+              <span className="chev"><I name="chevron" size={20} /></span>
+            </Link>
+          ))}
+        </>
+      )}
       {l.content_key && (
         <button className="secondary" onClick={openMaterial}>
           Open lesson material <I name="openExternal" size={16} />

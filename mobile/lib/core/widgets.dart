@@ -38,6 +38,53 @@ class UserAvatar extends ConsumerWidget {
   }
 }
 
+/// Card chrome for the selected surface style. `base` is the card's solid
+/// color; styles reshape how it renders (translucent, shadowed, gradient).
+BoxDecoration surfaceDecoration(SurfaceStyle style, Color base,
+    {double radius = 16}) {
+  final dark = AppColors.palette == darkPalette;
+  switch (style) {
+    case SurfaceStyle.flat:
+      return BoxDecoration(color: base, borderRadius: BorderRadius.circular(radius));
+    case SurfaceStyle.glass:
+      return BoxDecoration(
+        color: base.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: AppColors.text.withValues(alpha: 0.12)),
+      );
+    case SurfaceStyle.neo:
+      return BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: dark
+            ? const [
+                BoxShadow(color: Colors.black54, blurRadius: 14, offset: Offset(6, 6)),
+                BoxShadow(color: Color(0x0DFFFFFF), blurRadius: 10, offset: Offset(-4, -4)),
+              ]
+            : const [
+                BoxShadow(color: Color(0x738C98AF), blurRadius: 16, offset: Offset(6, 6)),
+                BoxShadow(color: Colors.white, blurRadius: 12, offset: Offset(-4, -4)),
+              ],
+      );
+    case SurfaceStyle.skeuo:
+      return BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.alphaBlend(AppColors.text.withValues(alpha: dark ? 0.07 : 0.04), base),
+            base,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: AppColors.line),
+        boxShadow: dark
+            ? const [BoxShadow(color: Colors.black45, blurRadius: 18, offset: Offset(0, 8))]
+            : const [BoxShadow(color: Color(0x4D5A6882), blurRadius: 14, offset: Offset(0, 6))],
+      );
+  }
+}
+
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
@@ -47,12 +94,15 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: color ?? AppColors.surface,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(padding: padding, child: child),
+        child: Ink(
+          decoration: surfaceDecoration(AppColors.surfaceStyle, color ?? AppColors.surface),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Padding(padding: padding, child: child),
+          ),
         ),
       );
 }
@@ -133,7 +183,7 @@ class BreakdownRow extends StatelessWidget {
         child: Row(children: [
           Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
           const SizedBox(width: 10),
-          SizedBox(width: 40, child: Text(percent, style: const TextStyle(fontWeight: FontWeight.w700))),
+          SizedBox(width: 48, child: Text(percent, style: const TextStyle(fontWeight: FontWeight.w700))),
           const SizedBox(width: 10),
           Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -153,7 +203,17 @@ class IslandNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Container(
+      // Row + Flexible(loose): centers the bar and caps it at ~560 without
+      // expanding vertically (Align/Center fill the unbounded nav slot) or
+      // overflowing narrow screens (a bare ConstrainedBox child could).
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            fit: FlexFit.loose,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
@@ -187,9 +247,30 @@ class IslandNavBar extends StatelessWidget {
               ),
           ],
         ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Caps content width and centers it when the window is wider than a phone
+/// (tablet, desktop window). Transparent pass-through on narrow screens.
+class MaxWidth extends StatelessWidget {
+  final Widget child;
+  final double max;
+  const MaxWidth({super.key, required this.child, this.max = 640});
+
+  @override
+  Widget build(BuildContext context) => Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: max),
+          child: child,
+        ),
+      );
 }
 
 class AsyncView<T> extends StatelessWidget {
@@ -214,11 +295,11 @@ class ErrorState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(AppIcons.offline, size: 40, color: AppColors.muted),
+          Icon(AppIcons.offline, size: 40, color: AppColors.muted),
           const SizedBox(height: 8),
           Text("Couldn't load this right now", style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
-          const Text('Check your connection and try again.',
+          Text('Check your connection and try again.',
               style: TextStyle(color: AppColors.muted), textAlign: TextAlign.center),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
@@ -246,7 +327,7 @@ class EmptyState extends StatelessWidget {
           Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
           if (message != null) ...[
             const SizedBox(height: 4),
-            Text(message!, style: const TextStyle(color: AppColors.muted), textAlign: TextAlign.center),
+            Text(message!, style: TextStyle(color: AppColors.muted), textAlign: TextAlign.center),
           ],
         ]),
       ),

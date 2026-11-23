@@ -27,9 +27,12 @@ abstract final class AppIcons {
   static const IconData university = LucideIcons.school;
   static const IconData presentation = LucideIcons.presentation;
 
+  static const IconData back = LucideIcons.arrowLeft;
+  static const IconData login = LucideIcons.logIn;
   static const IconData signOut = LucideIcons.logOut;
   static const IconData camera = LucideIcons.camera;
   static const IconData done = LucideIcons.checkCircle2;
+  static const IconData settings = LucideIcons.settings;
   static const IconData gain = LucideIcons.trendingUp;
   static const IconData retry = LucideIcons.refreshCw;
   static const IconData offline = LucideIcons.cloudOff;
@@ -50,6 +53,7 @@ abstract final class AppIcons {
   static const IconData pending = LucideIcons.timer;
   static const IconData award = LucideIcons.award;
   static const IconData delete = LucideIcons.trash2;
+  static const IconData copy = LucideIcons.copy;
 }
 
 /// 3D emoji assets (Microsoft Fluent Emoji, MIT) used on large feature tiles.

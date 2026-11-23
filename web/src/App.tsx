@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import RequireTeacher from "./components/RequireTeacher";
 import RequireStudent from "./components/RequireStudent";
-import RoleRedirect from "./components/RoleRedirect";
+import Landing from "./pages/Landing";
 import AppLayout from "./components/AppLayout";
 import StudentLayout from "./components/StudentLayout";
 import Login from "./pages/Login";
@@ -9,11 +9,13 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
-import ManageLessons from "./pages/ManageLessons";
 import LessonActivities from "./pages/LessonActivities";
+import Classes from "./pages/Classes";
+import ClassDetail from "./pages/ClassDetail";
 import Users from "./pages/Users";
 import StudentHome from "./pages/student/Home";
-import StudentLessons from "./pages/student/Lessons";
+import StudentClasses from "./pages/student/Classes";
+import StudentClassDetail from "./pages/student/ClassDetail";
 import StudentLessonDetail from "./pages/student/LessonDetail";
 import StudentAssessments from "./pages/student/Assessments";
 import StudentQuiz from "./pages/student/Quiz";
@@ -29,15 +31,16 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Landing: send each account to its role's portal. */}
-      <Route index element={<RoleRedirect />} />
+      {/* Landing for visitors; signed-in users bounce to their portal. */}
+      <Route index element={<Landing />} />
 
       {/* Student portal (mirrors the mobile app). */}
       <Route element={<RequireStudent />}>
         <Route path="/student/quiz/:id" element={<StudentQuiz />} />
         <Route element={<StudentLayout />}>
           <Route path="/student" element={<StudentHome />} />
-          <Route path="/student/lessons" element={<StudentLessons />} />
+          <Route path="/student/classes" element={<StudentClasses />} />
+          <Route path="/student/classes/:id" element={<StudentClassDetail />} />
           <Route path="/student/lessons/:id" element={<StudentLessonDetail />} />
           <Route path="/student/assessments" element={<StudentAssessments />} />
           <Route path="/student/review" element={<StudentReview />} />
@@ -50,8 +53,9 @@ export default function App() {
       <Route element={<RequireTeacher />}>
         <Route element={<AppLayout />}>
           <Route path="/teacher" element={<Dashboard />} />
-          <Route path="/teacher/lessons" element={<ManageLessons />} />
           <Route path="/teacher/lessons/:lessonId/activities" element={<LessonActivities />} />
+          <Route path="/teacher/classes" element={<Classes />} />
+          <Route path="/teacher/classes/:id" element={<ClassDetail />} />
           <Route path="/teacher/users" element={<Users />} />
         </Route>
       </Route>

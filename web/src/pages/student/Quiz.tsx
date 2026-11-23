@@ -85,8 +85,17 @@ export default function StudentQuiz() {
       <div className="quiz-page">
         <div className="card result">
           <div className="result-icon"><E name="postTest" size={72} /></div>
-          <div className="score">{result.score}%</div>
-          <p>{result.total} questions</p>
+          {result.score != null ? (
+            <>
+              <div className="score">{result.score}%</div>
+              <p>{result.total} questions</p>
+            </>
+          ) : (
+            <>
+              <h2>Submitted</h2>
+              <p className="muted-center">Your score will appear once your teacher releases it.</p>
+            </>
+          )}
           <button onClick={() => nav("/student/assessments")}>Done</button>
         </div>
       </div>

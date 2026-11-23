@@ -41,8 +41,8 @@ export default function SignUp() {
       <label className="field"><span>Full name</span>
         <input autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
       </label>
-      <label className="field"><span>Email</span>
-        <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <label className="field"><span>Email or username</span>
+        <input type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </label>
       <label className="field"><span>Password</span>
         <input type="password" minLength={6} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />

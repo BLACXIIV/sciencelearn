@@ -28,7 +28,7 @@ class UsersScreen extends ConsumerWidget {
       body: users.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(onRetry: () => ref.invalidate(profilesProvider)),
-        data: (rows) => ListView.separated(
+        data: (rows) => MaxWidth(child: ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: rows.length,
           separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -64,7 +64,7 @@ class UsersScreen extends ConsumerWidget {
               ]),
             );
           },
-        ),
+        )),
       ),
     );
   }

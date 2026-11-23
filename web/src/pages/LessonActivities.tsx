@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchLesson } from "../services/learning";
 import {
   createAssessment, deleteAssessment, deleteQuestion, fetchLessonAssessments,
-  fetchQuestionsFull, setAssessmentPublished, upsertQuestion,
+  fetchQuestionsFull, releaseScores, setAssessmentPublished, setScoreRelease, upsertQuestion,
 } from "../services/activities";
 import { I } from "../components/icons";
 import type { AssessmentKind, Question, QuestionType } from "../types";
@@ -267,13 +267,18 @@ export default function LessonActivities() {
     mutationFn: deleteAssessment,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-assessments", lessonId] }),
   });
+  const release = useMutation({
+    mutationFn: ({ id, mode }: { id: string; mode?: "immediate" | "manual"; reveal?: boolean }) =>
+      mode ? setScoreRelease(id, mode) : releaseScores(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-assessments", lessonId] }),
+  });
 
   if (lesson.isLoading) return <p>Loading…</p>;
   if (lesson.error) return <p className="err">{String(lesson.error)}</p>;
 
   return (
     <>
-      <Link to="/teacher/lessons" className="link-btn">← Back to lessons</Link>
+      <Link to={lesson.data?.class_id ? `/teacher/classes/${lesson.data.class_id}` : "/teacher/classes"} className="link-btn">← Back to class</Link>
       <h2>Activities for “{lesson.data?.title}”</h2>
 
       <div className="card">
@@ -316,6 +321,26 @@ export default function LessonActivities() {
             <button className="icon-btn" title="Delete" disabled={del.isPending} onClick={() => del.mutate(a.id)}>
               <I name="delete" size={15} />
             </button>
+          </div>
+          <div className="score-release">
+            <I name="award" size={13} />
+            <span>
+              {a.release_scores === "manual"
+                ? (a.scores_released ? "Scores released" : "Scores hidden until you release them")
+                : "Students see scores right after submitting"}
+            </span>
+            <button className="link-btn" disabled={release.isPending}
+              onClick={() => release.mutate({
+                id: a.id, mode: a.release_scores === "manual" ? "immediate" : "manual",
+              })}>
+              {a.release_scores === "manual" ? "Show after submit" : "Release manually"}
+            </button>
+            {a.release_scores === "manual" && !a.scores_released && (
+              <button className="link-btn accent" disabled={release.isPending}
+                onClick={() => release.mutate({ id: a.id })}>
+                Release scores
+              </button>
+            )}
           </div>
           {open === a.id && <AssessmentEditor assessmentId={a.id} />}
         </div>

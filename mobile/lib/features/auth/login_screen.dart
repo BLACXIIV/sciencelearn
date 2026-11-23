@@ -17,11 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscure = true;
   String? _err;
 
+  /// Accepts a real email or a bare username ("test2" -> test2@sciencelearn.local).
+  String get _loginId {
+    final id = _email.text.trim();
+    return id.contains('@') ? id : '$id@sciencelearn.local';
+  }
+
   Future<void> _signIn() async {
     setState(() { _busy = true; _err = null; });
     try {
       await Supabase.instance.client.auth
-          .signInWithPassword(email: _email.text.trim(), password: _pass.text);
+          .signInWithPassword(email: _loginId, password: _pass.text);
     } on AuthException catch (e) {
       setState(() => _err = e.message);
     } finally {
@@ -32,13 +38,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(colors: [AppColors.bg, AppColors.surface2], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           ),
-          child: Center(
+          child: Stack(children: [
+            Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Card(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Card(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -50,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     AutofillGroup(child: Column(children: [
                       TextField(
                         controller: _email,
-                        decoration: const InputDecoration(labelText: 'Email'),
+                        decoration: const InputDecoration(labelText: 'Email or username'),
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.email],
                         textInputAction: TextInputAction.next,
@@ -80,7 +89,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          ),
+            ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8),
+                child: IconButton(
+                  icon: const Icon(AppIcons.back),
+                  tooltip: 'Back',
+                  onPressed: () => context.canPop() ? context.pop() : context.go('/welcome'),
+                ),
+              ),
+            ),
+          ]),
         ),
       );
 }

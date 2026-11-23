@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/icons.dart';
@@ -29,8 +29,10 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() { _busy = true; _err = null; });
     try {
       final auth = Supabase.instance.client.auth;
+      // Real email or bare username ("test2" -> test2@sciencelearn.local).
+      final id = _email.text.trim();
       await auth.signUp(
-        email: _email.text.trim(),
+        email: id.contains('@') ? id : '$id@sciencelearn.local',
         password: _pass.text,
         data: {'full_name': _name.text.trim(), 'role': _role},
       );
@@ -50,26 +52,41 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(colors: [AppColors.bg, AppColors.surface2], begin: Alignment.topCenter, end: Alignment.bottomCenter),
           ),
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: _sent ? _checkEmail(context) : _form(context),
+          child: Stack(children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: _sent ? _checkEmail(context) : _form(context),
+                  ),
+                  ),
                 ),
               ),
             ),
-          ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8),
+                child: IconButton(
+                  icon: const Icon(AppIcons.back),
+                  tooltip: 'Back',
+                  onPressed: () => context.canPop() ? context.pop() : context.go('/welcome'),
+                ),
+              ),
+            ),
+          ]),
         ),
       );
 
   Widget _checkEmail(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(AppIcons.mailVerified, size: 48, color: AppColors.blue),
+        Icon(AppIcons.mailVerified, size: 48, color: AppColors.blue),
         const SizedBox(height: 8),
         Text('Check your email', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
@@ -95,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: _email,
-            decoration: _fieldDeco('Email'),
+            decoration: _fieldDeco('Email or username'),
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
             textInputAction: TextInputAction.next,
@@ -125,7 +142,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 16),
         Align(
           alignment: Alignment.centerLeft,
-          child: Text('I am a…', style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text('I am aâ€¦', style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         const SizedBox(height: 6),
         SizedBox(

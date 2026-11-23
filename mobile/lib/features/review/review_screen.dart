@@ -25,8 +25,8 @@ class ReviewScreen extends ConsumerWidget {
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('Review Center')),
-      body: GridView.count(
-        padding: const EdgeInsets.all(16), crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12,
+      body: MaxWidth(child: GridView.extent(
+        padding: const EdgeInsets.all(16), maxCrossAxisExtent: 220, mainAxisSpacing: 12, crossAxisSpacing: 12,
         children: [
           for (final t in tiles)
             AppCard(
@@ -39,7 +39,7 @@ class ReviewScreen extends ConsumerWidget {
               ]),
             ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -58,7 +58,7 @@ class _ListPage extends StatelessWidget {
             snap: snap,
             builder: (rows) => rows.isEmpty
                 ? const EmptyState(icon: AppIcons.inbox, title: 'Nothing here yet', message: 'Check back soon.')
-                : ListView.separated(
+                : MaxWidth(child: ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: rows.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -69,7 +69,7 @@ class _ListPage extends StatelessWidget {
                   Text(sub(rows[i])),
                 ]),
               ),
-            ),
+            )),
           ),
         ),
       );

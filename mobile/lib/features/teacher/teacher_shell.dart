@@ -6,8 +6,8 @@ import '../../core/widgets.dart';
 import '../../data/repository.dart';
 
 /// Teacher/admin shell. Branch indexes are fixed in the router:
-/// 0 dashboard, 1 lessons, 2 students, 3 users (admin), 4 account.
-/// Teachers hide branch 3; visible tabs map onto the same branches.
+/// 0 dashboard, 1 classes, 2 users (admin), 3 account.
+/// Teachers hide branch 2; visible tabs map onto the same branches.
 class TeacherShell extends ConsumerWidget {
   final StatefulNavigationShell shell;
   const TeacherShell({super.key, required this.shell});
@@ -30,11 +30,10 @@ class TeacherShell extends ConsumerWidget {
     }
 
     // Branch indexes visible as tabs; admins also get Users.
-    final visible = role == 'admin' ? const [0, 1, 2, 3, 4] : const [0, 1, 2, 4];
+    final visible = role == 'admin' ? const [0, 1, 2, 3] : const [0, 1, 3];
     const items = [
       (icon: AppIcons.dashboard, label: 'Dashboard'),
-      (icon: AppIcons.lessons, label: 'Lessons'),
-      (icon: AppIcons.students, label: 'Students'),
+      (icon: AppIcons.students, label: 'Classes'),
       (icon: AppIcons.userAdmin, label: 'Users'),
       (icon: AppIcons.account, label: 'Account'),
     ];

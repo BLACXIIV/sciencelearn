@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -25,20 +25,20 @@ class ProgressScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Progress Tracker')),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
+      body: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
         Text('Overall Progress', style: Theme.of(context).textTheme.titleMedium),
         Text('${overall.round()}%', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
         AppCard(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Wrap(
+            alignment: WrapAlignment.spaceAround, runSpacing: 12,
             children: [
               for (final r in rings)
                 Column(children: [
                   RingChart(r.$2, color: r.$3, size: 56, stroke: 6),
                   const SizedBox(height: 6),
-                  Text(r.$1, style: const TextStyle(fontSize: 11, color: AppColors.muted)),
+                  Text(r.$1, style: TextStyle(fontSize: 11, color: AppColors.muted)),
                 ]),
             ],
           ),
@@ -56,7 +56,7 @@ class ProgressScreen extends ConsumerWidget {
               BreakdownRow(color: AppColors.success, percent: '', label: 'Learning gain', value: '${gain >= 0 ? '+' : ''}$gain%'),
           ]),
         ),
-      ]),
+      ])),
     );
   }
 }

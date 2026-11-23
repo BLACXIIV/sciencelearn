@@ -1,12 +1,12 @@
 import { NavLink, Outlet } from "react-router-dom";
-import Avatar from "./Avatar";
+import TopNav from "./TopNav";
 import { I, type IconName } from "./icons";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
 
 const STUDENT_NAV: { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: "/student", label: "Home", icon: "home", end: true },
-  { to: "/student/lessons", label: "My Lessons", icon: "lessons", end: false },
+  { to: "/student/classes", label: "My Classes", icon: "students", end: false },
   { to: "/student/assessments", label: "Assessment Center", icon: "assessment", end: false },
   { to: "/student/review", label: "Review Center", icon: "review", end: false },
   { to: "/student/progress", label: "Progress Tracker", icon: "progress", end: false },
@@ -30,8 +30,8 @@ export default function StudentLayout() {
         <button type="button" className="nav-action" onClick={signOut}><I name="signOut" size={18} />Sign out</button>
       </aside>
       <main>
+        <TopNav />
         <header className="page-head">
-          <Avatar name={profile?.full_name ?? ""} avatarKey={profile?.avatar_url ?? null} size={44} />
           <div><h1>Welcome, {profile?.full_name}!</h1><p>Keep learning, keep growing!</p></div>
         </header>
         <Outlet />
