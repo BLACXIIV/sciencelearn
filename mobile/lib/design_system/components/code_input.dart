@@ -77,15 +77,18 @@ class _DSCodeInputState extends State<DSCodeInput> {
           child: Stack(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  for (var i = 0; i < widget.length; i++)
-                    _CodeCell(
-                      char: i < widget.value.length ? widget.value[i] : '',
-                      active: _focus.hasFocus && i == active,
-                      error: hasError,
-                      enabled: widget.enabled,
+                  for (var i = 0; i < widget.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    Expanded(
+                      child: _CodeCell(
+                        char: i < widget.value.length ? widget.value[i] : '',
+                        active: _focus.hasFocus && i == active,
+                        error: hasError,
+                        enabled: widget.enabled,
+                      ),
                     ),
+                  ],
                 ],
               ),
               Positioned.fill(
@@ -123,7 +126,9 @@ class _DSCodeInputState extends State<DSCodeInput> {
             children: [
               const DSIcon(DSIconName.alert, size: 14, color: DSColors.error),
               const SizedBox(width: 6),
-              Expanded(child: Text(widget.error!, style: DSText.caption.copyWith(color: DSColors.error))),
+              Expanded(
+                  child: Text(widget.error!,
+                      style: DSText.caption.copyWith(color: DSColors.error))),
             ],
           ),
         ],
@@ -137,19 +142,33 @@ class _CodeCell extends StatelessWidget {
   final bool active;
   final bool error;
   final bool enabled;
-  const _CodeCell({required this.char, required this.active, required this.error, required this.enabled});
+  const _CodeCell(
+      {required this.char,
+      required this.active,
+      required this.error,
+      required this.enabled});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 46,
       height: 54,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: DSColors.surface,
         borderRadius: DSRadii.inputBr,
-        border: Border.all(color: error ? DSColors.error : active ? DSColors.blue : DSColors.line),
-        boxShadow: dsEdge(error ? DSColors.error : active ? DSColors.edgeBlue : DSColors.edgeCard, h: 4),
+        border: Border.all(
+            color: error
+                ? DSColors.error
+                : active
+                    ? DSColors.blue
+                    : DSColors.line),
+        boxShadow: dsEdge(
+            error
+                ? DSColors.error
+                : active
+                    ? DSColors.edgeBlue
+                    : DSColors.edgeCard,
+            h: 4),
       ),
       child: Opacity(
         opacity: enabled ? 1 : 0.55,
@@ -164,6 +183,7 @@ class _CodeCell extends StatelessWidget {
 
 class _UpperCaseFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) =>
+  TextEditingValue formatEditUpdate(
+          TextEditingValue oldValue, TextEditingValue newValue) =>
       newValue.copyWith(text: newValue.text.toUpperCase());
 }

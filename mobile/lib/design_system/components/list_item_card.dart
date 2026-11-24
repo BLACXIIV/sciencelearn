@@ -50,19 +50,25 @@ class DSListItemCard extends StatelessWidget {
       child: Row(children: [
         if (lead != null) ...[lead, const SizedBox(width: DSSpacing.s3)],
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            DefaultTextStyle.merge(
-              style: DSText.title.copyWith(color: DSColors.ink),
-              child: title,
-            ),
-            if (subtitle != null)
-              DefaultTextStyle.merge(
-                style: DSText.caption.copyWith(color: DSColors.muted),
-                child: subtitle!,
-              ),
-          ]),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DefaultTextStyle.merge(
+                  style: DSText.title.copyWith(color: DSColors.ink),
+                  child: title,
+                ),
+                if (subtitle != null)
+                  DefaultTextStyle.merge(
+                    style: DSText.caption.copyWith(color: DSColors.muted),
+                    child: subtitle!,
+                  ),
+              ]),
         ),
-        if (trailing != null) ...[const SizedBox(width: DSSpacing.s2), trailing!],
+        if (trailing != null) ...[
+          const SizedBox(width: DSSpacing.s2),
+          trailing!
+        ],
       ]),
     );
 
