@@ -27,30 +27,33 @@ class DSIslandNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 560),
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
-          padding: const EdgeInsets.all(DSSpacing.s2),
-          decoration: BoxDecoration(
-            color: DSColors.surface,
-            borderRadius: DSRadii.panelBr,
-            border: Border.all(color: DSColors.line),
-            boxShadow: dsEdge(DSColors.edgeCard, h: 5),
-          ),
-          child: Row(
-            children: [
-              for (final it in items)
-                Expanded(
-                  child: _IslandItem(
-                    item: it,
-                    active: active == it.key,
-                    onTap: () => onSelect?.call(it.key),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 560),
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+            padding: const EdgeInsets.all(DSSpacing.s2),
+            decoration: BoxDecoration(
+              color: DSColors.surface,
+              borderRadius: DSRadii.panelBr,
+              border: Border.all(color: DSColors.line),
+              boxShadow: dsEdge(DSColors.edgeCard, h: 5),
+            ),
+            child: Row(
+              children: [
+                for (final it in items)
+                  Expanded(
+                    child: _IslandItem(
+                      item: it,
+                      active: active == it.key,
+                      onTap: () => onSelect?.call(it.key),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -60,7 +63,8 @@ class _IslandItem extends StatelessWidget {
   final DSNavItem item;
   final bool active;
   final VoidCallback onTap;
-  const _IslandItem({required this.item, required this.active, required this.onTap});
+  const _IslandItem(
+      {required this.item, required this.active, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +86,8 @@ class _IslandItem extends StatelessWidget {
           children: [
             DSIcon(item.icon, size: 22, color: color),
             const SizedBox(height: 2),
-            Text(item.label, style: DSText.label.copyWith(fontSize: 11, color: color)),
+            Text(item.label,
+                style: DSText.label.copyWith(fontSize: 11, color: color)),
           ],
         ),
       ),

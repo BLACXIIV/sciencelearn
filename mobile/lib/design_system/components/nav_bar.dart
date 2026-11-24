@@ -36,7 +36,8 @@ class DSNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: DSSpacing.s3, vertical: DSSpacing.s2),
+      padding: const EdgeInsets.symmetric(
+          horizontal: DSSpacing.s3, vertical: DSSpacing.s2),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -59,7 +60,10 @@ class DSNavBar extends StatelessWidget {
                   for (final it in items)
                     Padding(
                       padding: const EdgeInsets.only(right: DSSpacing.s2),
-                      child: _NavItem(item: it, active: active == it.key, onTap: () => onSelect?.call(it.key)),
+                      child: _NavItem(
+                          item: it,
+                          active: active == it.key,
+                          onTap: () => onSelect?.call(it.key)),
                     ),
                 ],
               ),
@@ -76,7 +80,8 @@ class _NavItem extends StatelessWidget {
   final DSNavItem item;
   final bool active;
   final VoidCallback onTap;
-  const _NavItem({required this.item, required this.active, required this.onTap});
+  const _NavItem(
+      {required this.item, required this.active, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +100,9 @@ class _NavItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DSIcon(item.icon, size: 20, color: active ? DSColors.surface : DSColors.pastelBlue),
+            DSIcon(item.icon,
+                size: 20,
+                color: active ? DSColors.surface : DSColors.pastelBlue),
             const SizedBox(height: 2),
             Text(
               item.label,
