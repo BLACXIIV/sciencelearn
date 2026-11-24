@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -55,20 +54,8 @@ class _AuthSheetHostState extends State<AuthSheetHost> {
   Widget build(BuildContext context) => const LandingScreen();
 }
 
-/// Trivia facts for the "Did you know?" card — same list as the web portal.
-const _trivia = [
-  'Momentum is conserved in an isolated system, even in a collision.',
-  "Honey never spoils. Archaeologists have tasted 3,000-year-old honey found in Egyptian tombs — and it's still edible.",
-  'A bolt of lightning is about five times hotter than the surface of the Sun.',
-  'Your body makes around 25 million new cells every single second.',
-  "There are more atoms in a glass of water than there are glasses of water in all of Earth's oceans.",
-  'Octopuses have three hearts — and two of them stop beating when they swim.',
-  "Hot water can freeze faster than cold water. It's called the Mpemba effect, and scientists still debate why.",
-];
-
-/// Navy-top sheet: the navy area holds the Storyset art in a paper circle
-/// (250px on Log in, 150px on Sign up — animated), then the white sheet
-/// slides up below it. The art can never overlap the title or form.
+/// White sheet: the Storyset art is the sheet's background — a blurred
+/// copy bleeds off the top-right corner behind the handle + switcher.
 class _AuthSheet extends StatefulWidget {
   final AuthTab initial;
   const _AuthSheet({required this.initial});
@@ -88,157 +75,85 @@ class _AuthSheetState extends State<_AuthSheet> {
   Widget build(BuildContext context) {
     final noMotion = MediaQuery.disableAnimationsOf(context);
     final dur = noMotion ? Duration.zero : const Duration(milliseconds: 250);
-    final tall = MediaQuery.sizeOf(context).height >= 700;
     return GestureDetector(
       // Tapping outside a field dismisses the keyboard.
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        // White sheet only — the SVG art sits on the dimmed backdrop behind
-        // it, blurred, peeking from the sheet's top-right corner; the "Did
-        // you know?" card floats above the top edge on the left.
-        child: Stack(clipBehavior: Clip.none, children: [
-          Positioned(
-            top: -132,
-            right: -10,
-            child: IgnorePointer(
-              child: AnimatedSwitcher(
-                duration: dur,
-                child: ImageFiltered(
-                  key: ValueKey(_art),
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: SvgPicture.asset(_art, width: 200),
-                ),
-              ),
-            ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: DSColors.surface,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: DSColors.surface,
-              borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(DSRadii.panel)),
-              boxShadow: dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                        color: DSColors.track, borderRadius: DSRadii.pillBr),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                DSSegmentedControl(
-                  options: const [
-                    DSSegment('login', 'Log in'),
-                    DSSegment('signup', 'Sign up'),
-                  ],
-                  value: _tab == AuthTab.login ? 'login' : 'signup',
-                  onChanged: (v) => setState(() =>
-                      _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
-                ),
-                const SizedBox(height: 16),
-                AnimatedSize(
-                  duration: dur,
-                  curve: Curves.easeInOut,
+          // The blurred Storyset art is the sheet's background, bleeding
+          // off the top-right corner behind the form.
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(DSRadii.panel)),
+            child: Stack(children: [
+              Positioned(
+                top: -24,
+                right: -24,
+                child: IgnorePointer(
                   child: AnimatedSwitcher(
                     duration: dur,
-                    child: _tab == AuthTab.login
-                        ? _LoginForm(
-                            key: const ValueKey('login'),
-                            onGoSignup: () =>
-                                setState(() => _tab = AuthTab.signup),
-                          )
-                        : _SignupForm(
-                            key: const ValueKey('signup'),
-                            onGoLogin: () =>
-                                setState(() => _tab = AuthTab.login),
-                            onRoleArt: (role) => setState(() =>
-                                _signupArt = 'assets/illustrations/$role.svg'),
-                          ),
+                    child: ImageFiltered(
+                      key: ValueKey(_art),
+                      imageFilter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: SvgPicture.asset(_art, width: 200),
+                    ),
                   ),
                 ),
-              ]),
-            ),
-          ),
-          if (tall)
-            const Positioned(
-              top: -128,
-              left: 16,
-              right: 168,
-              child: _TriviaCard(),
-            ),
-        ]),
-      ),
-    );
-  }
-}
-
-/// Compact "Did you know?" trivia card for the navy zone — shown only on
-/// tall viewports (≥700px). Facts rotate every 7s; tap shuffle for the next.
-class _TriviaCard extends StatefulWidget {
-  const _TriviaCard();
-
-  @override
-  State<_TriviaCard> createState() => _TriviaCardState();
-}
-
-class _TriviaCardState extends State<_TriviaCard> {
-  int _fact = 0;
-  Timer? _timer;
-
-  void _next() => setState(() => _fact = (_fact + 1) % _trivia.length);
-
-  @override
-  void initState() {
-    super.initState();
-    _fact = DateTime.now().millisecond % _trivia.length;
-    _timer = Timer.periodic(const Duration(seconds: 7), (_) {
-      if (mounted && !MediaQuery.disableAnimationsOf(context)) _next();
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
-      child: DSCard(
-        variant: DSCardVariant.trivia,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('DID YOU KNOW?',
-                  style: DSText.caption
-                      .copyWith(color: DSColors.blue, letterSpacing: .7)),
-              const SizedBox(height: 4),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: Text(
-                  _trivia[_fact],
-                  key: ValueKey(_fact),
-                  style: DSText.title.copyWith(fontSize: 13, height: 1.4),
-                ),
+              ),
+              SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                          color: DSColors.track, borderRadius: DSRadii.pillBr),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DSSegmentedControl(
+                    options: const [
+                      DSSegment('login', 'Log in'),
+                      DSSegment('signup', 'Sign up'),
+                    ],
+                    value: _tab == AuthTab.login ? 'login' : 'signup',
+                    onChanged: (v) => setState(() =>
+                        _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedSize(
+                    duration: dur,
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
+                      duration: dur,
+                      child: _tab == AuthTab.login
+                          ? _LoginForm(
+                              key: const ValueKey('login'),
+                              onGoSignup: () =>
+                                  setState(() => _tab = AuthTab.signup),
+                            )
+                          : _SignupForm(
+                              key: const ValueKey('signup'),
+                              onGoLogin: () =>
+                                  setState(() => _tab = AuthTab.login),
+                              onRoleArt: (role) => setState(() => _signupArt =
+                                  'assets/illustrations/$role.svg'),
+                            ),
+                    ),
+                  ),
+                ]),
               ),
             ]),
           ),
-          const SizedBox(width: 8),
-          DSIconButton(
-              icon: DSIconName.retry,
-              label: 'Show another fact',
-              onPressed: _next),
-        ]),
+        ),
       ),
     );
   }
