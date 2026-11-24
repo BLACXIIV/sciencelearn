@@ -98,18 +98,12 @@ button.secondary:active:not(:disabled) { box-shadow:0 1px 0 var(--shadow-card); 
 .tile:hover { transform:translateY(-2px); }
 .tile.active { outline:2px solid var(--blue); }
 .tile small { color:var(--muted); }
-.tile-ico { width:46px; height:46px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; }
 .dot { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; }
-.hero-progress { display:flex; align-items:center; gap:22px; }
-.hero-progress .big { font-size:34px; font-weight:800; display:block; margin:4px 0 8px; }
 .lesson-row { display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--text); }
 .lesson-row:hover { background:var(--bg); border-radius:12px; }
-.lesson-ico { width:52px; height:52px; background:var(--card2); color:var(--muted); border-radius:14px; display:flex; align-items:center; justify-content:center; }
 .thumb { width:56px; height:56px; border-radius:12px; object-fit:cover; }
 .lesson-body { flex:1; display:flex; flex-direction:column; gap:2px; }
 .lesson-body small { color:var(--muted); }
-.bar-row { display:flex; align-items:center; gap:10px; margin-top:4px; }
-.bar-row .bar { width:160px; }
 .chev { color:var(--muted); display:inline-flex; }
 .score-chip { font-size:12px; font-weight:700; color:var(--green); background:color-mix(in srgb, var(--green) 15%, transparent); padding:4px 10px; border-radius:999px; }
 .score-release { display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:var(--muted); }

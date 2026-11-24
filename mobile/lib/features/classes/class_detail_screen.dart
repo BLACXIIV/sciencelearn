@@ -1,10 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 import '../lessons/lessons_screen.dart';
 
 final _classLessonsProvider = FutureProvider.autoDispose
@@ -20,47 +19,84 @@ class StudentClassScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lessons = ref.watch(_classLessonsProvider(classId));
     return Scaffold(
-      appBar: AppBar(title: Text(name)),
-      body: lessons.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => ErrorState(onRetry: () => ref.invalidate(_classLessonsProvider(classId))),
-        data: (rows) => RefreshIndicator(
-          onRefresh: () async => ref.refresh(_classLessonsProvider(classId).future),
-          child: rows.isEmpty
-              ? ListView(children: const [
-                  SizedBox(height: 80),
-                  EmptyState(icon: AppIcons.lessons, title: 'No lessons here yet',
-                      message: 'Your teacher has not published lessons for this class.'),
-                ])
-              : MaxWidth(child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: rows.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) {
-                    final l = rows[i];
-                    final lp = (l['lesson_progress'] as List?) ?? [];
-                    final pct = lp.isEmpty ? 0 : (lp.first['percent'] as int);
-                    return AppCard(
-                      onTap: () => context.push('/lesson/${l['id']}'),
-                      child: Row(children: [
-                        LessonThumb(thumbKey: l['thumbnail_key'] as String?),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(l['title'], style: const TextStyle(fontWeight: FontWeight.w700)),
-                            Text('Objectives: ${l['objectives']}', maxLines: 2, overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                            const SizedBox(height: 6),
-                            Row(children: [Expanded(child: Bar(pct / 100)), const SizedBox(width: 8), Text('$pct%')]),
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Row(children: [
+              DSIconButton(
+                icon: DSIconName.back,
+                label: 'Back',
+                onPressed: () => context.pop(),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(name, style: DSText.h2)),
+            ]),
+          ),
+        ),
+        Expanded(child: lessons.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => DSEmptyState(
+            icon: DSIconName.offline,
+            title: "Couldn't load this right now",
+            body: 'Check your connection and try again.',
+            action: DSButton(
+              variant: DSButtonVariant.outline,
+              size: DSButtonSize.sm,
+              leadingIcon: DSIconName.retry,
+              onPressed: () => ref.invalidate(_classLessonsProvider(classId)),
+              child: const Text('Try again'),
+            ),
+          ),
+          data: (rows) => RefreshIndicator(
+            onRefresh: () async => ref.refresh(_classLessonsProvider(classId).future),
+            child: rows.isEmpty
+                ? ListView(children: const [
+                    SizedBox(height: 80),
+                    DSEmptyState(icon: DSIconName.lessons, title: 'No lessons here yet',
+                        body: 'Your teacher has not published lessons for this class.'),
+                  ])
+                : MaxWidth(child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: rows.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, i) {
+                      final l = rows[i];
+                      final lp = (l['lesson_progress'] as List?) ?? [];
+                      final pct = lp.isEmpty ? 0 : (lp.first['percent'] as int);
+                      return GestureDetector(
+                        onTap: () => context.push('/lesson/${l['id']}'),
+                        child: DSCard(
+                          child: Row(children: [
+                            LessonThumb(thumbKey: l['thumbnail_key'] as String?),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(l['title'], style: DSText.title),
+                                Text('Objectives: ${l['objectives']}',
+                                    maxLines: 2, overflow: TextOverflow.ellipsis,
+                                    style: DSText.caption.copyWith(color: DSColors.muted)),
+                                const SizedBox(height: 6),
+                                Row(children: [
+                                  Expanded(child: DSProgressBar(
+                                    value: pct / 100,
+                                    size: DSProgressBarSize.sm,
+                                  )),
+                                  const SizedBox(width: 8),
+                                  Text('$pct%', style: DSText.caption),
+                                ]),
+                              ]),
+                            ),
+                            const DSIcon(DSIconName.chevron, color: DSColors.muted),
                           ]),
                         ),
-                        Icon(AppIcons.chevron, color: AppColors.muted),
-                      ]),
-                    );
-                  },
-                )),
-        ),
-      ),
+                      );
+                    },
+                  )),
+          ),
+        )),
+      ]),
     );
   }
 }

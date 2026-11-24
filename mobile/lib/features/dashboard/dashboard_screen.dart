@@ -1,10 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -16,12 +15,12 @@ class DashboardScreen extends ConsumerWidget {
     final recent = ref.watch(recentProvider);
     final pct = ((prog.valueOrNull?['lessons_pct'] ?? 0) as num).toDouble();
 
-    final items = <(String, String, String)>[
-      ('My Classes', AppEmoji.school, '/classes'),
-      ('Assessment Center', AppEmoji.assessment, '/assessments'),
-      ('Review Center', AppEmoji.review, '/review'),
-      ('Progress Tracker', AppEmoji.progress, '/progress'),
-      ('Account', AppEmoji.account, '/account'),
+    const items = <(String, DSIconName, String, DSCardPastel)>[
+      ('My Classes', DSIconName.school, '/classes', DSCardPastel.blue),
+      ('Assessment Center', DSIconName.assessment, '/assessments', DSCardPastel.yellow),
+      ('Review Center', DSIconName.review, '/review', DSCardPastel.purple),
+      ('Progress Tracker', DSIconName.progress, '/progress', DSCardPastel.mint),
+      ('Account', DSIconName.account, '/account', DSCardPastel.blue),
     ];
 
     return ListView(padding: EdgeInsets.zero, children: [
@@ -33,9 +32,9 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Welcome, ${me.valueOrNull?['full_name'] ?? ''}!',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              Text('Keep learning, keep growing!', style: TextStyle(color: AppColors.muted)),
+              Text('Welcome, ${me.valueOrNull?['full_name'] ?? ''}!', style: DSText.h3),
+              Text('Keep learning, keep growing!',
+                  style: DSText.bodySm.copyWith(color: DSColors.muted)),
             ]),
           ),
         ]),
@@ -43,35 +42,51 @@ class DashboardScreen extends ConsumerWidget {
       Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          AppCard(
+          DSCard(
             child: Row(children: [
-              RingChart(pct / 100, color: AppColors.blue, size: 92, stroke: 9, label: '${pct.round()}%'),
+              DSRingChart(
+                size: 92,
+                thickness: 9,
+                slices: [
+                  DSRingSlice(pct, series: 1),
+                  DSRingSlice(100 - pct, series: 0),
+                ],
+                center: Text('${pct.round()}%', style: DSText.title),
+              ),
               const SizedBox(width: 18),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Your Learning Progress', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text('Your Learning Progress', style: DSText.title),
                   const SizedBox(height: 4),
-                  Text('Average lesson completion', style: TextStyle(color: AppColors.muted, fontSize: 12)),
+                  Text('Average lesson completion',
+                      style: DSText.caption.copyWith(color: DSColors.muted)),
                 ]),
               ),
             ]),
           ),
           const SizedBox(height: 20),
-          const Text('Quick Access', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text('Quick Access', style: DSText.h3),
           const SizedBox(height: 10),
           GridView.extent(
             maxCrossAxisExtent: 170, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 1,
             children: [
               for (final it in items)
-                AppCard(
-                  padding: const EdgeInsets.all(8),
-                  onTap: () => const ['/classes', '/progress', '/account'].contains(it.$3) ? context.go(it.$3) : context.push(it.$3),
-                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    EmojiIcon(it.$2, size: 44),
-                    const SizedBox(height: 8),
-                    Text(it.$1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                  ]),
+                GestureDetector(
+                  onTap: () => const ['/classes', '/progress', '/account'].contains(it.$3)
+                      ? context.go(it.$3)
+                      : context.push(it.$3),
+                  child: DSCard(
+                    variant: DSCardVariant.pastel,
+                    pastel: it.$4,
+                    tilt: true,
+                    padding: const EdgeInsets.all(8),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      DSIcon(it.$2, size: 36, color: DSColors.navy),
+                      const SizedBox(height: 8),
+                      Text(it.$1, textAlign: TextAlign.center, style: DSText.label),
+                    ]),
+                  ),
                 ),
             ],
           ),
@@ -79,22 +94,33 @@ class DashboardScreen extends ConsumerWidget {
           const _MyClassesCard(),
           const SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('Recent Activity', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            TextButton(
+            Text('Recent Activity', style: DSText.title),
+            DSButton(
+              variant: DSButtonVariant.outline,
+              size: DSButtonSize.sm,
               onPressed: () => context.go('/progress'),
-              child: Text('View All', style: TextStyle(color: AppColors.blue)),
+              child: const Text('View all'),
             ),
           ]),
+          const SizedBox(height: 10),
           if (recent.hasValue && (recent.valueOrNull ?? const <Json>[]).isEmpty)
-            const AppCard(child: EmptyState(icon: AppIcons.history, title: 'No activity yet', message: 'Open a lesson to get started.')),
+            const DSCard(child: DSEmptyState(icon: DSIconName.history,
+                title: 'No activity yet', body: 'Open a lesson to get started.')),
           for (final r in recent.valueOrNull ?? const <Json>[])
-            AppCard(
-              child: Row(children: [
-                Icon(r['percent'] == 100 ? AppIcons.done : AppIcons.pending,
-                    color: r['percent'] == 100 ? AppColors.success : AppColors.orange),
-                const SizedBox(width: 10),
-                Expanded(child: Text('${r['lessons']?['title'] ?? 'Lesson'}\n${r['percent'] == 100 ? 'Completed' : 'In progress'} â€¢ ${r['percent']}%')),
-              ]),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: DSCard(
+                child: Row(children: [
+                  DSIcon(r['percent'] == 100 ? DSIconName.done : DSIconName.pending,
+                      color: r['percent'] == 100 ? DSColors.success : DSColors.sun),
+                  const SizedBox(width: 10),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${r['lessons']?['title'] ?? 'Lesson'}', style: DSText.title),
+                    Text('${r['percent'] == 100 ? 'Completed' : 'In progress'} • ${r['percent']}%',
+                        style: DSText.caption.copyWith(color: DSColors.muted)),
+                  ])),
+                ]),
+              ),
             ),
         ]),
       ),
@@ -111,20 +137,17 @@ class _MyClassesCard extends ConsumerStatefulWidget {
 }
 
 class _MyClassesState extends ConsumerState<_MyClassesCard> {
-  final _code = TextEditingController();
+  String _code = '';
   bool _busy = false;
   String? _msg;
   bool _err = false;
   int _refresh = 0;
 
-  @override
-  void dispose() { _code.dispose(); super.dispose(); }
-
   Future<void> _join() async {
     setState(() { _busy = true; _msg = null; });
     try {
-      final r = await ref.read(repoProvider).joinClass(_code.text.trim());
-      _code.clear();
+      final r = await ref.read(repoProvider).joinClass(_code.trim());
+      _code = '';
       _msg = r['status'] == 'pending'
           ? 'Request sent to ${r['name']}, waiting for teacher approval'
           : 'Joined ${r['name']}';
@@ -140,30 +163,29 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
+    return DSCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('My Classes', style: TextStyle(fontWeight: FontWeight.w700)),
+        Text('My Classes', style: DSText.title),
         const SizedBox(height: 10),
         Row(children: [
-          Expanded(child: TextField(
-            controller: _code,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(hintText: 'Enter class code', isDense: true),
+          Expanded(child: DSCodeInput(
+            value: _code,
+            onChanged: (v) => setState(() => _code = v),
+            enabled: !_busy,
           )),
           const SizedBox(width: 8),
-          FilledButton(
-            onPressed: _busy || _code.text.trim().isEmpty ? null : _join,
-            child: _busy
-                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Join'),
+          DSButton(
+            loading: _busy,
+            disabled: _busy || _code.trim().isEmpty,
+            onPressed: _join,
+            child: const Text('Join'),
           ),
         ]),
         if (_msg != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(_msg!, style: TextStyle(
-                fontSize: 12,
-                color: _err ? Theme.of(context).colorScheme.error : AppColors.success)),
+            child: Text(_msg!, style: DSText.caption.copyWith(
+                color: _err ? DSColors.error : DSColors.success)),
           ),
         FutureBuilder<List<Json>>(
           key: ValueKey(_refresh),
@@ -174,7 +196,7 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
               return Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text('Not in any class yet. Get a code from your teacher.',
-                    style: TextStyle(fontSize: 12, color: AppColors.muted)),
+                    style: DSText.caption.copyWith(color: DSColors.muted)),
               );
             }
             return Column(children: [
@@ -183,12 +205,12 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Row(children: [
-                    Icon(AppIcons.students, size: 16,
-                        color: e['status'] == 'active' ? AppColors.blue : AppColors.muted),
+                    DSIcon(DSIconName.students, size: 16,
+                        color: e['status'] == 'active' ? DSColors.blue : DSColors.muted),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('${e['classes']?['name'] ?? 'Class'}')),
+                    Expanded(child: Text('${e['classes']?['name'] ?? 'Class'}', style: DSText.body)),
                     if (e['status'] == 'pending')
-                      const Text('Pending', style: TextStyle(fontSize: 11, color: AppColors.orange)),
+                      const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending')),
                   ]),
                 ),
             ]);

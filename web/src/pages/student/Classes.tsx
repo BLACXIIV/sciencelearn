@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { Badge, Button, Card, CodeInput, EmptyState, Icon } from "../../design-system";
 import { fetchEnrolledClasses, joinClass } from "../../services/classes";
-import { I } from "../../components/icons";
+import "./student.css";
 
 /** Student class list: join by code + enrolled classes with pending/active status. */
 export default function StudentClasses() {
@@ -27,44 +28,51 @@ export default function StudentClasses() {
   });
 
   return (
-    <>
-      <div className="card">
-        <h3>Join a class</h3>
-        <div className="row-actions" style={{ marginTop: 0 }}>
-          <input className="text-answer" style={{ margin: 0, flex: 1, textTransform: "uppercase" }}
-            placeholder="Enter class code" value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && code.trim() && join.mutate()} />
-          <button disabled={join.isPending || !code.trim()} onClick={() => join.mutate()}>
-            {join.isPending ? "Joining…" : "Join"}
-          </button>
+    <div className="sd-stack">
+      <Card>
+        <h3 className="ds-title">Join a class</h3>
+        <div className="sd-row">
+          <div className="sd-rowbody">
+            <CodeInput value={code} onChange={setCode} disabled={join.isPending} />
+          </div>
+          <Button loading={join.isPending} disabled={join.isPending || !code.trim()} onClick={() => join.mutate()}>
+            Join
+          </Button>
         </div>
-        {msg && <p className={msg.err ? "err" : "empty"} style={{ textAlign: "left", padding: 0 }}>{msg.text}</p>}
-      </div>
+        {msg && <p className={msg.err ? "sd-err" : "sd-ok"}>{msg.text}</p>}
+      </Card>
 
-      {classes.isLoading && <p className="empty">Loading classes…</p>}
-      {classes.error && <p className="err">{String(classes.error)}</p>}
+      {classes.isLoading && <p className="sd-dim">Loading classes…</p>}
+      {classes.error && <p className="sd-err">{String(classes.error)}</p>}
       {classes.data?.length === 0 && (
-        <div className="card"><p className="empty">No classes yet. Get a class code from your teacher.</p></div>
+        <Card>
+          <EmptyState icon="school" title="No classes yet" body="Get a class code from your teacher." />
+        </Card>
       )}
       {classes.data?.map((e) =>
         e.status === "active" ? (
-          <Link key={e.class_id} to={`/student/classes/${e.class_id}`} className="card lesson-row">
-            <span className="lesson-ico"><I name="school" size={22} /></span>
-            <span className="lesson-body"><strong>{e.classes?.name ?? "Class"}</strong></span>
-            <span className="chev"><I name="chevron" size={20} /></span>
+          <Link key={e.class_id} to={`/student/classes/${e.class_id}`} className="sd-cardlink">
+            <Card>
+              <span className="sd-row">
+                <Icon name="school" size={22} color="var(--ds-blue)" />
+                <span className="sd-rowbody"><strong>{e.classes?.name ?? "Class"}</strong></span>
+                <Icon name="chevron" size={20} color="var(--ds-muted)" />
+              </span>
+            </Card>
           </Link>
         ) : (
-          <div key={e.class_id} className="card lesson-row" style={{ cursor: "default" }}>
-            <span className="lesson-ico"><I name="pending" size={22} /></span>
-            <span className="lesson-body">
-              <strong>{e.classes?.name ?? "Class"}</strong>
-              <small>Waiting for teacher approval</small>
+          <Card key={e.class_id}>
+            <span className="sd-row">
+              <Icon name="pending" size={22} color="var(--ds-muted)" />
+              <span className="sd-rowbody">
+                <strong>{e.classes?.name ?? "Class"}</strong>
+                <small className="ds-caption">Waiting for teacher approval</small>
+              </span>
+              <Badge tone="sun">Pending</Badge>
             </span>
-            <span className="kind" style={{ color: "#f5a524" }}>Pending</span>
-          </div>
+          </Card>
         ),
       )}
-    </>
+    </div>
   );
 }

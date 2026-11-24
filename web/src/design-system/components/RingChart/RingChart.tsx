@@ -4,8 +4,10 @@ import "./RingChart.css";
 export interface RingSlice {
   /** 0–100 fraction of the ring. */
   value: number;
-  /** Series 1–4 → --ds-chart-1..4 (lessons, quizzes, pre-test, post-test). */
-  series: 1 | 2 | 3 | 4;
+  /** Series 1–4 → --ds-chart-1..4 (lessons, quizzes, pre-test, post-test).
+   *  Series 0 → --ds-track: use for the "remaining" slice of a single-value
+   *  progress ring so the unfilled portion matches the base ring. */
+  series: 0 | 1 | 2 | 3 | 4;
   label?: string;
 }
 
@@ -45,7 +47,7 @@ export function RingChart({ slices, size = 84, thickness = 10, children }: RingC
               key={i}
               cx={size / 2} cy={size / 2} r={r}
               fill="none"
-              stroke={`var(--ds-chart-${s.series})`}
+              stroke={s.series === 0 ? "var(--ds-track)" : `var(--ds-chart-${s.series})`}
               strokeWidth={thickness}
               strokeLinecap="round"
               strokeDasharray={`${Math.max(0, len - 2)} ${c - len + 2}`}

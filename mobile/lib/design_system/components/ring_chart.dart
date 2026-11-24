@@ -9,6 +9,8 @@ class DSRingSlice {
   final double value;
 
   /// Series 1–4 → DSColors.chart1..4 (lessons, quizzes, pre-test, post-test).
+  /// Series 0 → DSColors.track: use for the "remaining" slice of a
+  /// single-value progress ring so the unfilled portion matches the base ring.
   final int series;
   const DSRingSlice(this.value, {this.series = 1});
 }
@@ -74,7 +76,9 @@ class _RingPainter extends CustomPainter {
     for (final s in slices) {
       final sweep = (s.value / total) * math.pi * 2;
       final paint = Paint()
-        ..color = _seriesColors[(s.series - 1).clamp(0, 3)]
+        ..color = s.series <= 0
+            ? DSColors.track
+            : _seriesColors[(s.series - 1).clamp(0, 3)]
         ..style = PaintingStyle.stroke
         ..strokeWidth = thickness
         ..strokeCap = StrokeCap.round;

@@ -1,0 +1,42 @@
+/* Student portal screens — layout + token classes only (.sd-*). */
+
+/* Nav-tile grid (Quick Access). */
+.sd-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--ds-sp-3); }
+
+/* Centered content inside a nav tile card. */
+.sd-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-sp-3); min-height: 120px; text-align: center; }
+
+/* Generic icon + body + trailing row inside a card. */
+.sd-row { display: flex; align-items: center; gap: var(--ds-sp-3); }
+.sd-row + .sd-row { margin-top: var(--ds-sp-3); }
+.sd-rowbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.sd-rowbar { display: flex; align-items: center; gap: var(--ds-sp-2); }
+.sd-grow { flex: 1; min-width: 0; }
+.sd-actions { display: flex; gap: var(--ds-sp-3); margin-top: var(--ds-sp-4); flex-wrap: wrap; }
+.sd-chip { align-self: flex-start; margin-top: var(--ds-sp-2); }
+
+/* Card rows that are links: kill anchor chrome. */
+.sd-cardlink { display: block; text-decoration: none; color: inherit; }
+.sd-cardlink .ds-card { transition: transform .15s ease; }
+.sd-cardlink:hover .ds-card { transform: translateY(-2px); }
+
+/* Lesson thumbnail + fallback. */
+.sd-thumb { width: 64px; height: 64px; border-radius: var(--ds-radius-chip); object-fit: cover; flex: none; }
+.sd-thumbph { width: 64px; height: 64px; border-radius: var(--ds-radius-chip); display: grid; place-items: center; flex: none; background: var(--ds-track); color: var(--ds-muted); }
+
+/* Token text helpers. */
+.sd-err { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-error); margin: var(--ds-sp-2) 0 0; }
+.sd-ok { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-success); margin: var(--ds-sp-2) 0 0; }
+.sd-dim { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-muted); margin: var(--ds-sp-2) 0; }
+.sd-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ds-blue); font-family: var(--ds-font-display); font-size: 14px; font-weight: 600; text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; }
+.sd-link:hover { text-decoration: underline; }
+
+/* Lesson body text. */
+.sd-pre { white-space: pre-wrap; margin: 0; font-family: var(--ds-font-body); font-size: 15px; line-height: 1.65; color: var(--ds-ink); }
+
+/* Section spacing between stacked page cards. */
+.sd-stack > * + * { margin-top: var(--ds-sp-4); }
+
+@media (max-width: 760px) {
+  .sd-tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+}

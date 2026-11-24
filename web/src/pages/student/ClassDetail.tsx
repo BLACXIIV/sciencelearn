@@ -1,9 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Card, Chip, EmptyState, Icon, ProgressBar } from "../../design-system";
 import { fetchPublishedLessons } from "../../services/learning";
 import { fetchClass } from "../../services/classes";
 import { getR2Url } from "../../services/storage";
-import { I } from "../../components/icons";
+import "./student.css";
 
 function LessonThumb({ thumbKey }: { thumbKey: string | null }) {
   const url = useQuery({
@@ -12,8 +13,10 @@ function LessonThumb({ thumbKey }: { thumbKey: string | null }) {
     enabled: !!thumbKey,
     staleTime: 5 * 60 * 1000,
   });
-  if (!thumbKey || !url.data) return <span className="lesson-ico"><I name="science" size={26} /></span>;
-  return <img className="thumb" src={url.data} alt="" loading="lazy" />;
+  if (!thumbKey || !url.data) {
+    return <span className="sd-thumbph"><Icon name="science" size={26} /></span>;
+  }
+  return <img className="sd-thumb" src={url.data} alt="" loading="lazy" />;
 }
 
 /** Student view of one class: its published lessons with progress. */
@@ -26,39 +29,45 @@ export default function StudentClassDetail() {
   });
 
   return (
-    <>
-      <div className="card">
-        <div className="perf">
-          <span>
-            <strong>{cls.data?.name ?? "Class"}</strong>
-            <small className="kind">Code: {cls.data?.code ?? "…"}</small>
+    <div className="sd-stack">
+      <Card>
+        <div className="sd-row">
+          <span className="sd-rowbody">
+            <strong className="ds-title">{cls.data?.name ?? "Class"}</strong>
+            <Chip className="sd-chip">Code: {cls.data?.code ?? "…"}</Chip>
           </span>
         </div>
-      </div>
+      </Card>
 
-      {lessons.isLoading && <p className="empty">Loading lessons…</p>}
-      {lessons.error && <p className="err">{String(lessons.error)}</p>}
+      {lessons.isLoading && <p className="sd-dim">Loading lessons…</p>}
+      {lessons.error && <p className="sd-err">{String(lessons.error)}</p>}
       {lessons.data?.length === 0 && (
-        <div className="card"><p className="empty">No lessons here yet, your teacher has not published any for this class.</p></div>
+        <Card>
+          <EmptyState icon="lessons" title="No lessons here yet" body="Your teacher has not published any for this class." />
+        </Card>
       )}
       {lessons.data?.map((l) => {
         const pct = l.lesson_progress[0]?.percent ?? 0;
         return (
-          <Link key={l.id} to={`/student/lessons/${l.id}`} className="card lesson-row">
-            <LessonThumb thumbKey={l.thumbnail_key} />
-            <span className="lesson-body">
-              <strong>{l.title}</strong>
-              <small>Objectives: {l.objectives}</small>
-              <span className="bar-row">
-                <span className="bar"><div style={{ width: `${pct}%` }} /></span>
-                <small>{pct}%</small>
+          <Link key={l.id} to={`/student/lessons/${l.id}`} className="sd-cardlink">
+            <Card>
+              <span className="sd-row">
+                <LessonThumb thumbKey={l.thumbnail_key} />
+                <span className="sd-rowbody">
+                  <strong className="ds-title">{l.title}</strong>
+                  <small className="ds-caption">Objectives: {l.objectives}</small>
+                  <span className="sd-rowbar">
+                    <span className="sd-grow"><ProgressBar value={pct} size="sm" /></span>
+                    <small className="ds-caption">{pct}%</small>
+                  </span>
+                </span>
+                <Icon name="chevron" size={20} color="var(--ds-muted)" />
               </span>
-            </span>
-            <span className="chev"><I name="chevron" size={20} /></span>
+            </Card>
           </Link>
         );
       })}
-      <p className="empty"><Link to="/student/classes">← Back to My Classes</Link></p>
-    </>
+      <p className="sd-dim"><Link to="/student/classes" className="sd-link">Back to My Classes</Link></p>
+    </div>
   );
 }

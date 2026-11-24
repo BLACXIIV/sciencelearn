@@ -1,9 +1,10 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Badge, Button, Card, Divider, Icon } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchLesson, fetchLessonActivities, fetchMyAttemptScores, setLessonProgress } from "../../services/learning";
 import { getR2Url } from "../../services/storage";
-import { I } from "../../components/icons";
+import "./student.css";
 
 export default function StudentLessonDetail() {
   const { id = "" } = useParams();
@@ -32,43 +33,53 @@ export default function StudentLessonDetail() {
     window.open(url, "_blank", "noopener");
   }
 
-  if (lesson.isLoading) return <p>Loading lesson…</p>;
-  if (lesson.error) return <p className="err">{String(lesson.error)}</p>;
+  if (lesson.isLoading) return <p className="sd-dim">Loading lesson…</p>;
+  if (lesson.error) return <p className="sd-err">{String(lesson.error)}</p>;
   const l = lesson.data!;
 
   return (
-    <article className="card">
-      <Link to={l.class_id ? `/student/classes/${l.class_id}` : "/student/classes"} className="link-btn">← Back to class</Link>
-      <h2>{l.title}</h2>
-      <p><strong>Objectives:</strong> {l.objectives}</p>
-      <hr />
-      <p className="lesson-content">{l.content_md}</p>
+    <Card>
+      <Link to={l.class_id ? `/student/classes/${l.class_id}` : "/student/classes"} className="sd-link">
+        <Icon name="back" size={16} /> Back to class
+      </Link>
+      <h2 className="ds-h2">{l.title}</h2>
+      <p className="ds-body"><strong>Objectives:</strong> {l.objectives}</p>
+      <Divider />
+      <p className="sd-pre">{l.content_md}</p>
       {(activities.data?.length ?? 0) > 0 && (
         <>
-          <hr />
-          <h3>Activities</h3>
-          {activities.data?.map((a) => (
-            <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="card lesson-row">
-              <span className="lesson-ico"><I name="quiz" size={22} /></span>
-              <span className="lesson-body">
-                <strong>{a.title}</strong>
-                <small>{a.description}</small>
-              </span>
-              {scores.data?.[a.id] != null && <span className="score-chip">{Math.round(scores.data[a.id])}%</span>}
-              <span className="chev"><I name="chevron" size={20} /></span>
-            </Link>
-          ))}
+          <Divider />
+          <h3 className="ds-h3">Activities</h3>
+          <div className="sd-stack">
+            {activities.data?.map((a) => (
+              <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="sd-cardlink">
+                <Card>
+                  <span className="sd-row">
+                    <Icon name="quiz" size={22} color="var(--ds-blue)" />
+                    <span className="sd-rowbody">
+                      <strong>{a.title}</strong>
+                      <small className="ds-caption">{a.description}</small>
+                    </span>
+                    {scores.data?.[a.id] != null && <Badge tone="mint">{Math.round(scores.data[a.id])}%</Badge>}
+                    <Icon name="chevron" size={20} color="var(--ds-muted)" />
+                  </span>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </>
       )}
-      {l.content_key && (
-        <button className="secondary" onClick={openMaterial}>
-          Open lesson material <I name="openExternal" size={16} />
-        </button>
-      )}{" "}
-      <button onClick={() => complete.mutate()} disabled={complete.isPending}>
-        {complete.isPending ? "Saving…" : "Mark as completed"}
-      </button>
-      {complete.error && <p className="err">{String(complete.error)}</p>}
-    </article>
+      <div className="sd-actions">
+        {l.content_key && (
+          <Button variant="outline" leadingIcon="openExternal" onClick={openMaterial}>
+            Open lesson material
+          </Button>
+        )}
+        <Button loading={complete.isPending} onClick={() => complete.mutate()}>
+          Mark as completed
+        </Button>
+      </div>
+      {complete.error && <p className="sd-err">{String(complete.error)}</p>}
+    </Card>
   );
 }
