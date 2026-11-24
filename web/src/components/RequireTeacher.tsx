@@ -1,9 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
+import { hasPickedClass } from "../services/classes";
 import { Button } from "../design-system";
 
-/** Route guard: teacher/admin only — students go to the student portal. */
+/** Route guard: teacher/admin only — students go to the student portal,
+ *  and everyone picks a classroom first each session. */
 export default function RequireTeacher() {
   const { session, profile, loading } = useAuth();
   if (loading) return <p className="ds-body" style={{ padding: "80px 24px", textAlign: "center" }}>Loading…</p>;
@@ -17,5 +19,6 @@ export default function RequireTeacher() {
       </p>
     );
   if (profile.role === "student") return <Navigate to="/student" replace />;
+  if (!hasPickedClass()) return <Navigate to="/select-classroom" replace />;
   return <Outlet />;
 }

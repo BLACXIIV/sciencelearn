@@ -17,7 +17,12 @@
   transform: translateY(4px);
   box-shadow: 0 1px 0 var(--ds-edge);
 }
-.ds-btn:disabled { opacity: 0.5; cursor: default; }
+/* disabled = muted sticker (line fill, edge-card edge, muted label) */
+.ds-btn:disabled {
+  cursor: default;
+  background: var(--ds-line); color: var(--ds-muted);
+  --ds-edge: var(--ds-edge-card);
+}
 .ds-btn:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
 
 /* sizes */

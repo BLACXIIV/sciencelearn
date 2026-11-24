@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -190,8 +191,36 @@ class Repo {
       .from('lessons').select().eq('class_id', classId).order('created_at'));
 
   /// Student: classes they belong to (status = active | pending).
-  Future<List<Json>> enrolledClasses() async => List<Json>.from(
-      await sb.from('enrollments').select('class_id, status, classes(name, code)'));
+  /// profiles!classes_teacher_id_fkey embeds the teacher's name
+  /// (FK hint required — classes↔profiles also joins via enrollments;
+  /// migration 0009's read policy lets students see it). The nested
+  /// enrollments(status) gives each class's roster (migration 0010).
+  Future<List<Json>> enrolledClasses() async => List<Json>.from(await sb
+      .from('enrollments')
+      .select('class_id, status, classes(name, code, profiles!classes_teacher_id_fkey(full_name), enrollments(status))'));
+
+  /// class_id -> count of published assessments the student hasn't
+  /// attempted yet ("N to do" on the picker's class cards).
+  Future<Map<String, int>> awaitingByClass() async {
+    final acts = List<Json>.from(await sb
+        .from('assessments')
+        .select('id, lessons!inner(class_id)')
+        .eq('is_published', true));
+    final done = List<Json>.from(await sb
+            .from('attempts')
+            .select('assessment_id')
+            .eq('student_id', uid))
+        .map((r) => '${r['assessment_id']}')
+        .toSet();
+    final m = <String, int>{};
+    for (final a in acts) {
+      if (done.contains('${a['id']}')) continue;
+      final cid = '${a['lessons']?['class_id']}';
+      if (cid == 'null') continue;
+      m[cid] = (m[cid] ?? 0) + 1;
+    }
+    return m;
+  }
 
   /// Redeem a class code -> {name, status}. Throws on invalid code.
   Future<Json> joinClass(String code) async {
@@ -235,6 +264,11 @@ class Repo {
 }
 
 final repoProvider = Provider((_) => Repo());
+
+/// Set once the user leaves /select-class by entering (or creating) a class.
+/// A plain notifier (not widget-scoped) so the GoRouter redirect can read it;
+/// resets on app restart, matching "choose a classroom after sign-in".
+final classPicked = ValueNotifier<bool>(false);
 
 /// Emits on every auth change; user-scoped providers watch it so a sign-out
 /// + sign-in as a different user never shows the previous user's data.

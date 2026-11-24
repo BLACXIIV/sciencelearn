@@ -46,8 +46,10 @@ class _DSButtonState extends State<DSButton> {
   bool _pressed = false;
   bool get _inactive => widget.disabled || widget.loading || widget.onPressed == null;
 
+  // Disabled = muted sticker: line fill, edge-card edge, muted label.
   (Color, Color, Color?, Color) _colors() => switch (widget.variant) {
         // (fill, text, border, edge)
+        _ when widget.disabled => (DSColors.line, DSColors.muted, null, DSColors.edgeCard),
         DSButtonVariant.primary => (DSColors.blue, DSColors.surface, null, DSColors.edgeBlue),
         DSButtonVariant.mint => (DSColors.mint, DSColors.navy, null, DSColors.edgeMint),
         DSButtonVariant.white => (DSColors.surface, DSColors.navy, null, DSColors.edgeWhite),
@@ -87,31 +89,28 @@ class _DSButtonState extends State<DSButton> {
               ? const []
               : dsEdge(edge, h: _pressed ? 1 : h),
         ),
-        child: Opacity(
-          opacity: widget.disabled ? 0.5 : 1,
-          child: Row(
-            mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.loading)
-                SizedBox(
-                  width: 20, height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2.4, color: text),
-                )
-              else ...[
-                if (widget.leadingIcon != null) ...[
-                  DSIcon(widget.leadingIcon!, size: isSm ? 16 : 18, color: text),
-                  const SizedBox(width: 8),
-                ],
-                Flexible(
-                  child: DefaultTextStyle.merge(
-                    style: DSText.button.copyWith(color: text),
-                    child: widget.child,
-                  ),
-                ),
+        child: Row(
+          mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (widget.loading)
+              SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.4, color: text),
+              )
+            else ...[
+              if (widget.leadingIcon != null) ...[
+                DSIcon(widget.leadingIcon!, size: isSm ? 16 : 18, color: text),
+                const SizedBox(width: 8),
               ],
+              Flexible(
+                child: DefaultTextStyle.merge(
+                  style: DSText.button.copyWith(color: text),
+                  child: widget.child,
+                ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );

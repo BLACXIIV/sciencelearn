@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import SelectClassroom from "./pages/SelectClassroom";
 import Dashboard from "./pages/Dashboard";
 import LessonActivities from "./pages/LessonActivities";
 import Classes from "./pages/Classes";
@@ -32,6 +33,9 @@ export default function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Post-login gate: pick a classroom before entering the portal. */}
+      <Route path="/select-classroom" element={<SelectClassroom />} />
 
       {/* Landing for visitors; signed-in users bounce to their portal. */}
       <Route index element={<Landing />} />

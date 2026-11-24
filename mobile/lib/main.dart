@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'data/repository.dart';
 import 'design_system/design_system.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/signup_screen.dart';
@@ -11,6 +12,7 @@ import 'features/assessment/assessment_screen.dart';
 import 'features/assessment/quiz_runner_screen.dart';
 import 'features/classes/classes_screen.dart';
 import 'features/classes/class_detail_screen.dart';
+import 'features/classes/select_class_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/landing/landing_screen.dart';
 import 'features/lessons/lesson_detail_screen.dart';
@@ -51,19 +53,28 @@ class _AuthRefresh extends ChangeNotifier {
 }
 
 final _router = GoRouter(
-  refreshListenable: _AuthRefresh(),
+  refreshListenable: Listenable.merge([_AuthRefresh(), classPicked]),
   redirect: (context, state) {
     final loggedIn = Supabase.instance.client.auth.currentSession != null;
     const publicPages = {'/welcome', '/login', '/signup'};
     final onPublicPage = publicPages.contains(state.matchedLocation);
     if (!loggedIn) return onPublicPage ? null : '/welcome';
-    if (onPublicPage) return '/';
+    if (onPublicPage) return '/select-class';
+    // Classroom gate: first screen of every app run — bounce any in-app
+    // route back to the picker until a class is opened.
+    if (!classPicked.value && state.matchedLocation != '/select-class') {
+      return '/select-class';
+    }
     return null;
   },
   routes: [
     GoRoute(path: '/welcome', builder: (_, __) => const LandingScreen()),
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (_, __) => const SignupScreen()),
+    // Post-login gate: pick a classroom before entering the portal.
+    GoRoute(
+        path: '/select-class',
+        builder: (_, __) => const SelectClassScreen()),
     StatefulShellRoute.indexedStack(
       builder: (_, __, shell) => Shell(shell: shell),
       branches: [

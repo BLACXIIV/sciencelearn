@@ -6,7 +6,8 @@ import '../design_system/design_system.dart';
 /// Current user's avatar: R2 photo when set, initials tile otherwise.
 class UserAvatar extends ConsumerWidget {
   final double radius;
-  const UserAvatar({super.key, this.radius = 28});
+  final DSAvatarPastel pastel;
+  const UserAvatar({super.key, this.radius = 28, this.pastel = DSAvatarPastel.blue});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,6 +19,7 @@ class UserAvatar extends ConsumerWidget {
           name: (name == null || name.isEmpty) ? 'Me' : name,
           imageUrl: url,
           size: radius * 2,
+          pastel: pastel,
         );
     if (key == null || key.isEmpty) return avatar(null);
     return FutureBuilder<String?>(
