@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../core/icons.dart';
-import '../core/widgets.dart';
 import '../data/repository.dart';
+import '../design_system/design_system.dart';
 
 class Shell extends StatelessWidget {
   final StatefulNavigationShell shell;
@@ -13,14 +12,17 @@ class Shell extends StatelessWidget {
   Widget build(BuildContext context) => RoleGate(
         child: Scaffold(
           body: shell,
-          bottomNavigationBar: IslandNavBar(
-            currentIndex: shell.currentIndex,
-            onSelect: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+          bottomNavigationBar: DSIslandNavBar(
+            active: '${shell.currentIndex}',
+            onSelect: (key) {
+              final i = int.parse(key);
+              shell.goBranch(i, initialLocation: i == shell.currentIndex);
+            },
             items: const [
-              (icon: AppIcons.home, label: 'Home'),
-              (icon: AppIcons.students, label: 'Classes'),
-              (icon: AppIcons.progress, label: 'Progress'),
-              (icon: AppIcons.account, label: 'Account'),
+              DSNavItem('0', 'Home', DSIconName.home),
+              DSNavItem('1', 'Classes', DSIconName.students),
+              DSNavItem('2', 'Progress', DSIconName.progress),
+              DSNavItem('3', 'Account', DSIconName.account),
             ],
           ),
         ),
@@ -41,7 +43,19 @@ class RoleGate extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (me.hasError) {
-      return Scaffold(body: ErrorState(onRetry: () => ref.invalidate(meProvider)));
+      return Scaffold(
+        body: DSEmptyState(
+          icon: DSIconName.offline,
+          title: "Couldn't load this right now",
+          body: 'Check your connection and try again.',
+          action: DSButton(
+            variant: DSButtonVariant.outline,
+            size: DSButtonSize.sm,
+            onPressed: () => ref.invalidate(meProvider),
+            child: const Text('Try again'),
+          ),
+        ),
+      );
     }
     if (me.valueOrNull?['role'] != 'student') {
       WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -1,8 +1,9 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import TopNav from "./TopNav";
-import { I, type IconName } from "./icons";
+import { Icon, NavBar, type IconName } from "../design-system";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
+import "./shell.css";
 
 const STUDENT_NAV: { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: "/student", label: "Home", icon: "home", end: true },
@@ -13,26 +14,33 @@ const STUDENT_NAV: { to: string; label: string; icon: IconName; end: boolean }[]
   { to: "/student/account", label: "Account", icon: "account", end: false },
 ];
 
-/** Student shell: same sidebar layout as the staff portal, student destinations. */
+/** Student shell: same DS NavBar rail as the staff portal, student destinations. */
 export default function StudentLayout() {
   const { profile } = useAuth();
+  const nav = useNavigate();
+  const path = useLocation().pathname;
+  const active = [...STUDENT_NAV]
+    .sort((a, b) => b.to.length - a.to.length)
+    .find((i) => i.end ? path === i.to : path === i.to || path.startsWith(`${i.to}/`))?.to;
+
   return (
-    <div className="shell">
-      <aside>
-        <h2><span className="brand-mark"><I name="atom" size={22} /></span>ScienceLearn</h2>
-        <nav>
-          {STUDENT_NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end}>
-              <I name={item.icon} size={18} />{item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <button type="button" className="nav-action" onClick={signOut}><I name="signOut" size={18} />Sign out</button>
-      </aside>
-      <main>
+    <div className="sh">
+      <NavBar
+        brand={<div className="sh-brand"><img src="/logo.png" alt="" /><span>ScienceLearn</span></div>}
+        items={STUDENT_NAV.map((i) => ({ key: i.to, label: i.label, icon: i.icon }))}
+        active={active}
+        onSelect={(key) => nav(key)}
+        footer={
+          <button type="button" className="ds-nav-item" onClick={signOut}>
+            <Icon name="signOut" size={20} />
+            <span className="ds-nav-label">Sign out</span>
+          </button>
+        }
+      />
+      <main className="sh-main">
         <TopNav />
-        <header className="page-head">
-          <div><h1>Welcome, {profile?.full_name}!</h1><p>Keep learning, keep growing!</p></div>
+        <header className="sh-head">
+          <div><h1 className="ds-h2">Welcome, {profile?.full_name}!</h1><p className="ds-body-sm sh-dim">Keep learning, keep growing!</p></div>
         </header>
         <Outlet />
       </main>
