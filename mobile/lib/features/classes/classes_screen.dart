@@ -102,25 +102,20 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
                 for (final e in rows)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: GestureDetector(
-                      onTap: e['status'] == 'active'
-                          ? () => context.push('/class/${e['class_id']}?name=${Uri.encodeComponent('${e['classes']?['name'] ?? 'Class'}')}')
-                          : null,
-                      child: DSCard(
-                        child: Row(children: [
-                          DSIcon(e['status'] == 'active' ? DSIconName.school : DSIconName.pending,
-                              size: 20,
-                              color: e['status'] == 'active' ? DSColors.blue : DSColors.muted),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text('${e['classes']?['name'] ?? 'Class'}',
-                              style: DSText.title)),
-                          if (e['status'] == 'pending')
-                            const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending'))
-                          else
-                            const DSIcon(DSIconName.chevron, color: DSColors.muted),
-                        ]),
-                      ),
-                    ),
+                    child: e['status'] == 'active'
+                        ? DSListItemCard(
+                            onTap: () => context.push('/class/${e['class_id']}?name=${Uri.encodeComponent('${e['classes']?['name'] ?? 'Class'}')}'),
+                            leading: const DSIcon(DSIconName.school, size: 20, color: DSColors.blue),
+                            title: Text('${e['classes']?['name'] ?? 'Class'}'),
+                            trailing: const DSIcon(DSIconName.chevron, color: DSColors.muted),
+                          )
+                        : DSListItemCard(
+                            pending: true,
+                            leading: const DSIcon(DSIconName.pending, size: 20, color: DSColors.muted),
+                            title: Text('${e['classes']?['name'] ?? 'Class'}'),
+                            subtitle: const Text('Waiting for teacher approval'),
+                            trailing: const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending')),
+                          ),
                   ),
               ]);
             },

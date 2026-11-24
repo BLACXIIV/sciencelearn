@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Chip, EmptyState, Icon, ProgressBar } from "../../design-system";
+import { Card, Chip, EmptyState, Icon, ListItemCard, ProgressBar, Thumbnail } from "../../design-system";
 import { fetchPublishedLessons } from "../../services/learning";
 import { fetchClass } from "../../services/classes";
 import { getR2Url } from "../../services/storage";
@@ -13,10 +13,7 @@ function LessonThumb({ thumbKey }: { thumbKey: string | null }) {
     enabled: !!thumbKey,
     staleTime: 5 * 60 * 1000,
   });
-  if (!thumbKey || !url.data) {
-    return <span className="sd-thumbph"><Icon name="science" size={26} /></span>;
-  }
-  return <img className="sd-thumb" src={url.data} alt="" loading="lazy" />;
+  return <Thumbnail src={thumbKey ? url.data : null} />;
 }
 
 /** Student view of one class: its published lessons with progress. */
@@ -49,22 +46,22 @@ export default function StudentClassDetail() {
       {lessons.data?.map((l) => {
         const pct = l.lesson_progress[0]?.percent ?? 0;
         return (
-          <Link key={l.id} to={`/student/lessons/${l.id}`} className="sd-cardlink">
-            <Card>
-              <span className="sd-row">
-                <LessonThumb thumbKey={l.thumbnail_key} />
-                <span className="sd-rowbody">
-                  <strong className="ds-title">{l.title}</strong>
-                  <small className="ds-caption">Objectives: {l.objectives}</small>
-                  <span className="sd-rowbar">
-                    <span className="sd-grow"><ProgressBar value={pct} size="sm" /></span>
-                    <small className="ds-caption">{pct}%</small>
-                  </span>
+          <ListItemCard
+            key={l.id}
+            to={`/student/lessons/${l.id}`}
+            leading={<LessonThumb thumbKey={l.thumbnail_key} />}
+            title={l.title}
+            subtitle={
+              <>
+                Objectives: {l.objectives}
+                <span className="ds-lic-progress">
+                  <ProgressBar value={pct} size="sm" />
+                  <span className="ds-caption">{pct}%</span>
                 </span>
-                <Icon name="chevron" size={20} color="var(--ds-muted)" />
-              </span>
-            </Card>
-          </Link>
+              </>
+            }
+            trailing={<Icon name="chevron" size={20} color="var(--ds-muted)" />}
+          />
         );
       })}
       <p className="sd-dim"><Link to="/student/classes" className="sd-link">Back to My Classes</Link></p>

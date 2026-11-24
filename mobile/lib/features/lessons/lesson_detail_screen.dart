@@ -111,24 +111,18 @@ class _Activities extends StatelessWidget {
           for (final a in rows)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: GestureDetector(
+              child: DSListItemCard(
                 onTap: () => context.push('/quiz/${a['id']}?t=${Uri.encodeComponent('${a['title']}')}'),
-                child: DSCard(
-                  child: Row(children: [
-                    DSIcon(_icon('${a['kind']}'), size: 20, color: DSColors.blue),
-                    const SizedBox(width: 10),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('${a['title']}', style: DSText.title),
-                      Text('${a['description'] ?? ''}',
-                          style: DSText.caption.copyWith(color: DSColors.muted)),
-                    ])),
-                    if (scores.containsKey('${a['id']}'))
-                      DSBadge(tone: DSBadgeTone.mint,
-                          child: Text('${scores['${a['id']}']!.round()}%')),
-                    const SizedBox(width: 6),
-                    const DSIcon(DSIconName.chevron, color: DSColors.muted),
-                  ]),
-                ),
+                leading: DSIcon(_icon('${a['kind']}'), size: 20, color: DSColors.blue),
+                title: Text('${a['title']}'),
+                subtitle: Text('${a['description'] ?? ''}'),
+                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (scores.containsKey('${a['id']}'))
+                    DSBadge(tone: DSBadgeTone.mint,
+                        child: Text('${scores['${a['id']}']!.round()}%')),
+                  const SizedBox(width: 6),
+                  const DSIcon(DSIconName.chevron, color: DSColors.muted),
+                ]),
               ),
             ),
         ]);

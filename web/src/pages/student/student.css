@@ -6,23 +6,16 @@
 /* Centered content inside a nav tile card. */
 .sd-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-sp-3); min-height: 120px; text-align: center; }
 
-/* Generic icon + body + trailing row inside a card. */
+/* Generic flex row (form rows, card headers). */
 .sd-row { display: flex; align-items: center; gap: var(--ds-sp-3); }
-.sd-row + .sd-row { margin-top: var(--ds-sp-3); }
 .sd-rowbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sd-rowbar { display: flex; align-items: center; gap: var(--ds-sp-2); }
-.sd-grow { flex: 1; min-width: 0; }
 .sd-actions { display: flex; gap: var(--ds-sp-3); margin-top: var(--ds-sp-4); flex-wrap: wrap; }
 .sd-chip { align-self: flex-start; margin-top: var(--ds-sp-2); }
 
-/* Card rows that are links: kill anchor chrome. */
+/* Tile links that are anchors: kill anchor chrome. */
 .sd-cardlink { display: block; text-decoration: none; color: inherit; }
 .sd-cardlink .ds-card { transition: transform .15s ease; }
 .sd-cardlink:hover .ds-card { transform: translateY(-2px); }
-
-/* Lesson thumbnail + fallback. */
-.sd-thumb { width: 64px; height: 64px; border-radius: var(--ds-radius-chip); object-fit: cover; flex: none; }
-.sd-thumbph { width: 64px; height: 64px; border-radius: var(--ds-radius-chip); display: grid; place-items: center; flex: none; background: var(--ds-track); color: var(--ds-muted); }
 
 /* Token text helpers. */
 .sd-err { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-error); margin: var(--ds-sp-2) 0 0; }

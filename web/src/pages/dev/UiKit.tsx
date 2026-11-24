@@ -1,10 +1,11 @@
 import { ReactNode, useState } from "react";
 import {
   Avatar, Badge, BottomSheet, Button, Card, Checkbox, Chip, CodeInput,
-  Divider, EmptyState, Icon, IconButton, Modal, OptionTile, PageHeader,
-  Panel, PasswordField, ProgressBar, QuizCard, QuizOption, RadioCard,
-  RadioGroup, RingChart, SearchField, SegmentedControl, Select, Skeleton,
-  StatCard, StickerBadge, Switch, TextArea, TextField, Toast, type IconName,
+  Divider, EmptyState, Icon, IconButton, ListItemCard, Modal, OptionTile,
+  PageHeader, Panel, PasswordField, ProgressBar, QuizCard, QuizOption,
+  RadioCard, RadioGroup, RingChart, SearchField, SegmentedControl, Select,
+  Skeleton, StatCard, StickerBadge, Switch, TextArea, TextField, Thumbnail,
+  Toast, type IconName,
 } from "../../design-system";
 import "./UiKit.css";
 
@@ -281,7 +282,7 @@ export default function UiKit() {
           <RingChart slices={[{ value: 40, series: 1 }, { value: 25, series: 2 }, { value: 20, series: 3 }, { value: 15, series: 4 }]} size={120}>
             <div><strong className="uik-ring-num">85%</strong><br /><span className="uik-dim">mastered</span></div>
           </RingChart>
-          <RingChart slices={[{ value: 70, series: 2 }]} />
+          <RingChart slices={[{ value: 70, series: 1 }, { value: 30, series: 0 }]} />
         </Row>
       </Section>
 
@@ -295,6 +296,29 @@ export default function UiKit() {
           <Avatar name="Ada Lovelace" />
           <Avatar name="Marie Curie" pastelColor="purple" />
           <Avatar name="Alan Turing" pastelColor="mint" size={56} />
+        </Row>
+        <Row label="ListItemCard / Thumbnail">
+          <div className="uik-col uik-w-360">
+            <ListItemCard
+              leading={<Thumbnail />}
+              title="Forces in motion"
+              subtitle="Objectives: describe balanced forces"
+              trailing={<Icon name="chevron" size={20} />}
+            />
+            <ListItemCard
+              leading={<Icon name="quiz" size={22} />}
+              title="Pre-test: Kinematics"
+              subtitle="10 questions"
+              trailing={<><Badge tone="mint">92%</Badge><Icon name="chevron" size={20} /></>}
+            />
+            <ListItemCard
+              pending
+              leading={<Icon name="school" size={22} />}
+              title="Physics — Grade 10"
+              subtitle="Waiting for teacher approval"
+              trailing={<Badge tone="sun">Pending</Badge>}
+            />
+          </div>
         </Row>
         <Row label="EmptyState">
           <Card variant="flat" className="uik-col uik-w-360">

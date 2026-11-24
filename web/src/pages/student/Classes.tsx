@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { Badge, Button, Card, CodeInput, EmptyState, Icon } from "../../design-system";
+import { Badge, Button, Card, CodeInput, EmptyState, Icon, ListItemCard } from "../../design-system";
 import { fetchEnrolledClasses, joinClass } from "../../services/classes";
 import "./student.css";
 
@@ -51,26 +50,22 @@ export default function StudentClasses() {
       )}
       {classes.data?.map((e) =>
         e.status === "active" ? (
-          <Link key={e.class_id} to={`/student/classes/${e.class_id}`} className="sd-cardlink">
-            <Card>
-              <span className="sd-row">
-                <Icon name="school" size={22} color="var(--ds-blue)" />
-                <span className="sd-rowbody"><strong>{e.classes?.name ?? "Class"}</strong></span>
-                <Icon name="chevron" size={20} color="var(--ds-muted)" />
-              </span>
-            </Card>
-          </Link>
+          <ListItemCard
+            key={e.class_id}
+            to={`/student/classes/${e.class_id}`}
+            leading={<Icon name="school" size={22} color="var(--ds-blue)" />}
+            title={e.classes?.name ?? "Class"}
+            trailing={<Icon name="chevron" size={20} color="var(--ds-muted)" />}
+          />
         ) : (
-          <Card key={e.class_id}>
-            <span className="sd-row">
-              <Icon name="pending" size={22} color="var(--ds-muted)" />
-              <span className="sd-rowbody">
-                <strong>{e.classes?.name ?? "Class"}</strong>
-                <small className="ds-caption">Waiting for teacher approval</small>
-              </span>
-              <Badge tone="sun">Pending</Badge>
-            </span>
-          </Card>
+          <ListItemCard
+            key={e.class_id}
+            pending
+            leading={<Icon name="pending" size={22} color="var(--ds-muted)" />}
+            title={e.classes?.name ?? "Class"}
+            subtitle="Waiting for teacher approval"
+            trailing={<Badge tone="sun">Pending</Badge>}
+          />
         ),
       )}
     </div>

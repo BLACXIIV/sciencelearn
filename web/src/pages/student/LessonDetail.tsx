@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, Divider, Icon } from "../../design-system";
+import { Badge, Button, Card, Divider, Icon, ListItemCard } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchLesson, fetchLessonActivities, fetchMyAttemptScores, setLessonProgress } from "../../services/learning";
 import { getR2Url } from "../../services/storage";
@@ -52,19 +52,19 @@ export default function StudentLessonDetail() {
           <h3 className="ds-h3">Activities</h3>
           <div className="sd-stack">
             {activities.data?.map((a) => (
-              <Link key={a.id} to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`} className="sd-cardlink">
-                <Card>
-                  <span className="sd-row">
-                    <Icon name="quiz" size={22} color="var(--ds-blue)" />
-                    <span className="sd-rowbody">
-                      <strong>{a.title}</strong>
-                      <small className="ds-caption">{a.description}</small>
-                    </span>
+              <ListItemCard
+                key={a.id}
+                to={`/student/quiz/${a.id}?t=${encodeURIComponent(a.title)}`}
+                leading={<Icon name="quiz" size={22} color="var(--ds-blue)" />}
+                title={a.title}
+                subtitle={a.description}
+                trailing={
+                  <>
                     {scores.data?.[a.id] != null && <Badge tone="mint">{Math.round(scores.data[a.id])}%</Badge>}
                     <Icon name="chevron" size={20} color="var(--ds-muted)" />
-                  </span>
-                </Card>
-              </Link>
+                  </>
+                }
+              />
             ))}
           </div>
         </>

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
-import '../lessons/lessons_screen.dart';
+import '../lessons/lesson_thumb.dart';
 
 final _classLessonsProvider = FutureProvider.autoDispose
     .family<List<Json>, String>((ref, id) => ref.read(repoProvider).lessons(classId: id));
@@ -65,32 +65,27 @@ class StudentClassScreen extends ConsumerWidget {
                       final l = rows[i];
                       final lp = (l['lesson_progress'] as List?) ?? [];
                       final pct = lp.isEmpty ? 0 : (lp.first['percent'] as int);
-                      return GestureDetector(
+                      return DSListItemCard(
                         onTap: () => context.push('/lesson/${l['id']}'),
-                        child: DSCard(
-                          child: Row(children: [
-                            LessonThumb(thumbKey: l['thumbnail_key'] as String?),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                Text(l['title'], style: DSText.title),
-                                Text('Objectives: ${l['objectives']}',
-                                    maxLines: 2, overflow: TextOverflow.ellipsis,
-                                    style: DSText.caption.copyWith(color: DSColors.muted)),
-                                const SizedBox(height: 6),
-                                Row(children: [
-                                  Expanded(child: DSProgressBar(
-                                    value: pct / 100,
-                                    size: DSProgressBarSize.sm,
-                                  )),
-                                  const SizedBox(width: 8),
-                                  Text('$pct%', style: DSText.caption),
-                                ]),
-                              ]),
-                            ),
-                            const DSIcon(DSIconName.chevron, color: DSColors.muted),
-                          ]),
+                        leading: LessonThumb(thumbKey: l['thumbnail_key'] as String?),
+                        title: Text(l['title']),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Objectives: ${l['objectives']}',
+                                maxLines: 2, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 6),
+                            Row(children: [
+                              Expanded(child: DSProgressBar(
+                                value: pct / 100,
+                                size: DSProgressBarSize.sm,
+                              )),
+                              const SizedBox(width: 8),
+                              Text('$pct%'),
+                            ]),
+                          ],
                         ),
+                        trailing: const DSIcon(DSIconName.chevron, color: DSColors.muted),
                       );
                     },
                   )),

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Avatar, Badge, Button, Card, CodeInput, Icon, RingChart, type CardPastel, type IconName,
+  Avatar, Badge, Button, Card, CardPastel, CodeInput, Icon, IconName, ListItemCard, RingChart,
 } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchEnrolledClasses, joinClass } from "../../services/classes";
@@ -36,27 +36,31 @@ function MyClasses() {
   });
 
   return (
-    <Card>
-      <h3 className="ds-title">My Classes</h3>
-      <div className="sd-row">
-        <div className="sd-rowbody">
-          <CodeInput value={code} onChange={setCode} disabled={join.isPending} />
+    <>
+      <Card>
+        <h3 className="ds-title">My Classes</h3>
+        <div className="sd-row">
+          <div className="sd-rowbody">
+            <CodeInput value={code} onChange={setCode} disabled={join.isPending} />
+          </div>
+          <Button loading={join.isPending} disabled={join.isPending || !code.trim()} onClick={() => join.mutate()}>
+            Join
+          </Button>
         </div>
-        <Button loading={join.isPending} disabled={join.isPending || !code.trim()} onClick={() => join.mutate()}>
-          Join
-        </Button>
-      </div>
-      {msg && <p className={join.isError ? "sd-err" : "sd-ok"}>{msg}</p>}
-      {enrolled.isLoading && <p className="sd-dim">Loading…</p>}
-      {enrolled.data?.length === 0 && <p className="sd-dim">Not in any class yet. Get a code from your teacher.</p>}
+        {msg && <p className={join.isError ? "sd-err" : "sd-ok"}>{msg}</p>}
+        {enrolled.isLoading && <p className="sd-dim">Loading…</p>}
+        {enrolled.data?.length === 0 && <p className="sd-dim">Not in any class yet. Get a code from your teacher.</p>}
+      </Card>
       {enrolled.data?.map((e) => (
-        <div key={e.class_id} className="sd-row">
-          <Avatar name={e.classes?.name ?? "?"} size={32} />
-          <span className="sd-rowbody">{e.classes?.name}</span>
-          {e.status === "pending" && <Badge tone="sun">Pending</Badge>}
-        </div>
+        <ListItemCard
+          key={e.class_id}
+          pending={e.status === "pending"}
+          leading={<Avatar name={e.classes?.name ?? "?"} size={32} />}
+          title={e.classes?.name}
+          trailing={e.status === "pending" ? <Badge tone="sun">Pending</Badge> : undefined}
+        />
       ))}
-    </Card>
+    </>
   );
 }
 
@@ -69,20 +73,18 @@ export default function StudentHome() {
 
   return (
     <div className="sd-stack">
-      <Card>
-        <div className="sd-row">
+      <ListItemCard
+        leading={
           <RingChart size={100} thickness={10} slices={[
             { value: pct, series: 1 },
             { value: 100 - pct, series: 0 },
           ]}>
             <span className="ds-h3">{Math.round(pct)}%</span>
           </RingChart>
-          <div className="sd-rowbody">
-            <h3 className="ds-title">Your Learning Progress</h3>
-            <p className="ds-body-sm">Average lesson completion</p>
-          </div>
-        </div>
-      </Card>
+        }
+        title={<h3 className="ds-title">Your Learning Progress</h3>}
+        subtitle="Average lesson completion"
+      />
 
       <h3 className="ds-h3">Quick Access</h3>
       <div className="sd-tiles">
@@ -102,24 +104,25 @@ export default function StudentHome() {
       <MyClasses />
 
       <h3 className="ds-h3">Recent Activity</h3>
-      <Card>
-        {recent.isLoading && <p className="sd-dim">Loading…</p>}
-        {recent.error && <p className="sd-err">{String(recent.error)}</p>}
-        {recent.data?.length === 0 && <p className="sd-dim">No activity yet, open a lesson to get started.</p>}
-        {recent.data?.map((r, i) => (
-          <div key={i} className="sd-row">
+      {recent.isLoading && <Card><p className="sd-dim">Loading…</p></Card>}
+      {recent.error && <Card><p className="sd-err">{String(recent.error)}</p></Card>}
+      {recent.data?.length === 0 && (
+        <Card><p className="sd-dim">No activity yet, open a lesson to get started.</p></Card>
+      )}
+      {recent.data?.map((r, i) => (
+        <ListItemCard
+          key={i}
+          leading={
             <Icon
               name={r.percent === 100 ? "done" : "pending"}
               size={18}
               color={r.percent === 100 ? "var(--ds-success)" : "var(--ds-sun)"}
             />
-            <span className="sd-rowbody">
-              {r.lessons?.title ?? "Lesson"}
-              <small className="ds-caption">{r.percent === 100 ? "Completed" : "In progress"} · {r.percent}%</small>
-            </span>
-          </div>
-        ))}
-      </Card>
+          }
+          title={r.lessons?.title ?? "Lesson"}
+          subtitle={`${r.percent === 100 ? "Completed" : "In progress"} · ${r.percent}%`}
+        />
+      ))}
     </div>
   );
 }

@@ -317,6 +317,32 @@ class _UiKitScreenState extends State<UiKitScreen> {
           ],
           size: 120,
         ),
+        const SizedBox(height: 12),
+        const DSRingChart(
+          slices: [DSRingSlice(70, series: 1), DSRingSlice(30, series: 0)],
+        ),
+        _rowLabel('ListItemCard / Thumbnail'),
+        const DSListItemCard(
+          leading: DSThumbnail(),
+          title: Text('Forces in motion'),
+          subtitle: Text('Objectives: describe balanced forces'),
+          trailing: DSIcon(DSIconName.chevron, color: DSColors.muted),
+        ),
+        const SizedBox(height: 10),
+        const DSListItemCard(
+          leading: DSIcon(DSIconName.quiz, size: 22, color: DSColors.blue),
+          title: Text('Pre-test: Kinematics'),
+          subtitle: Text('10 questions'),
+          trailing: DSBadge(tone: DSBadgeTone.mint, child: Text('92%')),
+        ),
+        const SizedBox(height: 10),
+        const DSListItemCard(
+          pending: true,
+          leading: DSIcon(DSIconName.school, size: 22, color: DSColors.muted),
+          title: Text('Physics — Grade 10'),
+          subtitle: Text('Waiting for teacher approval'),
+          trailing: DSBadge(tone: DSBadgeTone.sun, child: Text('Pending')),
+        ),
         _rowLabel('StatCards / Avatars'),
         const Row(children: [
           Expanded(child: DSStatCard(icon: DSIconName.progress, value: '82%', label: 'Avg. score')),

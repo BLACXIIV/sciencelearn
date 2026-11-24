@@ -44,6 +44,8 @@ export 'components/avatar.dart';
 export 'components/empty_state.dart';
 export 'components/skeleton.dart';
 export 'components/divider.dart';
+export 'components/list_item_card.dart';
+export 'components/thumbnail.dart';
 export 'components/quiz_option.dart';
 export 'components/quiz_card.dart';
 export 'components/page_header.dart';

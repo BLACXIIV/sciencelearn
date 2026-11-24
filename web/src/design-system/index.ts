@@ -79,6 +79,10 @@ export { Skeleton } from "./components/Skeleton/Skeleton";
 export type { SkeletonProps } from "./components/Skeleton/Skeleton";
 export { Divider } from "./components/Divider/Divider";
 export type { DividerProps } from "./components/Divider/Divider";
+export { ListItemCard } from "./components/ListItemCard/ListItemCard";
+export type { ListItemCardProps } from "./components/ListItemCard/ListItemCard";
+export { Thumbnail } from "./components/Thumbnail/Thumbnail";
+export type { ThumbnailProps } from "./components/Thumbnail/Thumbnail";
 
 /* quiz */
 export { QuizOption } from "./components/QuizOption/QuizOption";

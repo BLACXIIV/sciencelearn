@@ -109,17 +109,11 @@ class DashboardScreen extends ConsumerWidget {
           for (final r in recent.valueOrNull ?? const <Json>[])
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: DSCard(
-                child: Row(children: [
-                  DSIcon(r['percent'] == 100 ? DSIconName.done : DSIconName.pending,
-                      color: r['percent'] == 100 ? DSColors.success : DSColors.sun),
-                  const SizedBox(width: 10),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${r['lessons']?['title'] ?? 'Lesson'}', style: DSText.title),
-                    Text('${r['percent'] == 100 ? 'Completed' : 'In progress'} • ${r['percent']}%',
-                        style: DSText.caption.copyWith(color: DSColors.muted)),
-                  ])),
-                ]),
+              child: DSListItemCard(
+                leading: DSIcon(r['percent'] == 100 ? DSIconName.done : DSIconName.pending,
+                    color: r['percent'] == 100 ? DSColors.success : DSColors.sun),
+                title: Text('${r['lessons']?['title'] ?? 'Lesson'}'),
+                subtitle: Text('${r['percent'] == 100 ? 'Completed' : 'In progress'} • ${r['percent']}%'),
               ),
             ),
         ]),
@@ -163,60 +157,63 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
 
   @override
   Widget build(BuildContext context) {
-    return DSCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('My Classes', style: DSText.title),
-        const SizedBox(height: 10),
-        Row(children: [
-          Expanded(child: DSCodeInput(
-            value: _code,
-            onChanged: (v) => setState(() => _code = v),
-            enabled: !_busy,
-          )),
-          const SizedBox(width: 8),
-          DSButton(
-            loading: _busy,
-            disabled: _busy || _code.trim().isEmpty,
-            onPressed: _join,
-            child: const Text('Join'),
-          ),
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      DSCard(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('My Classes', style: DSText.title),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(child: DSCodeInput(
+              value: _code,
+              onChanged: (v) => setState(() => _code = v),
+              enabled: !_busy,
+            )),
+            const SizedBox(width: 8),
+            DSButton(
+              loading: _busy,
+              disabled: _busy || _code.trim().isEmpty,
+              onPressed: _join,
+              child: const Text('Join'),
+            ),
+          ]),
+          if (_msg != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(_msg!, style: DSText.caption.copyWith(
+                  color: _err ? DSColors.error : DSColors.success)),
+            ),
         ]),
-        if (_msg != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(_msg!, style: DSText.caption.copyWith(
-                color: _err ? DSColors.error : DSColors.success)),
-          ),
-        FutureBuilder<List<Json>>(
-          key: ValueKey(_refresh),
-          future: ref.read(repoProvider).enrolledClasses(),
-          builder: (context, snap) {
-            if (!snap.hasData) return const SizedBox.shrink();
-            if (snap.data!.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text('Not in any class yet. Get a code from your teacher.',
-                    style: DSText.caption.copyWith(color: DSColors.muted)),
-              );
-            }
-            return Column(children: [
-              const SizedBox(height: 10),
-              for (final e in snap.data!)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Row(children: [
-                    DSIcon(DSIconName.students, size: 16,
-                        color: e['status'] == 'active' ? DSColors.blue : DSColors.muted),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text('${e['classes']?['name'] ?? 'Class'}', style: DSText.body)),
-                    if (e['status'] == 'pending')
-                      const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending')),
-                  ]),
+      ),
+      FutureBuilder<List<Json>>(
+        key: ValueKey(_refresh),
+        future: ref.read(repoProvider).enrolledClasses(),
+        builder: (context, snap) {
+          if (!snap.hasData) return const SizedBox.shrink();
+          if (snap.data!.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text('Not in any class yet. Get a code from your teacher.',
+                  style: DSText.caption.copyWith(color: DSColors.muted)),
+            );
+          }
+          return Column(children: [
+            const SizedBox(height: 10),
+            for (final e in snap.data!)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: DSListItemCard(
+                  pending: e['status'] == 'pending',
+                  leading: DSIcon(DSIconName.students, size: 16,
+                      color: e['status'] == 'active' ? DSColors.blue : DSColors.muted),
+                  title: Text('${e['classes']?['name'] ?? 'Class'}'),
+                  trailing: e['status'] == 'pending'
+                      ? const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending'))
+                      : null,
                 ),
-            ]);
-          },
-        ),
-      ]),
-    );
+              ),
+          ]);
+        },
+      ),
+    ]);
   }
 }
