@@ -55,17 +55,44 @@ function* walk(dir) {
   }
 }
 
+// ---- Pass 1: collect every --ds-* variable defined inside design-system/. ----
+// Any var(--ds-*) reference anywhere that is not in this set is a typo or a
+// dead token — it resolves to nothing and silently drops the declaration.
+const DS_DIR = join(SRC, "design-system");
+const defined = new Set();
+for (const file of walk(DS_DIR)) {
+  if (!file.endsWith(".css") && !/\.tsx?$/.test(file)) continue;
+  const src = readFileSync(file, "utf8");
+  for (const m of src.matchAll(/(--ds-[a-zA-Z0-9-]+)\s*:/g)) defined.add(m[1]);
+}
+
 const findings = [];
 for (const file of walk(SRC)) {
   const rel = relative(SRC, file);
-  if (EXEMPT.some((d) => rel.startsWith(d))) continue;
   const isCss = file.endsWith(".css");
   const isTs = /\.(tsx?|jsx?)$/.test(file);
   if (!isCss && !isTs) continue;
 
+  // Pass 2a: undefined --ds-* references — checked everywhere, DS included.
+  // var(--ds-x-${...}) interpolations are masked first — dynamic names can't
+  // be verified statically.
+  const src = readFileSync(file, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
+  src.split("\n").forEach((line, i) => {
+    const clean = line.replace(/var\(--ds-[a-zA-Z0-9-]*\$\{[^)]*\)/g, "");
+    for (const m of clean.matchAll(/var\((--ds-[a-zA-Z0-9-]+)/g)) {
+      if (!defined.has(m[1])) {
+        findings.push(`${rel}:${i + 1}  [unknown-token] var(${m[1]}) is not defined in design-system tokens — ${line.trim()}`);
+      }
+    }
+  });
+
+  if (EXEMPT.some((d) => rel.startsWith(d))) continue;
+
+  // Pass 2b: raw styling rules — pages/features only.
   const rules = isCss ? CSS_RULES : TS_RULES;
-  const lines = readFileSync(file, "utf8").split("\n");
-  lines.forEach((line, i) => {
+  src.split("\n").forEach((line, i) => {
     for (const r of rules) {
       const m = line.match(r.re);
       if (m && !(r.allow && r.allow(m))) {

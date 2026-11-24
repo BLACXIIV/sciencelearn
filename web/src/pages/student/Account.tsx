@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Divider } from "../../design-system";
+import { Avatar, Button, Card, Divider, Toast } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "../../services/auth";
 import { getR2Url, uploadToR2 } from "../../services/storage";
@@ -18,6 +18,7 @@ export default function StudentAccount() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const avatarKey = profile?.avatar_url ?? null;
   const url = useQuery({
@@ -37,6 +38,7 @@ export default function StudentAccount() {
       const key = await uploadToR2(file, "avatars");
       await setAvatarKey(session.user.id, key);
       await refreshProfile();
+      setSaved(true);
     } catch (error) {
       setErr(String(error));
     } finally {
@@ -86,6 +88,12 @@ export default function StudentAccount() {
 
       <p className="sd-dim sd-center-text"><em>Together for a brighter future</em></p>
       <Button variant="outline" leadingIcon="signOut" onClick={signOut}>Sign out</Button>
+      <Toast
+        open={saved}
+        message="Profile photo updated"
+        tone="success"
+        onClose={() => setSaved(false)}
+      />
     </div>
   );
 }

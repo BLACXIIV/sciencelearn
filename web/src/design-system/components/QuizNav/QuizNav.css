@@ -25,7 +25,7 @@
 }
 
 .ds-quiznav-dot[data-state="unanswered"] {
-  background: var(--ds-card);
+  background: var(--ds-surface);
   border: 1px dashed var(--ds-line);
   color: var(--ds-muted);
   box-shadow: 0 2px 0 var(--ds-edge-card);

@@ -9,7 +9,7 @@
 /* Generic flex row (form rows, card headers). */
 .sd-row { display: flex; align-items: center; gap: var(--ds-s3); }
 .sd-rowbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sd-actions { display: flex; gap: var(--ds-s3); margin-top: var(--ds-s4); flex-wrap: wrap; }
+.sd-actions { display: flex; gap: var(--ds-s3); flex-wrap: wrap; }
 .sd-chip { align-self: flex-start; margin-top: var(--ds-s2); }
 
 /* Tile links that are anchors: kill anchor chrome. */
