@@ -8,7 +8,7 @@ export default function StatCards({ stats }: { stats: StatItem[] }) {
       {stats.map((s) => (
         <div key={s.label} className="card stat">
           {s.icon && (
-            <span className="stat-ico" style={{ background: `${s.color}29`, color: s.color }}>
+            <span className="stat-ico" style={{ background: `color-mix(in srgb, ${s.color} 18%, transparent)`, color: s.color }}>
               <I name={s.icon} size={20} />
             </span>
           )}

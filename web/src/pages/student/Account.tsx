@@ -1,16 +1,31 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import Avatar from "../../components/Avatar";
-import { E } from "../../components/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Avatar, Button, Card, Divider } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "../../services/auth";
-import { uploadToR2 } from "../../services/storage";
+import { getR2Url, uploadToR2 } from "../../services/storage";
 import { setAvatarKey } from "../../services/users";
+import "./student.css";
+
+const ABOUT: { label: string; value: string }[] = [
+  { label: "Developed by", value: "Regym R. Medina" },
+  { label: "With the support of", value: "The Notre Dame of Isulan, Inc." },
+  { label: "References", value: "DepEd MATATAG Curriculum, Trusted Scientific Resources" },
+];
 
 export default function StudentAccount() {
   const { session, profile, refreshProfile } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const avatarKey = profile?.avatar_url ?? null;
+  const url = useQuery({
+    queryKey: ["r2-url", avatarKey],
+    queryFn: () => getR2Url(avatarKey!),
+    enabled: !!avatarKey,
+    staleTime: 5 * 60 * 1000,
+  });
 
   async function pick(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -30,25 +45,47 @@ export default function StudentAccount() {
   }
 
   return (
-    <>
-      <div className="card account-brand">
-        <Avatar name={profile?.full_name ?? ""} avatarKey={profile?.avatar_url ?? null} size={72} />
-        <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <E name="science" size={28} />ScienceLearn
-        </h2>
-        <p>Learn • Explore • Excel</p>
-        {profile && <p><strong>{profile.full_name}</strong> · {profile.role}</p>}
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={pick} />
-        <button className="secondary" onClick={() => fileRef.current?.click()} disabled={busy}>
-          {busy ? "Uploading…" : "Change photo"}
-        </button>
-        {err && <p className="err">{err}</p>}
-      </div>
-      <div className="card"><strong>Developed by</strong><p>Regym R. Medina</p></div>
-      <div className="card"><strong>With the support of</strong><p>The Notre Dame of Isulan, Inc.</p></div>
-      <div className="card"><strong>References</strong><p>DepEd MATATAG Curriculum, Trusted Scientific Resources</p></div>
-      <p className="empty"><em>Together for a Brighter Future</em></p>
-      <button className="secondary" onClick={signOut}>Sign out</button>
-    </>
+    <div className="sd-stack">
+      <Card>
+        <div className="sd-center">
+          <Avatar name={profile?.full_name ?? ""} src={url.data} size={72} />
+          <h2 className="ds-h2 sd-brand">
+            <img src="/logo.png" alt="" width={28} height={28} />
+            ScienceLearn
+          </h2>
+          <p className="ds-body-sm sd-tagline">Learn • Explore • Excel</p>
+          {profile && (
+            <p className="ds-body">
+              <strong>{profile.full_name}</strong> · {profile.role}
+            </p>
+          )}
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={pick} />
+          <Button
+            variant="outline"
+            leadingIcon="camera"
+            loading={busy}
+            onClick={() => fileRef.current?.click()}
+          >
+            {busy ? "Uploading…" : "Change photo"}
+          </Button>
+          {err && <p className="sd-err">{err}</p>}
+        </div>
+      </Card>
+
+      <Card>
+        {ABOUT.map((a, i) => (
+          <div key={a.label}>
+            {i > 0 && <Divider />}
+            <div className="sd-about">
+              <span className="ds-label">{a.label}</span>
+              <span className="ds-body-sm">{a.value}</span>
+            </div>
+          </div>
+        ))}
+      </Card>
+
+      <p className="sd-dim sd-center-text"><em>Together for a brighter future</em></p>
+      <Button variant="outline" leadingIcon="signOut" onClick={signOut}>Sign out</Button>
+    </div>
   );
 }

@@ -150,42 +150,6 @@ class _RingPainter extends CustomPainter {
       value != old.value || color != old.color;
 }
 
-/// One row in a "breakdown" list: colored dot, percent, name, trailing value.
-class BreakdownRow extends StatelessWidget {
-  final Color color;
-  final String percent;
-  final String label;
-  final String value;
-  const BreakdownRow(
-      {super.key,
-      required this.color,
-      required this.percent,
-      required this.label,
-      required this.value});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(children: [
-          Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                  color: color, borderRadius: BorderRadius.circular(3))),
-          const SizedBox(width: 10),
-          SizedBox(
-              width: 48,
-              child: Text(percent,
-                  style: const TextStyle(fontWeight: FontWeight.w700))),
-          const SizedBox(width: 10),
-          Expanded(
-              child: Text(label,
-                  style: const TextStyle(fontWeight: FontWeight.w600))),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
-        ]),
-      );
-}
-
 /// Caps content width and centers it when the window is wider than a phone
 /// (tablet, desktop window). Transparent pass-through on narrow screens.
 class MaxWidth extends StatelessWidget {
@@ -201,20 +165,6 @@ class MaxWidth extends StatelessWidget {
           child: child,
         ),
       );
-}
-
-class AsyncView<T> extends StatelessWidget {
-  final AsyncSnapshot<T> snap;
-  final Widget Function(T data) builder;
-  final VoidCallback? onRetry;
-  const AsyncView(
-      {super.key, required this.snap, required this.builder, this.onRetry});
-  @override
-  Widget build(BuildContext context) {
-    if (snap.hasError) return ErrorState(onRetry: onRetry);
-    if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-    return builder(snap.data as T);
-  }
 }
 
 class ErrorState extends StatelessWidget {

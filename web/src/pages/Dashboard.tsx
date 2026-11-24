@@ -42,7 +42,7 @@ export default function Dashboard() {
   const classes = useQuery({ queryKey: ["my-classes"], queryFn: fetchMyClasses });
   const allStats = [
     ...stats,
-    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, color: "#f0759c" },
+    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, color: "var(--ds-chart-3)" },
   ];
 
   if (isLoading) return <p>Loading class dashboard…</p>;

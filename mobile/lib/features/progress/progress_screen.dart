@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -16,47 +16,164 @@ class ProgressScreen extends ConsumerWidget {
     final overall = ((lessons + quizzes + (post?.toDouble() ?? 0)) / 3);
     final gain = (pre != null && post != null) ? (post - pre).round() : null;
 
-    final rings = <(String, double, Color)>[
-      ('Lessons', lessons / 100, AppColors.yellow),
-      ('Quizzes', quizzes / 100, AppColors.blue),
-      ('Pre-Test', (pre?.toDouble() ?? 0) / 100, AppColors.pink),
-      ('Post-Test', (post?.toDouble() ?? 0) / 100, AppColors.teal),
+    final rings = <(String, double, int)>[
+      ('Lessons', lessons / 100, 1),
+      ('Quizzes', quizzes / 100, 2),
+      ('Pre-test', (pre?.toDouble() ?? 0) / 100, 3),
+      ('Post-test', (post?.toDouble() ?? 0) / 100, 4),
+    ];
+    final breakdown = <(String, double?, String, DSProgressBarTone)>[
+      (
+        'Lessons completed',
+        lessons,
+        '${lessons.round()} / 100',
+        DSProgressBarTone.sun
+      ),
+      (
+        'Quiz average',
+        quizzes,
+        quizzes > 0 ? '${quizzes.round()}%' : '-',
+        DSProgressBarTone.blue
+      ),
+      (
+        'Pre-test',
+        pre?.toDouble(),
+        pre == null ? '-' : '${pre.round()}%',
+        DSProgressBarTone.blue
+      ),
+      (
+        'Post-test',
+        post?.toDouble(),
+        post == null ? '-' : '${post.round()}%',
+        DSProgressBarTone.mint
+      ),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Progress Tracker')),
-      body: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
-        Text('Overall Progress', style: Theme.of(context).textTheme.titleMedium),
-        Text('${overall.round()}%', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 12),
-        AppCard(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-          child: Wrap(
-            alignment: WrapAlignment.spaceAround, runSpacing: 12,
-            children: [
-              for (final r in rings)
-                Column(children: [
-                  RingChart(r.$2, color: r.$3, size: 56, stroke: 6),
-                  const SizedBox(height: 6),
-                  Text(r.$1, style: TextStyle(fontSize: 11, color: AppColors.muted)),
-                ]),
-            ],
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Text('Progress tracker', style: DSText.h2),
           ),
         ),
-        const SizedBox(height: 20),
-        const Text('Score breakdown', style: TextStyle(fontWeight: FontWeight.w700)),
-        AppCard(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          child: Column(children: [
-            BreakdownRow(color: AppColors.yellow, percent: '${lessons.round()}%', label: 'Lessons completed', value: '${lessons.round()} / 100'),
-            BreakdownRow(color: AppColors.blue, percent: '${quizzes.round()}%', label: 'Quiz average', value: quizzes > 0 ? '${quizzes.round()}' : '-'),
-            BreakdownRow(color: AppColors.pink, percent: pre == null ? '-' : '${pre.round()}%', label: 'Pre-Test', value: pre == null ? '-' : '${pre.round()}'),
-            BreakdownRow(color: AppColors.teal, percent: post == null ? '-' : '${post.round()}%', label: 'Post-Test', value: post == null ? '-' : '${post.round()}'),
-            if (gain != null)
-              BreakdownRow(color: AppColors.success, percent: '', label: 'Learning gain', value: '${gain >= 0 ? '+' : ''}$gain%'),
-          ]),
-        ),
-      ])),
+        Expanded(
+            child: MaxWidth(
+                child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            DSStatCard(
+              icon: DSIconName.progress,
+              value: '${overall.round()}%',
+              label: 'Overall progress',
+            ),
+            const SizedBox(height: 12),
+            DSCard(
+              child: Wrap(
+                alignment: WrapAlignment.spaceAround,
+                runSpacing: 12,
+                children: [
+                  for (final r in rings)
+                    Column(children: [
+                      DSRingChart(
+                        size: 64,
+                        slices: [
+                          DSRingSlice(r.$2 * 100, series: r.$3),
+                          DSRingSlice(100 - r.$2 * 100, series: 0),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(r.$1, style: DSText.caption),
+                    ]),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            DSCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Gain = post-test − pre-test', style: DSText.caption),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Pre-test', style: DSText.label),
+                      Text(pre == null ? '-' : '${pre.round()}%',
+                          style: DSText.label),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  DSProgressBar(value: (pre?.toDouble() ?? 0) / 100),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Post-test', style: DSText.label),
+                      Text(post == null ? '-' : '${post.round()}%',
+                          style: DSText.label),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  DSProgressBar(
+                      value: (post?.toDouble() ?? 0) / 100,
+                      tone: DSProgressBarTone.mint),
+                  if (gain != null)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: DSStickerBadge(
+                          rotation: -5,
+                          child: Text('${gain >= 0 ? '+' : ''}$gain% gain'),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            DSCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Score breakdown', style: DSText.title),
+                  const SizedBox(height: 8),
+                  for (final b in breakdown)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(b.$1, style: DSText.bodySm),
+                            Text(b.$3, style: DSText.label),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        DSProgressBar(
+                          value: (b.$2 ?? 0) / 100,
+                          size: DSProgressBarSize.sm,
+                          tone: b.$4,
+                        ),
+                      ]),
+                    ),
+                ],
+              ),
+            ),
+            if (p == null) ...[
+              const SizedBox(height: 12),
+              const DSCard(
+                child: DSEmptyState(
+                  icon: DSIconName.progress,
+                  title: 'No progress yet',
+                  body: 'Finish a lesson or quiz to start tracking.',
+                ),
+              ),
+            ],
+          ],
+        ))),
+      ]),
     );
   }
 }

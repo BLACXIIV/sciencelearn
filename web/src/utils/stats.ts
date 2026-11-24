@@ -16,9 +16,9 @@ export function computeClassStats(students: StudentProgress[], completedLessons:
   const gain = both.length ? Math.round(both.reduce((a, s) => a + (s.post_score! - s.pre_score!), 0) / both.length) : 0;
 
   return [
-    { label: "Total Students", value: students.length, icon: "students", color: "#4c8dff" },
-    { label: "Completed Lessons", value: completedLessons, icon: "done", color: "#3ecf8e" },
-    { label: "Average Score", value: `${avg}%`, icon: "progress", color: "#f5a623" },
-    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%`, icon: "gain", color: "#9b7bff" },
+    { label: "Total Students", value: students.length, icon: "students", color: "var(--ds-chart-2)" },
+    { label: "Completed Lessons", value: completedLessons, icon: "done", color: "var(--ds-chart-4)" },
+    { label: "Average Score", value: `${avg}%`, icon: "progress", color: "var(--ds-chart-1)" },
+    { label: "Class Gain", value: `${gain >= 0 ? "+" : ""}${gain}%`, icon: "gain", color: "color-mix(in srgb, var(--ds-pastel-purple) 65%, var(--ds-navy))" },
   ];
 }

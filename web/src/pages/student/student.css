@@ -1,16 +1,16 @@
 /* Student portal screens — layout + token classes only (.sd-*). */
 
 /* Nav-tile grid (Quick Access). */
-.sd-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--ds-sp-3); }
+.sd-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--ds-s3); }
 
 /* Centered content inside a nav tile card. */
-.sd-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-sp-3); min-height: 120px; text-align: center; }
+.sd-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-s3); min-height: 120px; text-align: center; }
 
 /* Generic flex row (form rows, card headers). */
-.sd-row { display: flex; align-items: center; gap: var(--ds-sp-3); }
+.sd-row { display: flex; align-items: center; gap: var(--ds-s3); }
 .sd-rowbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sd-actions { display: flex; gap: var(--ds-sp-3); margin-top: var(--ds-sp-4); flex-wrap: wrap; }
-.sd-chip { align-self: flex-start; margin-top: var(--ds-sp-2); }
+.sd-actions { display: flex; gap: var(--ds-s3); margin-top: var(--ds-s4); flex-wrap: wrap; }
+.sd-chip { align-self: flex-start; margin-top: var(--ds-s2); }
 
 /* Tile links that are anchors: kill anchor chrome. */
 .sd-cardlink { display: block; text-decoration: none; color: inherit; }
@@ -18,9 +18,9 @@
 .sd-cardlink:hover .ds-card { transform: translateY(-2px); }
 
 /* Token text helpers. */
-.sd-err { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-error); margin: var(--ds-sp-2) 0 0; }
-.sd-ok { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-success); margin: var(--ds-sp-2) 0 0; }
-.sd-dim { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-muted); margin: var(--ds-sp-2) 0; }
+.sd-err { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-error); margin: var(--ds-s2) 0 0; }
+.sd-ok { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-success); margin: var(--ds-s2) 0 0; }
+.sd-dim { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-muted); margin: var(--ds-s2) 0; }
 .sd-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ds-blue); font-family: var(--ds-font-display); font-size: 14px; font-weight: 600; text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; }
 .sd-link:hover { text-decoration: underline; }
 
@@ -28,15 +28,30 @@
 .sd-pre { white-space: pre-wrap; margin: 0; font-family: var(--ds-font-body); font-size: 15px; line-height: 1.65; color: var(--ds-ink); }
 
 /* Section spacing between stacked page cards. */
-.sd-stack > * + * { margin-top: var(--ds-sp-4); }
+.sd-stack > * + * { margin-top: var(--ds-s4); }
 
 /* Centered block content (result screens). */
-.sd-center { display: flex; flex-direction: column; align-items: center; gap: var(--ds-sp-3); text-align: center; padding: var(--ds-sp-4) 0; }
+.sd-center { display: flex; flex-direction: column; align-items: center; gap: var(--ds-s3); text-align: center; padding: var(--ds-s4) 0; }
 
 /* Quiz header: "Question X of Y" label + progress bar filling the row. */
-.sd-quizhead { display: flex; align-items: center; gap: var(--ds-sp-3); }
+.sd-quizhead { display: flex; align-items: center; gap: var(--ds-s3); }
 .sd-quizhead .ds-progress { flex: 1; }
 .sd-quizhead .ds-label { white-space: nowrap; }
+
+/* Progress rings row. */
+.sd-rings { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--ds-s3); padding: var(--ds-s2) 0; }
+.sd-ring-item { display: flex; flex-direction: column; align-items: center; gap: var(--ds-s2); }
+
+/* Label + value row above a progress bar. */
+.sd-bar { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ds-s3); margin: var(--ds-s2) 0 4px; }
+.sd-brow + .sd-brow { margin-top: var(--ds-s3); }
+.sd-gain { display: flex; justify-content: center; margin-top: var(--ds-s3); }
+
+/* Account page. */
+.sd-brand { display: flex; align-items: center; gap: var(--ds-s2); margin: 0; }
+.sd-tagline { color: var(--ds-muted); margin: 0; }
+.sd-about { display: flex; flex-direction: column; gap: 2px; }
+.sd-center-text { text-align: center; }
 
 @media (max-width: 760px) {
   .sd-tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
