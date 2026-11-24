@@ -99,10 +99,24 @@ class _AuthSheetState extends State<_AuthSheet> {
                 child: IgnorePointer(
                   child: AnimatedSwitcher(
                     duration: dur,
-                    child: ImageFiltered(
-                      key: ValueKey(_art),
-                      imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: SvgPicture.asset(_art, width: 200),
+                    child: ShaderMask(
+                      // Crisp at the corner, fully faded where the title is.
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (r) => const LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.transparent
+                        ],
+                        stops: [0.0, 0.42, 0.85],
+                      ).createShader(r),
+                      child: ImageFiltered(
+                        key: ValueKey(_art),
+                        imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                        child: SvgPicture.asset(_art, width: 200),
+                      ),
                     ),
                   ),
                 ),
