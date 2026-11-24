@@ -101,7 +101,7 @@ class _AuthSheetState extends State<_AuthSheet> {
                     duration: dur,
                     child: ImageFiltered(
                       key: ValueKey(_art),
-                      imageFilter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      imageFilter: ui.ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                       child: SvgPicture.asset(_art, width: 200),
                     ),
                   ),
