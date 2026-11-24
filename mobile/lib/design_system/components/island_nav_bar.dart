@@ -40,17 +40,19 @@ class DSIslandNavBar extends StatelessWidget {
               border: Border.all(color: DSColors.line),
               boxShadow: dsEdge(DSColors.edgeCard, h: 5),
             ),
-            child: Row(
-              children: [
-                for (final it in items)
-                  Expanded(
-                    child: _IslandItem(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final it in items)
+                    _IslandItem(
                       item: it,
                       active: active == it.key,
                       onTap: () => onSelect?.call(it.key),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -75,7 +77,8 @@ class _IslandItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         constraints: const BoxConstraints(minHeight: 52),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        padding:
+            const EdgeInsets.symmetric(vertical: 6, horizontal: DSSpacing.s3),
         decoration: BoxDecoration(
           color: active ? DSColors.pastelBlue : Colors.transparent,
           borderRadius: DSRadii.buttonBr,
