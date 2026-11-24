@@ -8,3 +8,10 @@ List<BoxShadow> dsEdge(Color color, {int h = 6}) {
   assert(h >= 3 && h <= 6, 'edge height must be 3, 4, 5 or 6');
   return [BoxShadow(color: color, offset: Offset(0, h.toDouble()))];
 }
+
+/// Solid TOP edge — same model flipped: for surfaces whose leading edge is
+/// at the top (the auth sheet's mint crown). Heights 3–6, still no blur.
+List<BoxShadow> dsEdgeTop(Color color, {int h = 3}) {
+  assert(h >= 3 && h <= 6, 'edge height must be 3, 4, 5 or 6');
+  return [BoxShadow(color: color, offset: Offset(0, -h.toDouble()))];
+}

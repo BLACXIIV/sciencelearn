@@ -107,11 +107,8 @@ class _AuthSheetState extends State<_AuthSheet> {
               ),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DSRadii.panel)),
-              boxShadow: [
-                BoxShadow(
-                    color: DSColors.mint.withValues(alpha: .4),
-                    offset: const Offset(0, -3)),
-              ],
+              boxShadow:
+                  dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
             ),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
             child: Column(children: [

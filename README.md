@@ -7,6 +7,10 @@
 | Database / Auth | Supabase PostgreSQL + RLS (`supabase/migrations`) |
 | Media storage | Cloudflare R2, accessed only through presigned URLs (`supabase/functions/r2-presign`) |
 
+Design system: `web/src/design-system/` (React) and `mobile/lib/design_system/` (Flutter) — pages import only from these barrels.
+Component gallery: `web` → `/dev/ui-kit` (dev builds); `mobile` → `flutter run -t lib/main_dev.dart`.
+Rule: pages/features may not contain raw hex colors, font families, border radii or box shadows — enforced by `web: npm run check:design` and `mobile: dart run tool/check_design.dart`.
+
 ## Setup
 1. **Supabase**: create a project → run `supabase/migrations/0001_init.sql` (SQL editor or `supabase db push`).
    Promote your teacher account: `update profiles set role='teacher' where id='<uuid>';`
