@@ -1,0 +1,9 @@
+/* RadioGroup — legend + grid of RadioCards. */
+
+.ds-radio-group { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ds-radio-group legend { padding: 0; color: var(--ds-navy); }
+
+.ds-radio-grid { display: grid; gap: 10px; }
+.ds-radio-grid-1 { grid-template-columns: 1fr; }
+.ds-radio-grid-2 { grid-template-columns: 1fr 1fr; }
+.ds-radio-grid-3 { grid-template-columns: 1fr 1fr 1fr; }

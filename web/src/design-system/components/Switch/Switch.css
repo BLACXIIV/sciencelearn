@@ -1,0 +1,34 @@
+/* Switch — pill toggle (radius 99), blue track when on. */
+
+.ds-switch { position: relative; display: inline-flex; align-items: center; min-height: 44px; }
+.ds-switch input {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; margin: 0;
+}
+.ds-switch-track {
+  display: inline-flex; align-items: center;
+  width: 46px; height: 26px; padding: 3px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-track);
+  border: 1px solid var(--ds-line);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.ds-switch-knob {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  transition: translate 0.15s ease;
+}
+.ds-switch input:checked + .ds-switch-track { background: var(--ds-blue); border-color: var(--ds-blue); }
+.ds-switch input:checked + .ds-switch-track .ds-switch-knob { translate: 20px 0; border-color: var(--ds-surface); }
+.ds-switch input:focus-visible + .ds-switch-track { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
+.ds-switch input:disabled + .ds-switch-track { opacity: 0.55; }
+.ds-switch input:disabled { cursor: default; }
+
+.ds-switch-row { display: inline-flex; align-items: center; gap: var(--ds-s3); min-height: 44px; cursor: pointer; }
+.ds-switch-text { font: 400 var(--ds-fs-body-sm) var(--ds-font-body); color: var(--ds-ink-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-switch-track, .ds-switch-knob { transition: none; }
+}

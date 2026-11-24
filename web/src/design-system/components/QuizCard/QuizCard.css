@@ -1,0 +1,29 @@
+/* QuizCard — navy question panel (like Panel + question layout). */
+
+.ds-quiz-card {
+  display: grid;
+  gap: var(--ds-s4);
+  padding: var(--ds-s6);
+  border-radius: var(--ds-r-panel);
+  background: var(--ds-navy);
+  color: var(--ds-surface);
+  box-shadow: 0 6px 0 var(--ds-edge-navy);
+}
+
+.ds-quiz-tag { justify-self: start; }
+
+.ds-quiz-title {
+  font: 700 var(--ds-fs-h3)/1.35 var(--ds-font-display);
+  color: var(--ds-surface);
+}
+
+.ds-quiz-options { display: grid; gap: var(--ds-s3); }
+
+.ds-quiz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s3);
+  color: var(--ds-pastel-blue);
+  font: 500 var(--ds-fs-caption)/1.5 var(--ds-font-body);
+}

@@ -1,0 +1,36 @@
+/* Card — chunky content card. Variants: white | pastel | navy | trivia | flat. */
+
+.ds-card {
+  border-radius: var(--ds-r-card);
+  padding: var(--ds-s5);
+}
+
+.ds-card-white { background: var(--ds-surface); box-shadow: 0 6px 0 var(--ds-edge-card); }
+
+.ds-card-pastel-blue   { background: var(--ds-pastel-blue);   box-shadow: 0 6px 0 var(--ds-edge-white); }
+.ds-card-pastel-yellow { background: var(--ds-pastel-yellow); box-shadow: 0 6px 0 var(--ds-edge-card); }
+.ds-card-pastel-purple { background: var(--ds-pastel-purple); box-shadow: 0 6px 0 var(--ds-edge-card); }
+.ds-card-pastel-mint   { background: var(--ds-pastel-mint);   box-shadow: 0 6px 0 var(--ds-edge-mint); }
+
+.ds-card-navy {
+  background: var(--ds-navy);
+  color: var(--ds-surface);
+  box-shadow: 0 6px 0 var(--ds-edge-navy);
+}
+
+.ds-card-trivia {
+  background: var(--ds-surface);
+  box-shadow: 0 5px 0 var(--ds-edge-card);
+  rotate: -1.2deg;
+}
+
+.ds-card-flat { background: var(--ds-surface); border: 1px solid var(--ds-line); }
+
+/* ±1.2° tilt that flattens on hover/focus */
+.ds-card-tilt { rotate: 1.2deg; transition: rotate 0.15s ease; }
+.ds-card:nth-of-type(even).ds-card-tilt, .ds-card-tilt[data-tilt="left"] { rotate: -1.2deg; }
+.ds-card-tilt:hover, .ds-card-tilt:focus-within { rotate: 0deg; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-card-tilt { transition: none; }
+}

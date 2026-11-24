@@ -1,0 +1,25 @@
+/* ProgressBar — track + chunky fill. lg 14px / sm 10px only. */
+
+.ds-progress {
+  width: 100%;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-track);
+  overflow: hidden;
+}
+.ds-progress-lg { height: 14px; }
+.ds-progress-sm { height: 10px; }
+
+.ds-progress-fill {
+  height: 100%;
+  border-radius: var(--ds-r-pill);
+  transition: width 0.3s ease;
+}
+
+.ds-progress-fill-blue    { background: var(--ds-blue); }
+.ds-progress-fill-mint    { background: var(--ds-mint); }
+.ds-progress-fill-sun     { background: var(--ds-sun); }
+.ds-progress-fill-success { background: var(--ds-success); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-progress-fill { transition: none; }
+}

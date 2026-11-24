@@ -1,0 +1,37 @@
+/* OptionTile — role-picker tile: white → pastel-mint when on. */
+
+.ds-option-tile {
+  --ds-edge: var(--ds-edge-card);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  min-width: 0;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+  font: 600 var(--ds-fs-body-sm) var(--ds-font-display);
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--ds-edge);
+  transition: box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.ds-option-tile-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ds-option-tile:disabled { opacity: 0.55; cursor: default; }
+
+.ds-option-tile:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 0 var(--ds-edge), 0 0 0 4px var(--ds-pastel-blue);
+}
+
+.ds-option-tile.on {
+  --ds-edge: var(--ds-navy);
+  background: var(--ds-pastel-mint);
+  border: 2px solid var(--ds-navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-option-tile { transition: none; }
+}

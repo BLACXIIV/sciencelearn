@@ -22,10 +22,12 @@ import StudentQuiz from "./pages/student/Quiz";
 import StudentReview from "./pages/student/Review";
 import StudentProgressPage from "./pages/student/Progress";
 import StudentAccount from "./pages/student/Account";
+import UiKit from "./pages/dev/UiKit";
 
 export default function App() {
   return (
     <Routes>
+      {import.meta.env.DEV && <Route path="/dev/ui-kit" element={<UiKit />} />}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

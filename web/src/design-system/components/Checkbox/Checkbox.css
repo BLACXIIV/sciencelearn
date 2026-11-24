@@ -1,0 +1,22 @@
+/* Checkbox — 18px accent box, 44px row target. */
+
+.ds-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-s2);
+  min-height: 44px;
+  font: 400 var(--ds-fs-body-sm) var(--ds-font-body);
+  color: var(--ds-ink-soft);
+  cursor: pointer;
+}
+
+.ds-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--ds-blue);
+  cursor: pointer;
+}
+.ds-check input:disabled { cursor: default; opacity: 0.55; }
+.ds-check input:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
+.ds-check:has(input:disabled) { cursor: default; opacity: 0.7; }

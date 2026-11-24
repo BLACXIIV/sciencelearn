@@ -1,0 +1,20 @@
+/* Divider — 1px line rule, optional centered label. */
+
+.ds-divider {
+  border: 0;
+  height: 1px;
+  background: var(--ds-line);
+}
+
+.ds-divider-labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+}
+.ds-divider-line { flex: 1; height: 1px; background: var(--ds-line); }
+.ds-divider-text {
+  font: 500 var(--ds-fs-caption)/1 var(--ds-font-body);
+  color: var(--ds-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}

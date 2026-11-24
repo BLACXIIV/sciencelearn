@@ -1,0 +1,40 @@
+/* Modal — centered dialog card on a dim backdrop. */
+
+.ds-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: var(--ds-s4);
+  background: color-mix(in srgb, var(--ds-ink) 25%, transparent);
+  animation: ds-fade 0.2s ease;
+}
+
+.ds-modal {
+  width: min(440px, 100%);
+  border-radius: var(--ds-r-card);
+  background: var(--ds-surface);
+  padding: var(--ds-s5);
+  box-shadow: 0 6px 0 var(--ds-edge-card);
+  animation: ds-sheet-up 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.ds-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s3);
+  margin-bottom: var(--ds-s4);
+}
+.ds-modal-head h3 { margin: 0; color: var(--ds-navy); }
+
+.ds-modal-body { color: var(--ds-ink-soft); }
+.ds-modal-body p { margin: 0 0 var(--ds-s3); }
+
+.ds-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-s3);
+  margin-top: var(--ds-s5);
+}

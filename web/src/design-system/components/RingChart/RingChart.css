@@ -1,0 +1,11 @@
+/* RingChart — donut svg; series colors are chart tokens. */
+
+.ds-ring { position: relative; display: inline-grid; place-items: center; }
+.ds-ring svg { display: block; }
+.ds-ring-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}

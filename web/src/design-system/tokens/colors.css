@@ -1,0 +1,54 @@
+/* ScienceLearn Design System — color tokens.
+   Canonical values copied from the Landing/Log in/Sign up screens
+   (previously styles/tokens.css --sl-*). --ds- prefix, self-contained layer. */
+
+:root {
+  /* brand */
+  --ds-navy: #0A1A5C;
+  --ds-navy-deep: #07124A;
+  --ds-blue: #2F5BFF;
+  --ds-blue-dark: #1B3FC4;
+  --ds-mint: #5EEAD4;
+  --ds-sun: #FFC83D;
+  --ds-paper: #F4F7FF;
+
+  /* pastels */
+  --ds-pastel-blue: #BFD0FF;
+  --ds-pastel-yellow: #FFE08A;
+  --ds-pastel-purple: #D9CCFF;
+  --ds-pastel-mint: #A7F3E4;
+
+  /* neutrals */
+  --ds-ink: var(--ds-navy);
+  --ds-ink-soft: #2B3466;
+  --ds-muted: #5A6480;
+  --ds-line: #DDE4F5;
+
+  /* solid bottom-edge ("edge") colors — a darker shade of the fill above */
+  --ds-edge-card: #C9CFEA;
+  --ds-edge-white: #9FB4FF;
+  --ds-edge-blue: var(--ds-blue-dark);
+  --ds-edge-mint: #2BB5A0;
+  --ds-edge-navy: var(--ds-navy-deep);
+  --ds-edge-chip: rgba(0, 0, 0, 0.2); /* sticker-chip drop on pastel fills */
+
+  /* status */
+  --ds-success: #2BB5A0;
+  --ds-warning: #F5A623;
+  --ds-error: #D9483B;
+  --ds-error-surface: #FFD9D4;
+
+  /* progress track */
+  --ds-track: #E4E9FB;
+
+  /* chart series (canonical order: lessons, quizzes, pre-test, post-test).
+     The mobile palette values win over the legacy web hardcodes so both
+     platforms draw identical rings. */
+  --ds-chart-1: #FFC83D;
+  --ds-chart-2: #2F5BFF;
+  --ds-chart-3: #F0759C;
+  --ds-chart-4: #2ED3B7;
+
+  /* surfaces */
+  --ds-surface: #FFFFFF;
+}

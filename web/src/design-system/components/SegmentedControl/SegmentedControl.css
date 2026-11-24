@@ -1,0 +1,46 @@
+/* SegmentedControl — white track + sliding navy pill. */
+
+.ds-seg {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  min-height: 46px;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-button);
+}
+
+.ds-seg-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: var(--ds-r-chip);
+  background: var(--ds-navy);
+  transition: transform 0.2s ease;
+}
+
+.ds-seg-opt {
+  position: relative;
+  flex: 1;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 38px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--ds-r-chip);
+  background: none;
+  color: var(--ds-muted);
+  font: 600 var(--ds-fs-body-sm) var(--ds-font-display);
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.2s ease;
+}
+.ds-seg-opt.on { color: var(--ds-surface); }
+.ds-seg-opt:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: -2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-seg-pill, .ds-seg-opt { transition: none; }
+}

@@ -1,0 +1,19 @@
+/* Select — native select with ds-field chrome + chevron affordance. */
+
+.ds-select-wrap { position: relative; }
+
+.ds-select-wrap select {
+  appearance: none;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.ds-select-chev {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--ds-muted);
+  pointer-events: none;
+  rotate: 90deg;
+}

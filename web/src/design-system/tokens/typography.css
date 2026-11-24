@@ -1,0 +1,40 @@
+/* ScienceLearn Design System — typography tokens.
+   Rule: Lexend = headings / buttons / tabs / field labels.
+         Inter  = body text / inputs / captions.
+   Loaded via Google Fonts in index.html (Lexend 600-800, Inter 400-800). */
+
+:root {
+  --ds-font-display: "Lexend", "Inter", system-ui, sans-serif;
+  --ds-font-body: "Inter", system-ui, sans-serif;
+
+  /* named-size tokens (per breakpoint where the audited design differs) */
+  --ds-fs-display: 76px;
+  --ds-fs-h1: 38px;
+  --ds-fs-h2: 27px;
+  --ds-fs-h3: 21px;
+  --ds-fs-title: 16px;
+  --ds-fs-body: 16px;
+  --ds-fs-body-sm: 14px;
+  --ds-fs-label: 13px;
+  --ds-fs-button: 15px;
+  --ds-fs-caption: 12px;
+}
+
+@media (max-width: 1024px) {
+  :root { --ds-fs-display: 56px; --ds-fs-h1: 30px; --ds-fs-h2: 24px; }
+}
+@media (max-width: 480px) {
+  :root { --ds-fs-display: 48px; }
+}
+
+/* Named text styles. Use the classes (or the vars) — never raw families. */
+.ds-display { font: 800 var(--ds-fs-display)/0.95 var(--ds-font-display); letter-spacing: -0.5px; }
+.ds-h1      { font: 800 var(--ds-fs-h1)/1.2 var(--ds-font-display); letter-spacing: -0.5px; }
+.ds-h2      { font: 800 var(--ds-fs-h2)/1.25 var(--ds-font-display); letter-spacing: -0.6px; }
+.ds-h3      { font: 800 var(--ds-fs-h3)/1.3 var(--ds-font-display); }
+.ds-title   { font: 600 var(--ds-fs-title)/1.35 var(--ds-font-display); }
+.ds-body    { font: 400 var(--ds-fs-body)/1.55 var(--ds-font-body); }
+.ds-body-sm { font: 400 var(--ds-fs-body-sm)/1.55 var(--ds-font-body); }
+.ds-label   { font: 600 var(--ds-fs-label)/1.3 var(--ds-font-display); }
+.ds-button  { font: 700 var(--ds-fs-button)/1 var(--ds-font-display); }
+.ds-caption { font: 400 var(--ds-fs-caption)/1.5 var(--ds-font-body); }

@@ -1,0 +1,9 @@
+/* PageHeader — navy band, rounded bottom corners (hero shape). */
+
+.ds-page-header {
+  padding: var(--ds-s6) var(--ds-gutter);
+  border-radius: 0 0 var(--ds-r-panel) var(--ds-r-panel);
+  background: linear-gradient(160deg, var(--ds-navy) 0%, var(--ds-navy-deep) 100%);
+  color: var(--ds-surface);
+}
+.ds-page-header.compact { padding: var(--ds-s5) var(--ds-gutter); }

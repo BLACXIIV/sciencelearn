@@ -1,0 +1,40 @@
+/* IslandNavBar — floating white pill, card edge + line border. */
+
+.ds-island {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  z-index: 60;
+  display: flex;
+  gap: var(--ds-s1);
+  width: min(560px, calc(100vw - 24px));
+  padding: var(--ds-s2);
+  border-radius: var(--ds-r-panel);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  box-shadow: 0 5px 0 var(--ds-edge-card);
+}
+
+.ds-island-item {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: var(--ds-r-button);
+  background: none;
+  color: var(--ds-muted);
+  font: 600 11px/1 var(--ds-font-display);
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.ds-island-item.on { color: var(--ds-blue); background: var(--ds-pastel-blue); }
+.ds-island-item:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: -2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-island-item { transition: none; }
+}

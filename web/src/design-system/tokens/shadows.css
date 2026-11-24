@@ -1,0 +1,24 @@
+/* ScienceLearn Design System — elevation: the "edge" model.
+   Solid bottom edge only — a darker shade of the fill, offset down, NO blur.
+   Allowed heights: 3, 4, 5, 6px. Colors come from --ds-edge-* in colors.css.
+
+   Pattern: give the element `--ds-edge: var(--ds-edge-<color>)`, then add one
+   of these utility classes. Interactive pressed states collapse the edge to
+   1px while the element translates down 4px (.edge-press). */
+
+.edge-3 { box-shadow: 0 3px 0 var(--ds-edge, var(--ds-edge-card)); }
+.edge-4 { box-shadow: 0 4px 0 var(--ds-edge, var(--ds-edge-card)); }
+.edge-5 { box-shadow: 0 5px 0 var(--ds-edge, var(--ds-edge-card)); }
+.edge-6 { box-shadow: 0 6px 0 var(--ds-edge, var(--ds-edge-card)); }
+
+.edge-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.edge-press:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--ds-edge, var(--ds-edge-card));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-press { transition: none; }
+}

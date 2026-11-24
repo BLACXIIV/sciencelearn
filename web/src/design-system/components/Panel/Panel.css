@@ -1,0 +1,9 @@
+/* Panel — big navy surface, radius 32 + navy-deep edge. */
+
+.ds-panel {
+  border-radius: var(--ds-r-panel);
+  padding: var(--ds-s6);
+  background: var(--ds-navy);
+  color: var(--ds-surface);
+  box-shadow: 0 6px 0 var(--ds-edge-navy);
+}

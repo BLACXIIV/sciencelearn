@@ -1,0 +1,18 @@
+/* PageSection — page body block with gutter + title row. */
+
+.ds-section {
+  padding: var(--ds-s7) var(--ds-gutter);
+}
+.ds-section.contained {
+  max-width: var(--ds-content-max);
+  margin: 0 auto;
+}
+
+.ds-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-s4);
+  margin-bottom: var(--ds-s5);
+}
+.ds-section-title { margin: 0; color: var(--ds-navy); }

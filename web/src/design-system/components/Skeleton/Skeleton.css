@@ -1,0 +1,19 @@
+/* Skeleton — shimmer placeholder on track fills. */
+
+.ds-skel {
+  display: block;
+  background: var(--ds-track);
+  animation: ds-skel-pulse 1.4s ease-in-out infinite;
+}
+.ds-skel-line   { height: 14px; border-radius: var(--ds-r-pill); }
+.ds-skel-card   { height: 120px; border-radius: var(--ds-r-card); }
+.ds-skel-circle { width: 44px; height: 44px; border-radius: 50%; }
+
+@keyframes ds-skel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-skel { animation: none; }
+}

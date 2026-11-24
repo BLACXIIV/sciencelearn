@@ -1,0 +1,36 @@
+/* Toast — bottom-center card, radius 22, 5px card edge. */
+
+.ds-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 100;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  max-width: min(480px, calc(100vw - 32px));
+  padding: 10px 10px 10px var(--ds-s4);
+  border-radius: var(--ds-r-card);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  box-shadow: 0 5px 0 var(--ds-edge-card);
+  font: 500 var(--ds-fs-body-sm) var(--ds-font-body);
+  color: var(--ds-ink);
+  animation: ds-toast-in 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.ds-toast-icon { flex: none; color: var(--ds-blue); }
+.ds-toast-success .ds-toast-icon { color: var(--ds-success); }
+.ds-toast-error .ds-toast-icon { color: var(--ds-error); }
+
+.ds-toast-msg { flex: 1; min-width: 0; }
+.ds-toast-x { flex: none; box-shadow: none; border-color: transparent; }
+
+@keyframes ds-toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-toast { animation: none; }
+}

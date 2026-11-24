@@ -1,0 +1,82 @@
+/* TextField — shared ".ds-field" chrome used by every labeled input
+   (PasswordField, TextArea, Select, SearchField, CodeInput import this file). */
+
+.ds-field { display: grid; gap: 6px; }
+
+.ds-field > label { color: var(--ds-navy); }
+
+.ds-field-wrap { position: relative; }
+
+.ds-field input,
+.ds-field textarea,
+.ds-field select {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  font: 500 15px/1.4 var(--ds-font-body);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ds-field textarea { min-height: 96px; padding: 12px 16px; resize: vertical; }
+
+.ds-field input::placeholder,
+.ds-field textarea::placeholder { color: var(--ds-muted); }
+
+.ds-field input:focus,
+.ds-field textarea:focus,
+.ds-field select:focus {
+  border-color: var(--ds-blue);
+  box-shadow: 0 0 0 1px var(--ds-blue);
+}
+
+.ds-field input:disabled,
+.ds-field textarea:disabled,
+.ds-field select:disabled { opacity: 0.55; cursor: default; }
+
+.ds-field-wrap.has-trailing input { padding-right: 52px; }
+.ds-field-wrap.has-leading input { padding-left: 46px; }
+
+/* leading slot — decorative icon anchored inside the input */
+.ds-field-lead {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--ds-muted);
+  pointer-events: none;
+}
+
+/* error state */
+.ds-field.err input,
+.ds-field.err textarea,
+.ds-field.err select { border-color: var(--ds-error); }
+.ds-field.err input:focus,
+.ds-field.err textarea:focus,
+.ds-field.err select:focus {
+  border-color: var(--ds-error);
+  box-shadow: 0 0 0 1px var(--ds-error);
+}
+
+.ds-field-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font: 400 var(--ds-fs-caption)/1.5 var(--ds-font-body);
+  color: var(--ds-error);
+}
+.ds-field-msg svg { flex: none; margin-top: 1px; }
+
+.ds-field-helper {
+  margin: 0;
+  font: 400 var(--ds-fs-caption)/1.5 var(--ds-font-body);
+  color: var(--ds-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-field input, .ds-field textarea, .ds-field select { transition: none; }
+}

@@ -1,0 +1,17 @@
+/* Badge — tiny count/status pill. */
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--ds-r-pill);
+  font: 800 11px/1 var(--ds-font-display);
+}
+
+.ds-badge-blue  { background: var(--ds-blue); color: var(--ds-surface); }
+.ds-badge-mint  { background: var(--ds-mint); color: var(--ds-navy); }
+.ds-badge-sun   { background: var(--ds-sun);  color: var(--ds-navy); }
+.ds-badge-error { background: var(--ds-error); color: var(--ds-surface); }

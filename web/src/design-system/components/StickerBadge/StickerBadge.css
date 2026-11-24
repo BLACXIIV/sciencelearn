@@ -1,0 +1,13 @@
+/* StickerBadge — tilted white sticker (auth/hero decorative chip). */
+
+.ds-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+  font: 800 13px/1 var(--ds-font-display);
+  box-shadow: 0 4px 0 var(--ds-edge-chip);
+}

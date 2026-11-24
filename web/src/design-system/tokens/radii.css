@@ -1,0 +1,10 @@
+/* ScienceLearn Design System — corner radii. Fixed set, six values. */
+
+:root {
+  --ds-r-button: 16px;
+  --ds-r-input: 14px;
+  --ds-r-card: 22px;
+  --ds-r-panel: 32px; /* panels, sheets, hero bottom corners */
+  --ds-r-chip: 14px;
+  --ds-r-pill: 999px;
+}

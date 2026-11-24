@@ -1,0 +1,21 @@
+/* ScienceLearn Design System — spacing scale. */
+
+:root {
+  --ds-s1: 4px;
+  --ds-s2: 8px;
+  --ds-s3: 12px;
+  --ds-s4: 16px;
+  --ds-s5: 24px;
+  --ds-s6: 32px;
+  --ds-s7: 48px;
+  --ds-s8: 80px;
+
+  /* gutters / containers */
+  --ds-gutter: 48px;
+  --ds-gutter-narrow: 20px;
+  --ds-content-max: 1200px;
+}
+
+@media (max-width: 1024px) {
+  :root { --ds-gutter: 20px; }
+}

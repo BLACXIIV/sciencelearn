@@ -1,0 +1,27 @@
+/* StatCard — white card, pastel icon square, big value + caption. */
+
+.ds-stat {
+  display: grid;
+  gap: 4px;
+  padding: var(--ds-s4);
+  border-radius: var(--ds-r-card);
+  background: var(--ds-surface);
+  box-shadow: 0 5px 0 var(--ds-edge-card);
+}
+
+.ds-stat-ic {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: var(--ds-r-input);
+  color: var(--ds-navy);
+}
+.ds-stat-ic-blue   { background: var(--ds-pastel-blue); }
+.ds-stat-ic-yellow { background: var(--ds-pastel-yellow); }
+.ds-stat-ic-purple { background: var(--ds-pastel-purple); }
+.ds-stat-ic-mint   { background: var(--ds-pastel-mint); }
+
+.ds-stat-value { font: 800 24px/1.1 var(--ds-font-display); color: var(--ds-navy); }
+.ds-stat-label { font: 400 var(--ds-fs-caption)/1.4 var(--ds-font-body); color: var(--ds-muted); }

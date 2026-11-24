@@ -1,0 +1,21 @@
+/* Chip — small pill label, radius 99. */
+
+.ds-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: var(--ds-r-pill);
+  font: 700 12px/1 var(--ds-font-display);
+  letter-spacing: 0.3px;
+}
+
+.ds-chip-white  { background: var(--ds-surface); color: var(--ds-navy); box-shadow: 0 3px 0 var(--ds-edge-card); }
+.ds-chip-navy   { background: var(--ds-navy);    color: var(--ds-surface); }
+.ds-chip-mint   { background: var(--ds-mint);    color: var(--ds-navy); }
+
+.ds-chip-pastel-blue   { background: var(--ds-pastel-blue);   color: var(--ds-navy); }
+.ds-chip-pastel-yellow { background: var(--ds-pastel-yellow); color: var(--ds-navy); }
+.ds-chip-pastel-purple { background: var(--ds-pastel-purple); color: var(--ds-navy); }
+.ds-chip-pastel-mint   { background: var(--ds-pastel-mint);   color: var(--ds-navy); }

@@ -1,0 +1,23 @@
+/* EmptyState — icon circle + title + optional CTA. */
+
+.ds-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--ds-s3);
+  padding: var(--ds-s7) var(--ds-s5);
+  text-align: center;
+}
+
+.ds-empty-ic {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--ds-pastel-blue);
+  color: var(--ds-navy);
+}
+
+.ds-empty-title { margin: 0; font: 700 var(--ds-fs-h3)/1.3 var(--ds-font-display); color: var(--ds-navy); }
+.ds-empty-body { margin: 0; max-width: 40ch; font: 400 var(--ds-fs-body-sm)/1.55 var(--ds-font-body); color: var(--ds-muted); }
+.ds-empty-action { margin-top: var(--ds-s2); }

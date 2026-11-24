@@ -1,0 +1,27 @@
+/* IconButton — white tile, card edge, 44px target. */
+
+.ds-icon-btn {
+  --ds-edge: var(--ds-edge-card);
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-chip);
+  background: var(--ds-surface);
+  color: var(--ds-muted);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--ds-edge);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+.ds-icon-btn:hover { color: var(--ds-ink); }
+.ds-icon-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ds-edge);
+}
+.ds-icon-btn:disabled { opacity: 0.5; cursor: default; }
+.ds-icon-btn:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-icon-btn { transition: none; }
+}
