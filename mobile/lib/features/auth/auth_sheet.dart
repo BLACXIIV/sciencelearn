@@ -98,11 +98,16 @@ class _AuthSheetState extends State<_AuthSheet> {
             EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           // ---- navy art zone (solid mint top edge, 32px corners) ----
-          // The Storyset art is the background: the same SVG fills the zone
-          // blurred, with the crisp art on top — cross-fading on swap.
+          // Art circle + "Did you know?" on top; the same SVG bleeds off
+          // the sheet's top-right corner as a blurred backdrop accent.
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [DSColors.navyDeep, DSColors.navy],
+              ),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DSRadii.panel)),
               boxShadow: dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
@@ -111,26 +116,17 @@ class _AuthSheetState extends State<_AuthSheet> {
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DSRadii.panel)),
               child: Stack(children: [
-                const Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [DSColors.navyDeep, DSColors.navy],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
+                Positioned(
+                  top: -30,
+                  right: -30,
                   child: IgnorePointer(
                     child: AnimatedSwitcher(
                       duration: dur,
                       child: ImageFiltered(
                         key: ValueKey(_art),
                         imageFilter:
-                            ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                        child: SvgPicture.asset(_art, fit: BoxFit.cover),
+                            ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: SvgPicture.asset(_art, width: 200),
                       ),
                     ),
                   ),
@@ -143,13 +139,8 @@ class _AuthSheetState extends State<_AuthSheet> {
                       curve: Curves.easeInOut,
                       width: artSize,
                       height: artSize,
-                      child: AnimatedSwitcher(
-                        duration: dur,
-                        child: Center(
-                          key: ValueKey(_art),
-                          child: SvgPicture.asset(_art, width: artSize * 1.1),
-                        ),
-                      ),
+                      child:
+                          _ArtCircle(art: _art, size: artSize, duration: dur),
                     ),
                     if (tall) ...[
                       const SizedBox(height: 14),
@@ -212,6 +203,30 @@ class _AuthSheetState extends State<_AuthSheet> {
             ),
           ),
         ]),
+      ),
+    );
+  }
+}
+
+/// Storyset SVG on the paper circle (125% bleed), cross-fading on swap.
+class _ArtCircle extends StatelessWidget {
+  final String art;
+  final double size;
+  final Duration duration;
+  const _ArtCircle(
+      {required this.art, required this.size, required this.duration});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration:
+          const BoxDecoration(color: DSColors.paper, shape: BoxShape.circle),
+      child: AnimatedSwitcher(
+        duration: duration,
+        child: Center(
+          key: ValueKey(art),
+          child: SvgPicture.asset(art, width: size * 1.25),
+        ),
       ),
     );
   }
