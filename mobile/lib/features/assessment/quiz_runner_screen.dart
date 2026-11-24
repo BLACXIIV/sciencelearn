@@ -1,9 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 class QuizRunnerScreen extends ConsumerStatefulWidget {
   final String id, title;
@@ -20,6 +20,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
   Json? _result;
   bool _busy = false;
   String? _err;
+  int _qi = 0;
 
   @override
   void dispose() {
@@ -40,60 +41,71 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
     return true;
   }
 
-  Widget _input(Json q) {
+  String _typeLabel(String qtype) => switch (qtype) {
+        'multiple_choice' => 'Multiple choice',
+        'true_false' => 'True or false',
+        'fill_blank' => 'Fill in the blank',
+        'identification' => 'Identification',
+        'enumeration' => 'Enumeration',
+        _ => 'Question',
+      };
+
+  /// Options for the current question, rendered inside the DSQuizCard.
+  List<Widget> _options(Json q) {
     final id = q['id'] as String;
+    String letter(int i) => String.fromCharCode(65 + i);
     switch (q['qtype'] as String? ?? 'multiple_choice') {
       case 'true_false':
         final sel = _answers[id]?['b'] as bool?;
-        return Row(children: [
-          for (final v in [true, false]) ...[
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Center(child: Text(v ? 'True' : 'False')),
-                  selected: sel == v,
-                  onSelected: (_) => setState(() => _answers[id] = {'b': v}),
-                ),
-              ),
+        return [
+          for (var i = 0; i < 2; i++)
+            DSQuizOption(
+              letter: letter(i),
+              state: sel == (i == 0)
+                  ? DSQuizOptionState.selected
+                  : DSQuizOptionState.normal,
+              onTap: () => setState(() => _answers[id] = {'b': i == 0}),
+              child: Text(i == 0 ? 'True' : 'False'),
             ),
-          ],
-        ]);
+        ];
       case 'fill_blank':
       case 'identification':
         final c = _ctrl.putIfAbsent(id, () => TextEditingController());
-        return TextField(
-          controller: c,
-          decoration: const InputDecoration(hintText: 'Your answer'),
-          onChanged: (v) => _answers[id] = {'t': v},
-        );
+        return [
+          DSTextField(
+            label: 'Your answer',
+            controller: c,
+            onChanged: (v) => _answers[id] = {'t': v},
+          ),
+        ];
       case 'enumeration':
         final n = (q['meta'] as Map?)?['n'] as int? ?? 3;
         final ctrls = _enumCtrl.putIfAbsent(
             id, () => List.generate(n, (_) => TextEditingController()));
-        return Column(children: [
+        return [
           for (var i = 0; i < n; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: TextField(
-                controller: ctrls[i],
-                decoration: InputDecoration(hintText: '${i + 1}.'),
-                onChanged: (_) => _answers[id] = {
-                  'items': ctrls.map((c) => c.text).toList()
-                },
-              ),
+            DSTextField(
+              label: 'Item ${i + 1}',
+              controller: ctrls[i],
+              onChanged: (_) => _answers[id] = {
+                'items': ctrls.map((c) => c.text).toList()
+              },
             ),
-        ]);
+        ];
       default: // multiple_choice
         final sel = _answers[id]?['i'] as int?;
-        return RadioGroup<int>(
-          groupValue: sel,
-          onChanged: (v) => setState(() => _answers[id] = {'i': v}),
-          child: Column(children: [
-            for (var c = 0; c < (q['choices'] as List? ?? []).length; c++)
-              RadioListTile<int>(value: c, title: Text('${(q['choices'] as List)[c]}')),
-          ]),
-        );
+        final choices = (q['choices'] as List? ?? []);
+        return [
+          for (var c = 0; c < choices.length; c++)
+            DSQuizOption(
+              letter: letter(c),
+              state: sel == c
+                  ? DSQuizOptionState.selected
+                  : DSQuizOptionState.normal,
+              onTap: () => setState(() => _answers[id] = {'i': c}),
+              child: Text('${choices[c]}'),
+            ),
+        ];
     }
   }
 
@@ -101,76 +113,123 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
   Widget build(BuildContext context) {
     final repo = ref.read(repoProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: _result != null
-          ? Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const EmojiIcon(AppEmoji.postTest, size: 88),
-                const SizedBox(height: 12),
-                if (_result!['score'] != null) ...[
-                  Text('${_result!['score']}%', style: Theme.of(context).textTheme.displayMedium),
-                  Text('${_result!['total']} questions'),
-                ] else ...[
-                  Text('Submitted!', style: Theme.of(context).textTheme.headlineSmall),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                    child: Text('Your score will appear once your teacher releases it.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.muted)),
-                  ),
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Row(children: [
+              DSIconButton(
+                icon: DSIconName.back,
+                label: 'Back',
+                onPressed: () => context.pop(),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(widget.title,
+                    style: DSText.h2, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ]),
+          ),
+        ),
+        Expanded(child: _result != null ? _buildResult() : _buildQuiz(repo)),
+      ]),
+    );
+  }
+
+  Widget _buildResult() {
+    final score = _result!['score'] as num?;
+    final s = (score ?? 0).toDouble();
+    return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+      DSCard(
+        child: Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(height: 16),
+            if (score != null) ...[
+              DSRingChart(
+                size: 140,
+                slices: [
+                  DSRingSlice(s, series: 1),
+                  DSRingSlice(100 - s, series: 0),
                 ],
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () { ref.invalidate(progressProvider); Navigator.of(context).pop(); },
-                  child: const Text('Done'),
-                ),
-              ]),
-            )
-          : FutureBuilder<List<Json>>(
-              future: repo.questions(widget.id),
-              builder: (context, snap) {
-                if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-                final qs = snap.data!;
-                final answered = qs.where(_answered).length;
-                return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
-                  for (var i = 0; i < qs.length; i++) ...[
-                    Text('${i + 1}. ${qs[i]['prompt']}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    Text('${qs[i]['qtype']}'.replaceAll('_', ' '),
-                        style: TextStyle(fontSize: 11, color: AppColors.muted)),
-                    const SizedBox(height: 6),
-                    _input(qs[i]),
-                    const Divider(height: 28),
-                  ],
-                  const SizedBox(height: 4),
-                  Text('$answered of ${qs.length} answered',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                  const SizedBox(height: 8),
-                  FilledButton(
-                    onPressed: (_busy || answered < qs.length) ? null : () async {
-                      setState(() { _busy = true; _err = null; });
-                      try {
-                        final r = await repo.submit(widget.id, _answers);
-                        setState(() => _result = r);
-                      } catch (e) {
-                        setState(() => _err = '$e'.replaceFirst('Exception: ', ''));
-                      } finally {
-                        if (mounted) setState(() => _busy = false);
-                      }
-                    },
-                    child: _busy
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Submit Answers'),
-                  ),
-                  if (_err != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(_err!, textAlign: TextAlign.center,
-                          style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                    ),
-                ]));
-              },
+                center: Text('${score.round()}%', style: DSText.h2),
+              ),
+              const SizedBox(height: 12),
+              Text('${_result!['total']} questions', style: DSText.bodySm),
+            ] else ...[
+              const DSEmptyState(
+                icon: DSIconName.done,
+                title: 'Submitted',
+                body: 'Your score will appear once your teacher releases it.',
+              ),
+            ],
+            const SizedBox(height: 16),
+            DSButton(
+              onPressed: () { ref.invalidate(progressProvider); Navigator.of(context).pop(); },
+              child: const Text('Done'),
             ),
+            const SizedBox(height: 8),
+          ]),
+        ),
+      ),
+    ]));
+  }
+
+  Widget _buildQuiz(Repo repo) {
+    return FutureBuilder<List<Json>>(
+      future: repo.questions(widget.id),
+      builder: (context, snap) {
+        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        final qs = snap.data!;
+        if (_qi >= qs.length) _qi = qs.length - 1;
+        final answered = qs.where(_answered).length;
+        final q = qs[_qi];
+        return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+          DSQuizCard(
+            tag: 'Question ${_qi + 1} of ${qs.length} · ${_typeLabel('${q['qtype']}')}',
+            title: Text('${q['prompt']}'),
+            options: _options(q),
+            footer: Text('$answered of ${qs.length} answered'),
+          ),
+          const SizedBox(height: 16),
+          Wrap(spacing: 8, children: [
+            DSButton(
+              variant: DSButtonVariant.outline,
+              disabled: _qi == 0,
+              onPressed: () => setState(() => _qi -= 1),
+              child: const Text('Back'),
+            ),
+            if (_qi < qs.length - 1)
+              DSButton(
+                onPressed: () => setState(() => _qi += 1),
+                child: const Text('Next'),
+              )
+            else
+              DSButton(
+                loading: _busy,
+                disabled: answered < qs.length,
+                onPressed: () async {
+                  setState(() { _busy = true; _err = null; });
+                  try {
+                    final r = await repo.submit(widget.id, _answers);
+                    setState(() => _result = r);
+                  } catch (e) {
+                    setState(() => _err = '$e'.replaceFirst('Exception: ', ''));
+                  } finally {
+                    if (mounted) setState(() => _busy = false);
+                  }
+                },
+                child: const Text('Submit answers'),
+              ),
+          ]),
+          if (_err != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(_err!, textAlign: TextAlign.center,
+                  style: DSText.caption.copyWith(color: DSColors.error)),
+            ),
+        ]));
+      },
     );
   }
 }

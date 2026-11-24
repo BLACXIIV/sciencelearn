@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { E, type EmojiName } from "../../components/icons";
+import {
+  Card, EmptyState, ListItemCard, OptionTile, type IconName,
+} from "../../design-system";
 import { fetchFlashcards, fetchFormulas, fetchKeyTerms } from "../../services/learning";
+import "./student.css";
 
 type Kind = "flashcards" | "formulas" | "terms";
 
-const SECTIONS: { kind: Kind; label: string; emoji: EmojiName }[] = [
-  { kind: "flashcards", label: "Flashcards", emoji: "flashcards" },
-  { kind: "formulas", label: "Formula Guide", emoji: "formulas" },
-  { kind: "terms", label: "Key Terms", emoji: "keyTerms" },
+const SECTIONS: { kind: Kind; label: string; icon: IconName }[] = [
+  { kind: "flashcards", label: "Flashcards", icon: "review" },
+  { kind: "formulas", label: "Formula guide", icon: "formulas" },
+  { kind: "terms", label: "Key terms", icon: "keyTerms" },
 ];
 
 interface Row { head: string; sub: string }
@@ -26,27 +29,30 @@ export default function StudentReview() {
   const list = useQuery({ queryKey: ["review", kind], queryFn: () => fetchSection(kind!), enabled: !!kind });
 
   return (
-    <>
-      <div className="tiles narrow">
+    <div className="sd-stack">
+      <div className="sd-tiles">
         {SECTIONS.map((s) => (
-          <button key={s.kind} className={`tile ${kind === s.kind ? "active" : ""}`}
-            onClick={() => setKind(s.kind)}>
-            <E name={s.emoji} size={44} />
-            {s.label}
-          </button>
+          <OptionTile
+            key={s.kind}
+            icon={s.icon}
+            label={s.label}
+            selected={kind === s.kind}
+            onClick={() => setKind(s.kind)}
+          />
         ))}
       </div>
 
-      {kind === null && <p className="empty">Pick a section above to start reviewing.</p>}
-      {list.isLoading && kind && <p className="empty">Loading…</p>}
-      {list.error && <p className="err">{String(list.error)}</p>}
-      {list.data?.length === 0 && <div className="card"><p className="empty">Nothing here yet, check back soon.</p></div>}
+      {kind === null && <p className="sd-dim">Pick a section above to start reviewing.</p>}
+      {list.isLoading && kind && <p className="sd-dim">Loading…</p>}
+      {list.error && <p className="sd-err">{String(list.error)}</p>}
+      {list.data?.length === 0 && (
+        <Card>
+          <EmptyState icon="inbox" title="Nothing here yet" body="Check back soon." />
+        </Card>
+      )}
       {list.data?.map((r, i) => (
-        <div key={i} className="card">
-          <strong>{r.head}</strong>
-          <p>{r.sub}</p>
-        </div>
+        <ListItemCard key={i} title={r.head} subtitle={r.sub} />
       ))}
-    </>
+    </div>
   );
 }

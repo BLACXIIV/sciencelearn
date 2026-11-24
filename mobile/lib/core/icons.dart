@@ -26,6 +26,7 @@ abstract final class AppIcons {
   static const IconData school = LucideIcons.graduationCap;
   static const IconData university = LucideIcons.school;
   static const IconData presentation = LucideIcons.presentation;
+  static const IconData shield = LucideIcons.shield;
 
   static const IconData back = LucideIcons.arrowLeft;
   static const IconData login = LucideIcons.logIn;
@@ -46,6 +47,8 @@ abstract final class AppIcons {
   static const IconData hide = LucideIcons.eyeOff;
   static const IconData edit = LucideIcons.pencil;
   static const IconData chevron = LucideIcons.chevronRight;
+  static const IconData arrow = LucideIcons.arrowRight;
+  static const IconData alert = LucideIcons.alertCircle;
   static const IconData openExternal = LucideIcons.externalLink;
   static const IconData play = LucideIcons.play;
   static const IconData add = LucideIcons.plus;
@@ -54,33 +57,4 @@ abstract final class AppIcons {
   static const IconData award = LucideIcons.award;
   static const IconData delete = LucideIcons.trash2;
   static const IconData copy = LucideIcons.copy;
-}
-
-/// 3D emoji assets (Microsoft Fluent Emoji, MIT) used on large feature tiles.
-/// Functional UI (nav, actions, states) stays on AppIcons: emoji can't be tinted.
-class AppEmoji {
-  AppEmoji._();
-  static const String lessons = 'open_book_3d.png';
-  static const String assessment = 'clipboard_3d.png';
-  static const String review = 'spiral_notepad_3d.png';
-  static const String progress = 'chart_increasing_3d.png';
-  static const String account = 'bust_in_silhouette_3d.png';
-  static const String preTest = 'memo_3d.png';
-  static const String postTest = 'trophy_3d.png';
-  static const String flashcards = 'card_index_dividers_3d.png';
-  static const String formulas = 'abacus_3d.png';
-  static const String keyTerms = 'key_3d.png';
-  static const String science = 'test_tube_3d.png';
-  static const String school = 'graduation_cap_3d.png';
-}
-
-/// Renders a bundled 3D emoji asset by its AppEmoji filename.
-class EmojiIcon extends StatelessWidget {
-  final String emoji;
-  final double size;
-  const EmojiIcon(this.emoji, {super.key, this.size = 40});
-
-  @override
-  Widget build(BuildContext context) =>
-      Image.asset('assets/emoji/$emoji', width: size, height: size, fit: BoxFit.contain);
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 class ReviewScreen extends ConsumerWidget {
   const ReviewScreen({super.key});
@@ -15,31 +15,43 @@ class ReviewScreen extends ConsumerWidget {
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => _ListPage(title: title, future: f, head: a, sub: b)));
     }
 
-    final tiles = <(String, String, Color, VoidCallback)>[
-      ('Flashcards', AppEmoji.flashcards, AppColors.purple,
+    final tiles = <(String, DSIconName, DSCardPastel, VoidCallback)>[
+      ('Flashcards', DSIconName.review, DSCardPastel.purple,
           () => open('Flashcards', repo.flashcards(), (r) => r['front'], (r) => r['back'])),
-      ('Formula Guide', AppEmoji.formulas, AppColors.teal,
-          () => open('Formula Guide', repo.formulas(), (r) => r['title'], (r) => r['expression'])),
-      ('Key Terms', AppEmoji.keyTerms, AppColors.orange,
-          () => open('Key Terms', repo.keyTerms(), (r) => r['term'], (r) => r['definition'])),
+      ('Formula guide', DSIconName.formulas, DSCardPastel.mint,
+          () => open('Formula guide', repo.formulas(), (r) => r['title'], (r) => r['expression'])),
+      ('Key terms', DSIconName.keyTerms, DSCardPastel.yellow,
+          () => open('Key terms', repo.keyTerms(), (r) => r['term'], (r) => r['definition'])),
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Review Center')),
-      body: MaxWidth(child: GridView.extent(
-        padding: const EdgeInsets.all(16), maxCrossAxisExtent: 220, mainAxisSpacing: 12, crossAxisSpacing: 12,
-        children: [
-          for (final t in tiles)
-            AppCard(
-              color: pastelBg(context, t.$3),
-              onTap: t.$4,
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                EmojiIcon(t.$2, size: 52),
-                const SizedBox(height: 8),
-                Text(t.$1, style: const TextStyle(fontWeight: FontWeight.w600)),
-              ]),
-            ),
-        ],
-      )),
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Text('Review center', style: DSText.h2),
+          ),
+        ),
+        Expanded(child: MaxWidth(child: GridView.extent(
+          padding: const EdgeInsets.all(16), maxCrossAxisExtent: 220, mainAxisSpacing: 12, crossAxisSpacing: 12,
+          children: [
+            for (final t in tiles)
+              GestureDetector(
+                onTap: t.$4,
+                child: DSCard(
+                  variant: DSCardVariant.pastel,
+                  pastel: t.$3,
+                  tilt: true,
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    DSIcon(t.$2, size: 36, color: DSColors.navy),
+                    const SizedBox(height: 8),
+                    Text(t.$1, style: DSText.title),
+                  ]),
+                ),
+              ),
+          ],
+        ))),
+      ]),
     );
   }
 }
@@ -51,26 +63,49 @@ class _ListPage extends StatelessWidget {
   const _ListPage({required this.title, required this.future, required this.head, required this.sub});
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: FutureBuilder<List<Json>>(
-          future: future,
-          builder: (_, snap) => AsyncView<List<Json>>(
-            snap: snap,
-            builder: (rows) => rows.isEmpty
-                ? const EmptyState(icon: AppIcons.inbox, title: 'Nothing here yet', message: 'Check back soon.')
-                : MaxWidth(child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: rows.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (_, i) => AppCard(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(head(rows[i]), style: const TextStyle(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text(sub(rows[i])),
-                ]),
-              ),
-            )),
+        body: Column(children: [
+          DSPageHeader(
+            compact: true,
+            child: SafeArea(
+              bottom: false,
+              child: Row(children: [
+                DSIconButton(
+                  icon: DSIconName.back,
+                  label: 'Back',
+                  onPressed: () => context.pop(),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(title, style: DSText.h2)),
+              ]),
+            ),
           ),
-        ),
+          Expanded(child: FutureBuilder<List<Json>>(
+            future: future,
+            builder: (_, snap) {
+              if (snap.hasError) {
+                return const DSEmptyState(
+                  icon: DSIconName.offline,
+                  title: "Couldn't load this right now",
+                  body: 'Check your connection and try again.',
+                );
+              }
+              if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+              final rows = snap.data!;
+              if (rows.isEmpty) {
+                return const DSEmptyState(icon: DSIconName.inbox,
+                    title: 'Nothing here yet', body: 'Check back soon.');
+              }
+              return MaxWidth(child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: rows.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (_, i) => DSListItemCard(
+                  title: Text(head(rows[i])),
+                  subtitle: Text(sub(rows[i])),
+                ),
+              ));
+            },
+          )),
+        ]),
       );
 }

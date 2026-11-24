@@ -1,9 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button, Card, EmptyState, Icon, QuizCard, QuizOption, RingChart, TextField,
+} from "../../design-system";
 import { fetchQuestions, submitAttempt } from "../../services/learning";
-import { E } from "../../components/icons";
 import type { AnswerValue, AttemptResult, QuizQuestion } from "../../types";
+import "./student.css";
+
+const LETTERS = "ABCDEFGH";
+
+const TYPE_LABEL: Record<string, string> = {
+  multiple_choice: "Multiple choice",
+  true_false: "True or false",
+  fill_blank: "Fill in the blank",
+  identification: "Identification",
+  enumeration: "Enumeration",
+};
 
 /** Per-question input for one qtype. Reports changes as AnswerValue payloads. */
 function AnswerInput({ q, value, onChange }: {
@@ -14,48 +27,61 @@ function AnswerInput({ q, value, onChange }: {
       return (
         <>
           {(q.choices ?? []).map((c, ci) => (
-            <label key={ci} className="choice">
-              <input type="radio" name={q.id} checked={(value as { i: number })?.i === ci}
-                onChange={() => onChange({ i: ci })} />
+            <QuizOption
+              key={ci}
+              letter={LETTERS[ci]}
+              state={(value as { i: number })?.i === ci ? "selected" : "default"}
+              onClick={() => onChange({ i: ci })}
+            >
               {c}
-            </label>
+            </QuizOption>
           ))}
         </>
       );
     case "true_false":
       return (
-        <div className="tf-row">
-          {[true, false].map((v) => (
-            <label key={String(v)} className="choice">
-              <input type="radio" name={q.id} checked={(value as { b: boolean })?.b === v}
-                onChange={() => onChange({ b: v })} />
+        <>
+          {[true, false].map((v, i) => (
+            <QuizOption
+              key={String(v)}
+              letter={LETTERS[i]}
+              state={(value as { b: boolean })?.b === v ? "selected" : "default"}
+              onClick={() => onChange({ b: v })}
+            >
               {v ? "True" : "False"}
-            </label>
+            </QuizOption>
           ))}
-        </div>
+        </>
       );
     case "fill_blank":
     case "identification":
       return (
-        <input className="text-answer" type="text" placeholder="Your answer"
+        <TextField
+          label="Your answer"
+          type="text"
           value={(value as { t: string })?.t ?? ""}
-          onChange={(e) => onChange({ t: e.target.value })} />
+          onChange={(e) => onChange({ t: e.target.value })}
+        />
       );
     case "enumeration": {
       const n = q.meta?.n ?? 3;
       const items = (value as { items: string[] })?.items ?? Array(n).fill("");
       return (
-        <div className="enum-list">
+        <>
           {Array.from({ length: n }, (_, i) => (
-            <input key={i} className="text-answer" type="text" placeholder={`${i + 1}.`}
+            <TextField
+              key={i}
+              label={`Item ${i + 1}`}
+              type="text"
               value={items[i] ?? ""}
               onChange={(e) => {
                 const next = [...items];
                 next[i] = e.target.value;
                 onChange({ items: next });
-              }} />
+              }}
+            />
           ))}
-        </div>
+        </>
       );
     }
   }
@@ -71,6 +97,7 @@ export default function StudentQuiz() {
   const questions = useQuery({ queryKey: ["questions", id], queryFn: () => fetchQuestions(id) });
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [result, setResult] = useState<AttemptResult | null>(null);
+  const [qi, setQi] = useState(0);
 
   const submit = useMutation({
     mutationFn: () => submitAttempt(id, answers),
@@ -82,23 +109,28 @@ export default function StudentQuiz() {
 
   if (result) {
     return (
-      <div className="quiz-page">
-        <div className="card result">
-          <div className="result-icon"><E name="postTest" size={72} /></div>
+      <Card>
+        <div className="sd-center">
           {result.score != null ? (
             <>
-              <div className="score">{result.score}%</div>
-              <p>{result.total} questions</p>
+              <RingChart size={140} slices={[
+                { value: result.score, series: 1 },
+                { value: 100 - result.score, series: 0 },
+              ]}>
+                <span className="ds-h2">{Math.round(result.score)}%</span>
+              </RingChart>
+              <p className="ds-body-sm">{result.total} questions</p>
             </>
           ) : (
-            <>
-              <h2>Submitted</h2>
-              <p className="muted-center">Your score will appear once your teacher releases it.</p>
-            </>
+            <EmptyState
+              icon="done"
+              title="Submitted"
+              body="Your score will appear once your teacher releases it."
+            />
           )}
-          <button onClick={() => nav("/student/assessments")}>Done</button>
+          <Button onClick={() => nav("/student/assessments")}>Done</Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -110,31 +142,50 @@ export default function StudentQuiz() {
     return true;
   };
   const answered = qs.filter((q) => isAnswered(answers[q.id])).length;
+  const q = qs[qi];
 
   return (
-    <div className="quiz-page">
-      <Link to="/student/assessments" className="link-btn">← Back to Assessment Center</Link>
-      <h2>{title}</h2>
-      {questions.isLoading && <p className="empty">Loading questions…</p>}
-      {questions.error && <p className="err">{String(questions.error)}</p>}
-      {qs.map((q, i) => (
-        <fieldset key={q.id} className="card q-block">
-          <legend className="q-prompt">
-            {i + 1}. {q.prompt}
-            <small className="q-kind">{q.qtype.replace(/_/g, " ")}</small>
-          </legend>
-          <AnswerInput q={q} value={answers[q.id]}
-            onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))} />
-        </fieldset>
-      ))}
-      {qs.length > 0 && (
-        <div className="card">
-          <p className="empty-sm">{answered} of {qs.length} answered</p>
-          <button disabled={submit.isPending || answered < qs.length} onClick={() => submit.mutate()}>
-            {submit.isPending ? "Submitting…" : "Submit Answers"}
-          </button>
-          {submit.error && <p className="err">{String(submit.error)}</p>}
-        </div>
+    <div className="sd-stack">
+      <p className="sd-dim">
+        <Link to="/student/assessments" className="sd-link">
+          <Icon name="back" size={16} /> Back to Assessment Center
+        </Link>
+      </p>
+      <h2 className="ds-h2">{title}</h2>
+      {questions.isLoading && <p className="sd-dim">Loading questions…</p>}
+      {questions.error && <p className="sd-err">{String(questions.error)}</p>}
+      {q && (
+        <>
+          <QuizCard
+            tag={`Question ${qi + 1} of ${qs.length} · ${TYPE_LABEL[q.qtype] ?? "Question"}`}
+            title={q.prompt}
+            footer={<span>{answered} of {qs.length} answered</span>}
+          >
+            <AnswerInput
+              key={q.id}
+              q={q}
+              value={answers[q.id]}
+              onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
+            />
+          </QuizCard>
+          <div className="sd-actions">
+            <Button variant="outline" disabled={qi === 0} onClick={() => setQi(qi - 1)}>
+              Back
+            </Button>
+            {qi < qs.length - 1 ? (
+              <Button onClick={() => setQi(qi + 1)}>Next</Button>
+            ) : (
+              <Button
+                loading={submit.isPending}
+                disabled={answered < qs.length}
+                onClick={() => submit.mutate()}
+              >
+                Submit answers
+              </Button>
+            )}
+          </div>
+          {submit.error && <p className="sd-err">{String(submit.error)}</p>}
+        </>
       )}
     </div>
   );

@@ -6,8 +6,10 @@ import {
   BarChart3,
   BookOpen,
   Camera,
+  Check,
   CheckCircle2,
   ChevronRight,
+  CircleAlert,
   ClipboardCheck,
   ClipboardList,
   Clock,
@@ -15,6 +17,7 @@ import {
   Copy,
   ExternalLink,
   Eye,
+  EyeOff,
   FlaskConical,
   GraduationCap,
   Home,
@@ -37,6 +40,7 @@ import {
   RefreshCw,
   School,
   Settings,
+  Shield,
   Sigma,
   Timer,
   Trash2,
@@ -69,6 +73,7 @@ export const Icons = {
   school: GraduationCap,
   university: School,
   presentation: Presentation,
+  shield: Shield,
   signOut: LogOut,
   camera: Camera,
   done: CheckCircle2,
@@ -82,6 +87,9 @@ export const Icons = {
   mail: Mail,
   mailVerified: MailCheck,
   show: Eye,
+  hide: EyeOff,
+  check: Check,
+  alert: CircleAlert,
   edit: Pencil,
   delete: Trash2,
   chevron: ChevronRight,
@@ -101,28 +109,4 @@ export type IconName = keyof typeof Icons;
 export function I({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {
   const C: LucideIcon = Icons[name];
   return <C size={size} strokeWidth={1.8} className={className} aria-hidden="true" />;
-}
-
-// 3D emoji assets (Microsoft Fluent Emoji, MIT) for large feature tiles.
-// Functional UI (nav, actions, states) stays on Icons: emoji can't be tinted.
-export const Emoji = {
-  lessons: "open_book_3d.png",
-  assessment: "clipboard_3d.png",
-  review: "spiral_notepad_3d.png",
-  progress: "chart_increasing_3d.png",
-  account: "bust_in_silhouette_3d.png",
-  preTest: "memo_3d.png",
-  postTest: "trophy_3d.png",
-  flashcards: "card_index_dividers_3d.png",
-  formulas: "abacus_3d.png",
-  keyTerms: "key_3d.png",
-  science: "test_tube_3d.png",
-  school: "graduation_cap_3d.png",
-} as const;
-
-export type EmojiName = keyof typeof Emoji;
-
-/** Renders a bundled 3D emoji asset by its Emoji registry name. */
-export function E({ name, size = 40, className }: { name: EmojiName; size?: number; className?: string }) {
-  return <img src={`/emoji/${Emoji[name]}`} width={size} height={size} className={className} alt="" aria-hidden="true" />;
 }

@@ -1,10 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 class AssessmentScreen extends ConsumerWidget {
   const AssessmentScreen({super.key});
@@ -13,17 +12,30 @@ class AssessmentScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(repoProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Assessment Center')),
-      body: FutureBuilder<({List<Json> rows, Map<String, num> scores})>(
-        future: (() async => (
-          rows: await repo.assessments(['pre_test', 'post_test', 'topic_quiz', 'problem_solving', 'final_challenge']),
-          scores: await repo.myAttemptScores(),
-        ))(),
-        builder: (context, snap) => AsyncView<({List<Json> rows, Map<String, num> scores})>(
-          snap: snap,
-          builder: (data) {
-            final scores = data.scores;
-            final rows = data.rows;
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Text('Assessment center', style: DSText.h2),
+          ),
+        ),
+        Expanded(child: FutureBuilder<({List<Json> rows, Map<String, num> scores})>(
+          future: (() async => (
+            rows: await repo.assessments(['pre_test', 'post_test', 'topic_quiz', 'problem_solving', 'final_challenge']),
+            scores: await repo.myAttemptScores(),
+          ))(),
+          builder: (context, snap) {
+            if (snap.hasError) {
+              return const DSEmptyState(
+                icon: DSIconName.offline,
+                title: "Couldn't load this right now",
+                body: 'Check your connection and try again.',
+              );
+            }
+            if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+            final scores = snap.data!.scores;
+            final rows = snap.data!.rows;
             final tests = rows.where((a) => a['kind'] == 'pre_test' || a['kind'] == 'post_test').toList();
             final quizzes = rows.where((a) => a['kind'] != 'pre_test' && a['kind'] != 'post_test').toList();
             return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
@@ -36,63 +48,55 @@ class AssessmentScreen extends ConsumerWidget {
                   ],
                 ]),
               if (tests.isNotEmpty) const SizedBox(height: 18),
-              const Text('Quizzes & Exercises', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text('Quizzes & exercises', style: DSText.title),
               const SizedBox(height: 8),
               if (quizzes.isEmpty)
-                const AppCard(child: EmptyState(icon: AppIcons.assessment, title: 'No quizzes published yet')),
+                const DSCard(child: DSEmptyState(icon: DSIconName.assessment,
+                    title: 'No quizzes published yet')),
               for (final a in quizzes)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: AppCard(
+                  child: DSListItemCard(
                     onTap: () => context.push('/quiz/${a['id']}?t=${Uri.encodeComponent(a['title'])}'),
-                    child: Row(children: [
-                      iconChip(context, _icon(a['kind']), _color(a['kind'])),
-                      const SizedBox(width: 12),
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(a['title'], style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text(a['description'] ?? '', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ])),
+                    leading: DSIcon(_icon(a['kind']), size: 22, color: DSColors.blue),
+                    title: Text('${a['title']}'),
+                    subtitle: Row(children: [
+                      DSChip(child: Text(_label('${a['kind']}'))),
+                      const SizedBox(width: 6),
+                      Flexible(child: Text('${a['description'] ?? ''}')),
+                    ]),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                       if (scores.containsKey('${a['id']}'))
-                        _ScoreChip('${scores['${a['id']}']!.round()}%'),
-                      Icon(AppIcons.chevron, color: AppColors.muted),
+                        DSBadge(tone: DSBadgeTone.mint,
+                            child: Text('${scores['${a['id']}']!.round()}%')),
+                      const SizedBox(width: 6),
+                      const DSIcon(DSIconName.chevron, color: DSColors.muted),
                     ]),
                   ),
                 ),
             ]));
           },
-        ),
-      ),
+        )),
+      ]),
     );
   }
 
-  IconData _icon(String kind) => switch (kind) {
-        'pre_test' => AppIcons.preTest,
-        'post_test' => AppIcons.postTest,
-        'problem_solving' => AppIcons.puzzle,
-        'final_challenge' => AppIcons.award,
-        _ => AppIcons.quiz,
+  DSIconName _icon(String kind) => switch (kind) {
+        'pre_test' => DSIconName.preTest,
+        'post_test' => DSIconName.postTest,
+        'problem_solving' => DSIconName.puzzle,
+        'final_challenge' => DSIconName.award,
+        _ => DSIconName.quiz,
       };
 
-  Color _color(String kind) => switch (kind) {
-        'problem_solving' => AppColors.success,
-        'final_challenge' => AppColors.orange,
-        _ => AppColors.purple,
+  String _label(String kind) => switch (kind) {
+        'pre_test' => 'Pre-test',
+        'post_test' => 'Post-test',
+        'problem_solving' => 'Exercise',
+        'final_challenge' => 'Final',
+        'practice' => 'Practice',
+        _ => 'Quiz',
       };
-}
-
-class _ScoreChip extends StatelessWidget {
-  final String label;
-  const _ScoreChip(this.label);
-  @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(right: 6),
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: pastelBg(context, AppColors.success),
-      borderRadius: BorderRadius.circular(99),
-    ),
-    child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.success)),
-  );
 }
 
 class _TestTile extends StatelessWidget {
@@ -102,17 +106,20 @@ class _TestTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPre = a['kind'] == 'pre_test';
-    final color = isPre ? AppColors.blue : AppColors.orange;
-    return AppCard(
-      color: pastelBg(context, color),
+    return GestureDetector(
       onTap: () => context.push('/quiz/${a['id']}?t=${Uri.encodeComponent(a['title'])}'),
-      child: Column(children: [
-        EmojiIcon(isPre ? AppEmoji.preTest : AppEmoji.postTest, size: 40),
-        const SizedBox(height: 6),
-        Text(isPre ? 'Pre-Test' : 'Post-Test', style: const TextStyle(fontWeight: FontWeight.w700)),
-        Text(isPre ? 'Before Learning' : 'After Learning',
-            style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-      ]),
+      child: DSCard(
+        variant: DSCardVariant.pastel,
+        pastel: isPre ? DSCardPastel.blue : DSCardPastel.yellow,
+        tilt: true,
+        child: Column(children: [
+          DSIcon(isPre ? DSIconName.preTest : DSIconName.postTest,
+              size: 36, color: DSColors.navy),
+          const SizedBox(height: 6),
+          Text(isPre ? 'Pre-test' : 'Post-test', style: DSText.title),
+          Text(isPre ? 'Before learning' : 'After learning', style: DSText.caption),
+        ]),
+      ),
     );
   }
 }

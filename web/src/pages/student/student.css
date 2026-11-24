@@ -30,6 +30,9 @@
 /* Section spacing between stacked page cards. */
 .sd-stack > * + * { margin-top: var(--ds-sp-4); }
 
+/* Centered block content (result screens). */
+.sd-center { display: flex; flex-direction: column; align-items: center; gap: var(--ds-sp-3); text-align: center; padding: var(--ds-sp-4) 0; }
+
 @media (max-width: 760px) {
   .sd-tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }
