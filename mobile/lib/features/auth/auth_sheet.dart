@@ -327,7 +327,8 @@ class _LoginFormState extends State<_LoginForm> {
                 minimumSize: const Size(44, 44),
                 padding: const EdgeInsets.symmetric(horizontal: 8)),
             child: Text('Forgot password?',
-                style: DSText.label.copyWith(color: DSColors.blue)),
+                style: DSText.bodySm.copyWith(
+                    fontWeight: FontWeight.w600, color: DSColors.blue)),
           ),
         ]),
         if (_err != null) _ErrRow(_err!),
@@ -347,7 +348,8 @@ class _LoginFormState extends State<_LoginForm> {
                 minimumSize: const Size(44, 40),
                 padding: const EdgeInsets.symmetric(horizontal: 8)),
             child: Text('Create an account',
-                style: DSText.label.copyWith(color: DSColors.blue)),
+                style: DSText.bodySm.copyWith(
+                    fontWeight: FontWeight.w600, color: DSColors.blue)),
           ),
         ]),
       ]),
@@ -440,7 +442,7 @@ class _SignupFormState extends State<_SignupForm> {
       return Column(children: [
         const DSIcon(DSIconName.mailVerified, size: 48, color: DSColors.blue),
         const SizedBox(height: 10),
-        Text('Check your email', style: DSText.h3),
+        Text('Check your email', style: DSText.h2),
         const SizedBox(height: 8),
         Text(
           'We sent a confirmation link to ${_email.text.trim()}. Open it to activate your account, then sign in.',
@@ -451,7 +453,8 @@ class _SignupFormState extends State<_SignupForm> {
         TextButton(
             onPressed: widget.onGoLogin,
             child: Text('Back to Sign In',
-                style: DSText.label.copyWith(color: DSColors.blue))),
+                style: DSText.bodySm.copyWith(
+                    fontWeight: FontWeight.w600, color: DSColors.blue))),
       ]);
     }
 
@@ -514,7 +517,7 @@ class _SignupFormState extends State<_SignupForm> {
         const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerLeft,
-          child: Text('I am a…', style: DSText.title),
+          child: Text('I am a…', style: DSText.label),
         ),
         const SizedBox(height: 6),
         Row(children: [
@@ -563,7 +566,8 @@ class _SignupFormState extends State<_SignupForm> {
                 minimumSize: const Size(44, 40),
                 padding: const EdgeInsets.symmetric(horizontal: 8)),
             child: Text('Log in',
-                style: DSText.label.copyWith(color: DSColors.blue)),
+                style: DSText.bodySm.copyWith(
+                    fontWeight: FontWeight.w600, color: DSColors.blue)),
           ),
         ]),
       ]),
