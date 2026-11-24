@@ -27,12 +27,13 @@ class DSIslandNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: 1,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+          child: Container(
             constraints: const BoxConstraints(maxWidth: 560),
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
             padding: const EdgeInsets.all(DSSpacing.s2),
             decoration: BoxDecoration(
               color: DSColors.surface,
@@ -55,7 +56,7 @@ class DSIslandNavBar extends StatelessWidget {
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -142,8 +142,11 @@ class LandingScreen extends StatelessWidget {
               child: Row(children: [
                 const _LogoMark(40),
                 const SizedBox(width: 10),
-                Text('ScienceLearn',
-                    style: DSText.h3.copyWith(color: DSColors.surface)),
+                Flexible(
+                  child: Text('ScienceLearn',
+                      overflow: TextOverflow.ellipsis,
+                      style: DSText.h3.copyWith(color: DSColors.surface)),
+                ),
               ]),
             ),
             DSButton(
@@ -430,8 +433,11 @@ class LandingScreen extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             const _LogoMark(32),
             const SizedBox(width: 8),
-            Text('ScienceLearn',
-                style: DSText.h3.copyWith(color: DSColors.surface)),
+            Flexible(
+              child: Text('ScienceLearn',
+                  overflow: TextOverflow.ellipsis,
+                  style: DSText.h3.copyWith(color: DSColors.surface)),
+            ),
           ]),
           const SizedBox(height: 6),
           Text(
