@@ -92,6 +92,7 @@ class _NavItem extends StatelessWidget {
           boxShadow: active ? dsEdge(DSColors.edgeBlue, h: 4) : const [],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DSIcon(item.icon, size: 20, color: active ? DSColors.surface : DSColors.pastelBlue),

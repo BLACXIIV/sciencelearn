@@ -29,7 +29,7 @@ class DSIslandNavBar extends StatelessWidget {
       top: false,
       child: Center(
         child: Container(
-          width: 560,
+          constraints: const BoxConstraints(maxWidth: 560),
           margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
           padding: const EdgeInsets.all(DSSpacing.s2),
           decoration: BoxDecoration(
@@ -77,6 +77,7 @@ class _IslandItem extends StatelessWidget {
           borderRadius: DSRadii.buttonBr,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DSIcon(item.icon, size: 22, color: color),
