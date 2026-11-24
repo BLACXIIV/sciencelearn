@@ -426,26 +426,25 @@ class LandingScreen extends StatelessWidget {
 
   // ---- 6 · footer ----
 
-  Widget _footer() => Container(
-        color: DSColors.navy,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+  Widget _footer() => Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: DSSpacing.gutter, vertical: DSSpacing.s6),
         child: Column(children: [
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const _LogoMark(32),
+            const _LogoMark(24),
             const SizedBox(width: 8),
             Flexible(
               child: Text('ScienceLearn',
                   overflow: TextOverflow.ellipsis,
-                  style: DSText.h3.copyWith(color: DSColors.surface)),
+                  style: DSText.title.copyWith(fontWeight: FontWeight.w800)),
             ),
           ]),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             'Developed by Regym R. Medina · With the support of The Notre Dame of Isulan, Inc.\n'
             'References: DepEd MATATAG Curriculum, Trusted Scientific Resources · Together for a Brighter Future',
             textAlign: TextAlign.center,
-            style:
-                DSText.bodySm.copyWith(color: DSColors.surface, height: 1.55),
+            style: DSText.caption.copyWith(color: DSColors.muted),
           ),
         ]),
       );
