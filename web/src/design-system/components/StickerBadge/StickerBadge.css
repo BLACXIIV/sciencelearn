@@ -11,3 +11,8 @@
   font: 800 13px/1 var(--ds-font-display);
   box-shadow: 0 4px 0 var(--ds-edge-chip);
 }
+
+.ds-sticker--blue   { background: var(--ds-pastel-blue); }
+.ds-sticker--yellow { background: var(--ds-pastel-yellow); }
+.ds-sticker--purple { background: var(--ds-pastel-purple); }
+.ds-sticker--mint   { background: var(--ds-pastel-mint); }

@@ -39,8 +39,20 @@
 .ld-cta { display: flex; gap: 12px; align-items: center; }
 .ld-cta a { text-decoration: none; }
 
-.ld-ill { position: relative; text-align: center; }
-.ld-ill > img { width: 82%; max-width: 420px; }
+.ld-ill {
+  position: relative;
+  width: min(100%, 460px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.ld-ill::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--ds-paper); border-radius: 50%;
+}
+.ld-ill > img {
+  position: absolute; left: 50%; top: 50%;
+  width: 125%; transform: translate(-50%, -50%);
+}
 .ld-spark { position: absolute; height: 5px; border-radius: var(--ds-r-pill); background: var(--ds-surface); }
 .ld-spark.s1 { width: 26px; top: 8%; right: 5%; transform: rotate(-6deg); }
 .ld-spark.s2 { width: 18px; top: 3%; right: 22%; transform: rotate(17deg); }
@@ -131,8 +143,7 @@
   .ld-mark { width: 40px; height: 40px; }
   .ld-word { font-size: 18px; }
   .ld-hg { display: flex; flex-direction: column; gap: 26px; padding-top: 28px; }
-  .ld-ill { order: 2; padding: 0 4px; }
-  .ld-ill > img { width: 88%; }
+  .ld-ill { order: 2; padding: 0 4px; width: min(94vw, 460px); }
   .ld-chip.c1 { left: 2%; top: 12%; }
   .ld-chip.c2 { right: 0; bottom: 30%; }
   .ld-cta { flex-direction: column; align-items: stretch; width: 100%; }

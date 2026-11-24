@@ -418,6 +418,14 @@ class _UiKitScreenState extends State<UiKitScreen> {
           DSChip(variant: DSChipVariant.mint, child: Text('Mint')),
           DSStickerBadge(rotation: -5, child: Text('New unit')),
           DSStickerBadge(rotation: 5, child: Text('Top score')),
+          DSStickerBadge(
+              rotation: -5, pastel: DSCardPastel.blue, child: Text('Join')),
+          DSStickerBadge(
+              rotation: 5, pastel: DSCardPastel.mint, child: Text('+15%')),
+          DSStickerBadge(
+              rotation: -3,
+              pastel: DSCardPastel.yellow,
+              child: Text('Physics')),
           DSBadge(child: Text('3')),
           DSBadge(tone: DSBadgeTone.mint, child: Text('12')),
           DSBadge(tone: DSBadgeTone.error, child: Text('9+')),

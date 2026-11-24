@@ -260,6 +260,9 @@ export default function UiKit() {
         <Row label="StickerBadge (rotations −5 / +5)">
           <StickerBadge rotation={-5}>New unit</StickerBadge>
           <StickerBadge rotation={5}>Top score</StickerBadge>
+          <StickerBadge rotation={-5} pastel="blue">Join</StickerBadge>
+          <StickerBadge rotation={5} pastel="mint">+15%</StickerBadge>
+          <StickerBadge rotation={-3} pastel="yellow">Physics</StickerBadge>
         </Row>
         <Row label="Badges">
           <Badge>3</Badge>

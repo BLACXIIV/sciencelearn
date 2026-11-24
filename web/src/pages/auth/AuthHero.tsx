@@ -45,8 +45,8 @@ export function AuthHero({ art }: { art?: string }) {
           {art && (
             <div className="a-ill">
               <img src={art} alt="" />
-              <span className="a-chip c1"><StickerBadge rotation={-5}>Join with a class code</StickerBadge></span>
-              <span className="a-chip c2"><StickerBadge rotation={5}>Pre → post gain</StickerBadge></span>
+              <span className="a-chip c1"><StickerBadge rotation={-5} pastel="blue">Join with a class code</StickerBadge></span>
+              <span className="a-chip c2"><StickerBadge rotation={5} pastel="mint">Pre → post gain</StickerBadge></span>
             </div>
           )}
         </div>

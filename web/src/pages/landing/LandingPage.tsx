@@ -123,10 +123,10 @@ export default function LandingPage() {
               <img src={learningCuate} alt="" />
               <span className="ld-spark s1" aria-hidden="true" />
               <span className="ld-spark s2" aria-hidden="true" />
-              <span className="ld-chip c1"><StickerBadge rotation={-5}>Join with a class code</StickerBadge></span>
-              <span className="ld-chip c2"><StickerBadge rotation={5}>Pre → post gain</StickerBadge></span>
-              <span className="ld-chip c3 d"><StickerBadge rotation={-3}>Physics · Chemistry · Earth Science</StickerBadge></span>
-              <span className="ld-chip c3 m"><StickerBadge rotation={-3}>Physics · Chem · Earth</StickerBadge></span>
+              <span className="ld-chip c1"><StickerBadge rotation={-5} pastel="blue">Join with a class code</StickerBadge></span>
+              <span className="ld-chip c2"><StickerBadge rotation={5} pastel="mint">Pre → post gain</StickerBadge></span>
+              <span className="ld-chip c3 d"><StickerBadge rotation={-3} pastel="yellow">Physics · Chemistry · Earth Science</StickerBadge></span>
+              <span className="ld-chip c3 m"><StickerBadge rotation={-3} pastel="yellow">Physics · Chem · Earth</StickerBadge></span>
             </div>
           </div>
         </div>

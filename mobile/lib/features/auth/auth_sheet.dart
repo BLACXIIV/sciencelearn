@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,6 +98,8 @@ class _AuthSheetState extends State<_AuthSheet> {
             EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           // ---- navy art zone (solid mint top edge, 32px corners) ----
+          // The Storyset art fills the zone behind the paper circle as a
+          // soft blurred backdrop, cross-fading on tab/role swap.
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -107,23 +110,47 @@ class _AuthSheetState extends State<_AuthSheet> {
               ),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DSRadii.panel)),
-              boxShadow:
-                  dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
+              boxShadow: dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
             ),
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            child: Column(children: [
-              AnimatedContainer(
-                duration: dur,
-                curve: Curves.easeInOut,
-                width: artSize,
-                height: artSize,
-                child: _ArtCircle(art: _art, size: artSize, duration: dur),
-              ),
-              if (tall) ...[
-                const SizedBox(height: 14),
-                const _TriviaCard(),
-              ],
-            ]),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(DSRadii.panel)),
+              child: Stack(children: [
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: .45,
+                      child: AnimatedSwitcher(
+                        duration: dur,
+                        child: ImageFiltered(
+                          key: ValueKey(_art),
+                          imageFilter:
+                              ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          child: SvgPicture.asset(_art, fit: BoxFit.cover),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                  child: Column(children: [
+                    AnimatedContainer(
+                      duration: dur,
+                      curve: Curves.easeInOut,
+                      width: artSize,
+                      height: artSize,
+                      child:
+                          _ArtCircle(art: _art, size: artSize, duration: dur),
+                    ),
+                    if (tall) ...[
+                      const SizedBox(height: 14),
+                      const _TriviaCard(),
+                    ],
+                  ]),
+                ),
+              ]),
+            ),
           ),
           // ---- white sheet: handle + switcher + form ----
           Flexible(
@@ -133,50 +160,49 @@ class _AuthSheetState extends State<_AuthSheet> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 5,
-                        decoration: BoxDecoration(
-                            color: DSColors.track, borderRadius: DSRadii.pillBr),
-                      ),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                          color: DSColors.track, borderRadius: DSRadii.pillBr),
                     ),
-                    const SizedBox(height: 16),
-                    DSSegmentedControl(
-                      options: const [
-                        DSSegment('login', 'Log in'),
-                        DSSegment('signup', 'Sign up'),
-                      ],
-                      value: _tab == AuthTab.login ? 'login' : 'signup',
-                      onChanged: (v) => setState(() =>
-                          _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
-                    ),
-                    const SizedBox(height: 16),
-                    AnimatedSize(
+                  ),
+                  const SizedBox(height: 16),
+                  DSSegmentedControl(
+                    options: const [
+                      DSSegment('login', 'Log in'),
+                      DSSegment('signup', 'Sign up'),
+                    ],
+                    value: _tab == AuthTab.login ? 'login' : 'signup',
+                    onChanged: (v) => setState(() =>
+                        _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedSize(
+                    duration: dur,
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
                       duration: dur,
-                      curve: Curves.easeInOut,
-                      child: AnimatedSwitcher(
-                        duration: dur,
-                        child: _tab == AuthTab.login
-                            ? _LoginForm(
-                                key: const ValueKey('login'),
-                                onGoSignup: () =>
-                                    setState(() => _tab = AuthTab.signup),
-                              )
-                            : _SignupForm(
-                                key: const ValueKey('signup'),
-                                onGoLogin: () =>
-                                    setState(() => _tab = AuthTab.login),
-                                onRoleArt: (role) => setState(() =>
-                                    _signupArt =
-                                        'assets/illustrations/$role.svg'),
-                              ),
-                      ),
+                      child: _tab == AuthTab.login
+                          ? _LoginForm(
+                              key: const ValueKey('login'),
+                              onGoSignup: () =>
+                                  setState(() => _tab = AuthTab.signup),
+                            )
+                          : _SignupForm(
+                              key: const ValueKey('signup'),
+                              onGoLogin: () =>
+                                  setState(() => _tab = AuthTab.login),
+                              onRoleArt: (role) => setState(() => _signupArt =
+                                  'assets/illustrations/$role.svg'),
+                            ),
                     ),
-                  ]),
-                ),
+                  ),
+                ]),
               ),
             ),
+          ),
         ]),
       ),
     );
@@ -195,8 +221,8 @@ class _ArtCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-          color: DSColors.paper, shape: BoxShape.circle),
+      decoration:
+          const BoxDecoration(color: DSColors.paper, shape: BoxShape.circle),
       child: AnimatedSwitcher(
         duration: duration,
         child: Center(
@@ -247,8 +273,8 @@ class _TriviaCardState extends State<_TriviaCard> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('DID YOU KNOW?',
                   style: DSText.caption
                       .copyWith(color: DSColors.blue, letterSpacing: .7)),
@@ -265,7 +291,9 @@ class _TriviaCardState extends State<_TriviaCard> {
           ),
           const SizedBox(width: 8),
           DSIconButton(
-              icon: DSIconName.retry, label: 'Show another fact', onPressed: _next),
+              icon: DSIconName.retry,
+              label: 'Show another fact',
+              onPressed: _next),
         ]),
       ),
     );
@@ -683,8 +711,8 @@ class _ErrRow extends StatelessWidget {
         const DSIcon(DSIconName.alert, size: 16, color: DSColors.error),
         const SizedBox(width: 6),
         Expanded(
-          child: Text(text,
-              style: DSText.bodySm.copyWith(color: DSColors.error)),
+          child:
+              Text(text, style: DSText.bodySm.copyWith(color: DSColors.error)),
         ),
       ]),
     );
