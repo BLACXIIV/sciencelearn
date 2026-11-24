@@ -33,6 +33,11 @@
 /* Centered block content (result screens). */
 .sd-center { display: flex; flex-direction: column; align-items: center; gap: var(--ds-sp-3); text-align: center; padding: var(--ds-sp-4) 0; }
 
+/* Quiz header: "Question X of Y" label + progress bar filling the row. */
+.sd-quizhead { display: flex; align-items: center; gap: var(--ds-sp-3); }
+.sd-quizhead .ds-progress { flex: 1; }
+.sd-quizhead .ds-label { white-space: nowrap; }
+
 @media (max-width: 760px) {
   .sd-tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }

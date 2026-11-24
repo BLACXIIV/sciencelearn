@@ -30,7 +30,8 @@ class _UiKitScreenState extends State<UiKitScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('ScienceLearn UI Kit', style: DSText.h1.copyWith(color: DSColors.surface)),
+                Text('ScienceLearn UI Kit',
+                    style: DSText.h1.copyWith(color: DSColors.surface)),
                 const SizedBox(height: 4),
                 Text('Design-system gallery — debug builds only.',
                     style: DSText.bodySm.copyWith(color: DSColors.pastelBlue)),
@@ -65,26 +66,44 @@ class _UiKitScreenState extends State<UiKitScreen> {
   Widget _rowLabel(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 8, top: 16),
         child: Text(t.toUpperCase(),
-            style: DSText.caption.copyWith(color: DSColors.muted, letterSpacing: 0.6, fontWeight: FontWeight.w500)),
+            style: DSText.caption.copyWith(
+                color: DSColors.muted,
+                letterSpacing: 0.6,
+                fontWeight: FontWeight.w500)),
       );
 
   Widget _tokens() => _sec('Tokens', [
         _rowLabel('Colors'),
         Wrap(spacing: 12, runSpacing: 12, children: [
           for (final (n, c) in [
-            ('navy', DSColors.navy), ('navyDeep', DSColors.navyDeep),
-            ('blue', DSColors.blue), ('blueDark', DSColors.blueDark),
-            ('mint', DSColors.mint), ('sun', DSColors.sun), ('paper', DSColors.paper),
-            ('pastelBlue', DSColors.pastelBlue), ('pastelYellow', DSColors.pastelYellow),
-            ('pastelPurple', DSColors.pastelPurple), ('pastelMint', DSColors.pastelMint),
-            ('inkSoft', DSColors.inkSoft), ('muted', DSColors.muted), ('line', DSColors.line),
-            ('edgeCard', DSColors.edgeCard), ('edgeWhite', DSColors.edgeWhite),
-            ('edgeBlue', DSColors.edgeBlue), ('edgeMint', DSColors.edgeMint),
-            ('edgeNavy', DSColors.edgeNavy), ('success', DSColors.success),
-            ('warning', DSColors.warning), ('error', DSColors.error),
-            ('errorSurface', DSColors.errorSurface), ('track', DSColors.track),
-            ('chart1', DSColors.chart1), ('chart2', DSColors.chart2),
-            ('chart3', DSColors.chart3), ('chart4', DSColors.chart4),
+            ('navy', DSColors.navy),
+            ('navyDeep', DSColors.navyDeep),
+            ('blue', DSColors.blue),
+            ('blueDark', DSColors.blueDark),
+            ('mint', DSColors.mint),
+            ('sun', DSColors.sun),
+            ('paper', DSColors.paper),
+            ('pastelBlue', DSColors.pastelBlue),
+            ('pastelYellow', DSColors.pastelYellow),
+            ('pastelPurple', DSColors.pastelPurple),
+            ('pastelMint', DSColors.pastelMint),
+            ('inkSoft', DSColors.inkSoft),
+            ('muted', DSColors.muted),
+            ('line', DSColors.line),
+            ('edgeCard', DSColors.edgeCard),
+            ('edgeWhite', DSColors.edgeWhite),
+            ('edgeBlue', DSColors.edgeBlue),
+            ('edgeMint', DSColors.edgeMint),
+            ('edgeNavy', DSColors.edgeNavy),
+            ('success', DSColors.success),
+            ('warning', DSColors.warning),
+            ('error', DSColors.error),
+            ('errorSurface', DSColors.errorSurface),
+            ('track', DSColors.track),
+            ('chart1', DSColors.chart1),
+            ('chart2', DSColors.chart2),
+            ('chart3', DSColors.chart3),
+            ('chart4', DSColors.chart4),
           ])
             _Swatch(n, c),
         ]),
@@ -102,28 +121,40 @@ class _UiKitScreenState extends State<UiKitScreen> {
         _rowLabel('Radii'),
         Wrap(spacing: 12, runSpacing: 12, children: [
           for (final (n, r) in [
-            ('button', DSRadii.button), ('input', DSRadii.input),
-            ('card', DSRadii.card), ('panel', DSRadii.panel),
-            ('chip', DSRadii.chip), ('pill', 24.0),
+            ('button', DSRadii.button),
+            ('input', DSRadii.input),
+            ('card', DSRadii.card),
+            ('panel', DSRadii.panel),
+            ('chip', DSRadii.chip),
+            ('pill', 24.0),
           ])
             Column(children: [
               Container(
-                width: 72, height: 48,
+                width: 72,
+                height: 48,
                 decoration: BoxDecoration(
                   color: DSColors.pastelBlue,
                   border: Border.all(color: DSColors.line),
                   borderRadius: BorderRadius.circular(r),
                 ),
               ),
-              Text(n, style: DSText.caption.copyWith(color: DSColors.muted, fontSize: 11)),
+              Text(n,
+                  style: DSText.caption
+                      .copyWith(color: DSColors.muted, fontSize: 11)),
             ]),
         ]),
         _rowLabel('Edges (heights 3–6 only)'),
         Wrap(spacing: 16, runSpacing: 12, children: [
-          for (final (h, e) in [(3, DSColors.edgeCard), (4, DSColors.edgeCard), (5, DSColors.edgeBlue), (6, DSColors.edgeNavy)])
+          for (final (h, e) in [
+            (3, DSColors.edgeCard),
+            (4, DSColors.edgeCard),
+            (5, DSColors.edgeBlue),
+            (6, DSColors.edgeNavy)
+          ])
             Column(children: [
               Container(
-                width: 72, height: 48,
+                width: 72,
+                height: 48,
                 decoration: BoxDecoration(
                   color: DSColors.surface,
                   border: Border.all(color: DSColors.line),
@@ -131,7 +162,9 @@ class _UiKitScreenState extends State<UiKitScreen> {
                   boxShadow: dsEdge(e, h: h),
                 ),
               ),
-              Text('edge $h', style: DSText.caption.copyWith(color: DSColors.muted, fontSize: 11)),
+              Text('edge $h',
+                  style: DSText.caption
+                      .copyWith(color: DSColors.muted, fontSize: 11)),
             ]),
         ]),
         _rowLabel('Icon registry'),
@@ -139,7 +172,9 @@ class _UiKitScreenState extends State<UiKitScreen> {
           for (final n in DSIconName.values)
             Column(children: [
               DSIcon(n, size: 20, color: DSColors.inkSoft),
-              Text(n.name, style: DSText.caption.copyWith(color: DSColors.muted, fontSize: 9)),
+              Text(n.name,
+                  style: DSText.caption
+                      .copyWith(color: DSColors.muted, fontSize: 9)),
             ]),
         ]),
       ]);
@@ -148,40 +183,77 @@ class _UiKitScreenState extends State<UiKitScreen> {
         _rowLabel('Button — variants'),
         Wrap(spacing: 12, runSpacing: 12, children: [
           DSButton(onPressed: () {}, child: const Text('Primary')),
-          DSButton(variant: DSButtonVariant.mint, onPressed: () {}, child: const Text('Mint')),
-          DSButton(variant: DSButtonVariant.white, onPressed: () {}, child: const Text('White')),
-          DSButton(variant: DSButtonVariant.outline, onPressed: () {}, child: const Text('Outline')),
-          DSButton(variant: DSButtonVariant.danger, onPressed: () {}, child: const Text('Danger')),
+          DSButton(
+              variant: DSButtonVariant.mint,
+              onPressed: () {},
+              child: const Text('Mint')),
+          DSButton(
+              variant: DSButtonVariant.white,
+              onPressed: () {},
+              child: const Text('White')),
+          DSButton(
+              variant: DSButtonVariant.outline,
+              onPressed: () {},
+              child: const Text('Outline')),
+          DSButton(
+              variant: DSButtonVariant.danger,
+              onPressed: () {},
+              child: const Text('Danger')),
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: DSColors.navy, borderRadius: DSRadii.buttonBr),
-            child: DSButton(variant: DSButtonVariant.ghost, onPressed: () {}, child: const Text('Ghost')),
+            decoration: BoxDecoration(
+                color: DSColors.navy, borderRadius: DSRadii.buttonBr),
+            child: DSButton(
+                variant: DSButtonVariant.ghost,
+                onPressed: () {},
+                child: const Text('Ghost')),
           ),
         ]),
         _rowLabel('Sizes / loading / disabled / icon'),
         Wrap(spacing: 12, runSpacing: 12, children: [
-          DSButton(size: DSButtonSize.sm, onPressed: () {}, child: const Text('Small')),
-          DSButton(loading: true, onPressed: () {}, child: const Text('Loading')),
-          DSButton(disabled: true, onPressed: () {}, child: const Text('Disabled')),
-          DSButton(leadingIcon: DSIconName.add, onPressed: () {}, child: const Text('With icon')),
+          DSButton(
+              size: DSButtonSize.sm,
+              onPressed: () {},
+              child: const Text('Small')),
+          DSButton(
+              loading: true, onPressed: () {}, child: const Text('Loading')),
+          DSButton(
+              disabled: true, onPressed: () {}, child: const Text('Disabled')),
+          DSButton(
+              leadingIcon: DSIconName.add,
+              onPressed: () {},
+              child: const Text('With icon')),
         ]),
         const SizedBox(height: 12),
-        DSButton(fullWidth: true, onPressed: () {}, child: const Text('Full width')),
+        DSButton(
+            fullWidth: true, onPressed: () {}, child: const Text('Full width')),
         _rowLabel('IconButton'),
         Wrap(spacing: 12, children: [
-          DSIconButton(icon: DSIconName.close, label: 'Close', onPressed: () {}),
+          DSIconButton(
+              icon: DSIconName.close, label: 'Close', onPressed: () {}),
           DSIconButton(icon: DSIconName.edit, label: 'Edit', onPressed: () {}),
-          DSIconButton(icon: DSIconName.delete, label: 'Delete', onPressed: () {}),
-          DSIconButton(icon: DSIconName.settings, label: 'Settings', disabled: true, onPressed: () {}),
+          DSIconButton(
+              icon: DSIconName.delete, label: 'Delete', onPressed: () {}),
+          DSIconButton(
+              icon: DSIconName.settings,
+              label: 'Settings',
+              disabled: true,
+              onPressed: () {}),
         ]),
       ]);
 
   Widget _fields() => _sec('Forms', [
         const DSTextField(label: 'Display name', hint: 'Ada Lovelace'),
         const SizedBox(height: 16),
-        const DSTextField(label: 'With error', hint: 'bad@', error: 'Enter a valid email address.'),
+        const DSTextField(
+            label: 'With error',
+            hint: 'bad@',
+            error: 'Enter a valid email address.'),
         const SizedBox(height: 16),
-        const DSTextField(label: 'With helper', hint: 'you@school.edu', helper: 'We never share your email.'),
+        const DSTextField(
+            label: 'With helper',
+            hint: 'you@school.edu',
+            helper: 'We never share your email.'),
         const SizedBox(height: 16),
         const DSPasswordField(label: 'Password', hint: '••••••••'),
         const SizedBox(height: 16),
@@ -204,16 +276,27 @@ class _UiKitScreenState extends State<UiKitScreen> {
           label: 'Class code',
           value: _code,
           onChanged: (v) => setState(() => _code = v),
-          error: _code.isNotEmpty && _code.length < 6 ? 'Enter all 6 characters.' : null,
+          error: _code.isNotEmpty && _code.length < 6
+              ? 'Enter all 6 characters.'
+              : null,
         ),
       ]);
 
   Widget _choices() => _sec('Choice controls', [
-        DSCheckbox(label: 'Remember me', value: _check, onChanged: (v) => setState(() => _check = v)),
-        DSSwitch(label: 'Daily reminders', value: _sw, onChanged: (v) => setState(() => _sw = v)),
+        DSCheckbox(
+            label: 'Remember me',
+            value: _check,
+            onChanged: (v) => setState(() => _check = v)),
+        DSSwitch(
+            label: 'Daily reminders',
+            value: _sw,
+            onChanged: (v) => setState(() => _sw = v)),
         const SizedBox(height: 16),
         DSSegmentedControl(
-          options: const [DSSegment('login', 'Log in'), DSSegment('signup', 'Sign up')],
+          options: const [
+            DSSegment('login', 'Log in'),
+            DSSegment('signup', 'Sign up')
+          ],
           value: _seg,
           onChanged: (v) => setState(() => _seg = v),
         ),
@@ -223,20 +306,28 @@ class _UiKitScreenState extends State<UiKitScreen> {
           value: _role,
           onChanged: (v) => setState(() => _role = v),
           options: const [
-            DSRadioOption('student', _TileIcon(icon: DSIconName.school, label: 'Student')),
-            DSRadioOption('teacher', _TileIcon(icon: DSIconName.presentation, label: 'Teacher')),
+            DSRadioOption('student',
+                _TileIcon(icon: DSIconName.school, label: 'Student')),
+            DSRadioOption('teacher',
+                _TileIcon(icon: DSIconName.presentation, label: 'Teacher')),
           ],
         ),
         const SizedBox(height: 16),
         Row(children: [
           Expanded(
-            child: DSOptionTile(icon: DSIconName.school, label: 'Student',
-                selected: _role == 'student', onTap: () => setState(() => _role = 'student')),
+            child: DSOptionTile(
+                icon: DSIconName.school,
+                label: 'Student',
+                selected: _role == 'student',
+                onTap: () => setState(() => _role = 'student')),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: DSOptionTile(icon: DSIconName.presentation, label: 'Teacher',
-                selected: _role == 'teacher', onTap: () => setState(() => _role = 'teacher')),
+            child: DSOptionTile(
+                icon: DSIconName.presentation,
+                label: 'Teacher',
+                selected: _role == 'teacher',
+                onTap: () => setState(() => _role = 'teacher')),
           ),
         ]),
       ]);
@@ -245,17 +336,35 @@ class _UiKitScreenState extends State<UiKitScreen> {
         _rowLabel('Card variants'),
         const DSCard(child: Text('White')),
         const SizedBox(height: 12),
-        const DSCard(variant: DSCardVariant.pastel, pastel: DSCardPastel.blue, tilt: true, child: Text('Pastel + tilt')),
+        const DSCard(
+            variant: DSCardVariant.pastel,
+            pastel: DSCardPastel.blue,
+            tilt: true,
+            child: Text('Pastel + tilt')),
         const SizedBox(height: 12),
         const Row(children: [
-          Expanded(child: DSCard(variant: DSCardVariant.pastel, pastel: DSCardPastel.yellow, child: Text('Yellow'))),
+          Expanded(
+              child: DSCard(
+                  variant: DSCardVariant.pastel,
+                  pastel: DSCardPastel.yellow,
+                  child: Text('Yellow'))),
           SizedBox(width: 12),
-          Expanded(child: DSCard(variant: DSCardVariant.pastel, pastel: DSCardPastel.purple, child: Text('Purple'))),
+          Expanded(
+              child: DSCard(
+                  variant: DSCardVariant.pastel,
+                  pastel: DSCardPastel.purple,
+                  child: Text('Purple'))),
           SizedBox(width: 12),
-          Expanded(child: DSCard(variant: DSCardVariant.pastel, pastel: DSCardPastel.mint, child: Text('Mint'))),
+          Expanded(
+              child: DSCard(
+                  variant: DSCardVariant.pastel,
+                  pastel: DSCardPastel.mint,
+                  child: Text('Mint'))),
         ]),
         const SizedBox(height: 12),
-        const DSCard(variant: DSCardVariant.trivia, child: Text('Trivia — Did you know?')),
+        const DSCard(
+            variant: DSCardVariant.trivia,
+            child: Text('Trivia — Did you know?')),
         const SizedBox(height: 12),
         const DSCard(variant: DSCardVariant.flat, child: Text('Flat')),
         const SizedBox(height: 12),
@@ -266,7 +375,9 @@ class _UiKitScreenState extends State<UiKitScreen> {
         Wrap(spacing: 12, children: [
           DSButton(
             variant: DSButtonVariant.outline,
-            onPressed: () => showDSBottomSheet<void>(context, child: Text('Bottom sheet — radius 32, handle, dim barrier.', style: DSText.bodySm)),
+            onPressed: () => showDSBottomSheet<void>(context,
+                child: Text('Bottom sheet — radius 32, handle, dim barrier.',
+                    style: DSText.bodySm)),
             child: const Text('Open sheet'),
           ),
           DSButton(
@@ -274,17 +385,22 @@ class _UiKitScreenState extends State<UiKitScreen> {
             onPressed: () => showDSModal<void>(
               context,
               title: 'Delete class?',
-              body: Text('This removes the class and its roster.', style: DSText.bodySm),
+              body: Text('This removes the class and its roster.',
+                  style: DSText.bodySm),
               actions: [
-                DSButton(variant: DSButtonVariant.danger, size: DSButtonSize.sm,
-                    onPressed: () => Navigator.of(context).pop(), child: const Text('Delete')),
+                DSButton(
+                    variant: DSButtonVariant.danger,
+                    size: DSButtonSize.sm,
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Delete')),
               ],
             ),
             child: const Text('Open modal'),
           ),
           DSButton(
             variant: DSButtonVariant.outline,
-            onPressed: () => DSToast.show(context, message: 'Class code copied.', tone: DSToastTone.success),
+            onPressed: () => DSToast.show(context,
+                message: 'Class code copied.', tone: DSToastTone.success),
             child: const Text('Show toast'),
           ),
         ]),
@@ -294,7 +410,10 @@ class _UiKitScreenState extends State<UiKitScreen> {
         _rowLabel('Chips / StickerBadge / Badges'),
         const Wrap(spacing: 12, runSpacing: 12, children: [
           DSChip(child: Text('White')),
-          DSChip(variant: DSChipVariant.pastel, pastel: DSChipPastel.yellow, child: Text('Pastel')),
+          DSChip(
+              variant: DSChipVariant.pastel,
+              pastel: DSChipPastel.yellow,
+              child: Text('Pastel')),
           DSChip(variant: DSChipVariant.navy, child: Text('Navy')),
           DSChip(variant: DSChipVariant.mint, child: Text('Mint')),
           DSStickerBadge(rotation: -5, child: Text('New unit')),
@@ -312,8 +431,10 @@ class _UiKitScreenState extends State<UiKitScreen> {
         _rowLabel('RingChart (chart1..4)'),
         const DSRingChart(
           slices: [
-            DSRingSlice(40, series: 1), DSRingSlice(25, series: 2),
-            DSRingSlice(20, series: 3), DSRingSlice(15, series: 4),
+            DSRingSlice(40, series: 1),
+            DSRingSlice(25, series: 2),
+            DSRingSlice(20, series: 3),
+            DSRingSlice(15, series: 4),
           ],
           size: 120,
         ),
@@ -345,9 +466,18 @@ class _UiKitScreenState extends State<UiKitScreen> {
         ),
         _rowLabel('StatCards / Avatars'),
         const Row(children: [
-          Expanded(child: DSStatCard(icon: DSIconName.progress, value: '82%', label: 'Avg. score')),
+          Expanded(
+              child: DSStatCard(
+                  icon: DSIconName.progress,
+                  value: '82%',
+                  label: 'Avg. score')),
           SizedBox(width: 12),
-          Expanded(child: DSStatCard(icon: DSIconName.students, value: '128', label: 'Students', pastel: DSStatPastel.mint)),
+          Expanded(
+              child: DSStatCard(
+                  icon: DSIconName.students,
+                  value: '128',
+                  label: 'Students',
+                  pastel: DSStatPastel.mint)),
         ]),
         const SizedBox(height: 16),
         const Wrap(spacing: 12, children: [
@@ -379,12 +509,47 @@ class _UiKitScreenState extends State<UiKitScreen> {
           title: Text('Which planet has the most moons?'),
           options: [
             DSQuizOption(letter: 'A', child: Text('Earth')),
-            DSQuizOption(letter: 'B', state: DSQuizOptionState.selected, child: Text('Saturn')),
-            DSQuizOption(letter: 'C', state: DSQuizOptionState.correct, child: Text('Saturn — correct!')),
-            DSQuizOption(letter: 'D', state: DSQuizOptionState.wrong, child: Text('Jupiter')),
-            DSQuizOption(letter: 'E', state: DSQuizOptionState.disabled, child: Text('Mars')),
+            DSQuizOption(
+                letter: 'B',
+                state: DSQuizOptionState.selected,
+                child: Text('Saturn')),
+            DSQuizOption(
+                letter: 'C',
+                state: DSQuizOptionState.correct,
+                child: Text('Saturn — correct!')),
+            DSQuizOption(
+                letter: 'D',
+                state: DSQuizOptionState.wrong,
+                child: Text('Jupiter')),
+            DSQuizOption(
+                letter: 'E',
+                state: DSQuizOptionState.disabled,
+                child: Text('Mars')),
           ],
           footer: Text('Question 2 of 10'),
+        ),
+        _rowLabel('QuizNav'),
+        DSQuizNav(
+          count: 10,
+          current: 3,
+          answered: const [
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false
+          ],
+          onSelect: (_) {},
+        ),
+        _rowLabel('Flashcard'),
+        const DSFlashcard(
+          front: Text('What is the chemical symbol for water?'),
+          back: Text('H₂O'),
         ),
       ]);
 
@@ -438,13 +603,16 @@ class _Swatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(children: [
         Container(
-          width: 72, height: 48,
+          width: 72,
+          height: 48,
           decoration: BoxDecoration(
             color: color,
             borderRadius: DSRadii.inputBr,
             border: Border.all(color: DSColors.line),
           ),
         ),
-        Text(name, style: DSText.caption.copyWith(color: DSColors.muted, fontSize: 11)),
+        Text(name,
+            style:
+                DSText.caption.copyWith(color: DSColors.muted, fontSize: 11)),
       ]);
 }

@@ -1,11 +1,11 @@
 import { ReactNode, useState } from "react";
 import {
   Avatar, Badge, BottomSheet, Button, Card, Checkbox, Chip, CodeInput,
-  Divider, EmptyState, Icon, IconButton, ListItemCard, Modal, OptionTile,
-  PageHeader, Panel, PasswordField, ProgressBar, QuizCard, QuizOption,
-  RadioCard, RadioGroup, RingChart, SearchField, SegmentedControl, Select,
-  Skeleton, StatCard, StickerBadge, Switch, TextArea, TextField, Thumbnail,
-  Toast, type IconName,
+  Divider, EmptyState, Flashcard, Icon, IconButton, ListItemCard, Modal,
+  OptionTile, PageHeader, Panel, PasswordField, ProgressBar, QuizCard,
+  QuizNav, QuizOption, RadioCard, RadioGroup, RingChart, SearchField,
+  SegmentedControl, Select, Skeleton, StatCard, StickerBadge, Switch,
+  TextArea, TextField, Thumbnail, Toast, type IconName,
 } from "../../design-system";
 import "./UiKit.css";
 
@@ -348,6 +348,24 @@ export default function UiKit() {
           <QuizOption letter="D" state="wrong">Jupiter</QuizOption>
           <QuizOption letter="E" state="disabled">Mars</QuizOption>
         </QuizCard>
+        <Row label="QuizNav">
+          <QuizNav
+            count={10}
+            current={3}
+            answered={[true, true, false, false, true, false, false, false, true, false]}
+            onSelect={() => {}}
+          />
+        </Row>
+      </Section>
+
+      {/* ——— Flashcard ——— */}
+      <Section title="Flashcard">
+        <div className="uik-col uik-w-360">
+          <Flashcard
+            front={<span className="ds-title">What is the chemical symbol for water?</span>}
+            back={<span className="ds-title">H₂O</span>}
+          />
+        </div>
       </Section>
 
       {/* ——— Layout ——— */}

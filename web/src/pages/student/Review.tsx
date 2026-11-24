@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Card, EmptyState, ListItemCard, OptionTile, type IconName,
+  Card, EmptyState, Flashcard, ListItemCard, OptionTile, type IconName,
 } from "../../design-system";
 import { fetchFlashcards, fetchFormulas, fetchKeyTerms } from "../../services/learning";
 import "./student.css";
@@ -50,9 +50,13 @@ export default function StudentReview() {
           <EmptyState icon="inbox" title="Nothing here yet" body="Check back soon." />
         </Card>
       )}
-      {list.data?.map((r, i) => (
-        <ListItemCard key={i} title={r.head} subtitle={r.sub} />
-      ))}
+      {list.data?.map((r, i) =>
+        kind === "flashcards" ? (
+          <Flashcard key={i} front={r.head} back={r.sub} />
+        ) : (
+          <ListItemCard key={i} title={r.head} subtitle={r.sub} />
+        ),
+      )}
     </div>
   );
 }

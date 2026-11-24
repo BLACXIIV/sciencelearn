@@ -1,0 +1,51 @@
+/* QuizNav — row of numbered question dots. */
+
+.ds-quiznav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-s2);
+}
+
+.ds-quiznav-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ds-r-button);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ds-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.ds-quiznav-dot:active {
+  transform: translateY(2px);
+}
+
+.ds-quiznav-dot[data-state="unanswered"] {
+  background: var(--ds-card);
+  border: 1px dashed var(--ds-line);
+  color: var(--ds-muted);
+  box-shadow: 0 2px 0 var(--ds-edge-card);
+}
+
+.ds-quiznav-dot[data-state="answered"] {
+  background: var(--ds-pastel-mint);
+  border: 1px solid var(--ds-pastel-mint);
+  color: var(--ds-navy);
+  box-shadow: 0 2px 0 var(--ds-edge-mint);
+}
+
+.ds-quiznav-dot[data-state="current"] {
+  background: var(--ds-navy);
+  border: 1px solid var(--ds-navy);
+  color: var(--ds-paper);
+  box-shadow: 0 2px 0 var(--ds-edge-navy);
+}
+
+.ds-quiznav-dot:focus-visible {
+  outline: 3px solid var(--ds-blue);
+  outline-offset: 2px;
+}

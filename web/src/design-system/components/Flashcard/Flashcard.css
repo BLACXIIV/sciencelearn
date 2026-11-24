@@ -1,0 +1,97 @@
+/* Flashcard — white card that flips to reveal the back.
+   Faces: front = paper white, back = pastel mint. */
+
+.ds-flashcard {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  perspective: 800px;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ds-flashcard-in {
+  position: relative;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+.ds-flashcard.is-flipped .ds-flashcard-in {
+  transform: rotateY(180deg);
+}
+
+.ds-flashcard-face {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-s2);
+  min-height: 96px;
+  padding: var(--ds-s4);
+  border-radius: var(--ds-r-card);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  font-family: var(--ds-font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ds-ink);
+}
+
+.ds-flashcard-front {
+  position: relative;
+  background: var(--ds-card);
+  box-shadow: 0 5px 0 var(--ds-edge-card);
+}
+
+/* Back sits on top of the front in the same grid cell, pre-rotated. */
+.ds-flashcard-back {
+  position: absolute;
+  inset: 0;
+  background: var(--ds-pastel-mint);
+  box-shadow: 0 5px 0 var(--ds-edge-mint);
+  transform: rotateY(180deg);
+}
+
+/* Focus ring: place on the inner so it survives the 3D context. */
+.ds-flashcard:focus-visible {
+  outline: none;
+}
+.ds-flashcard:focus-visible .ds-flashcard-in {
+  outline: 3px solid var(--ds-blue);
+  outline-offset: 3px;
+  border-radius: var(--ds-r-card);
+}
+
+/* Small hint shown bottom-right on the front face. */
+.ds-flashcard-front::after {
+  content: "Tap to flip";
+  align-self: flex-end;
+  margin-top: auto;
+  font-family: var(--ds-font-body);
+  font-size: 11px;
+  color: var(--ds-muted);
+}
+
+.ds-flashcard-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-flashcard-in {
+    transition: none;
+    transform-style: flat;
+  }
+  /* With no 3D context, toggle visibility instead of rotating. */
+  .ds-flashcard .ds-flashcard-back { visibility: hidden; }
+  .ds-flashcard.is-flipped .ds-flashcard-in { transform: none; }
+  .ds-flashcard.is-flipped .ds-flashcard-back { visibility: visible; transform: none; }
+  .ds-flashcard.is-flipped .ds-flashcard-front { visibility: hidden; }
+}

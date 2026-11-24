@@ -89,6 +89,10 @@ export { QuizOption } from "./components/QuizOption/QuizOption";
 export type { QuizOptionProps, QuizOptionState } from "./components/QuizOption/QuizOption";
 export { QuizCard } from "./components/QuizCard/QuizCard";
 export type { QuizCardProps } from "./components/QuizCard/QuizCard";
+export { QuizNav } from "./components/QuizNav/QuizNav";
+export type { QuizNavProps } from "./components/QuizNav/QuizNav";
+export { Flashcard } from "./components/Flashcard/Flashcard";
+export type { FlashcardProps } from "./components/Flashcard/Flashcard";
 
 /* layout */
 export { PageHeader } from "./components/PageHeader/PageHeader";

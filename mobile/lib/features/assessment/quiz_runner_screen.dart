@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
@@ -28,7 +28,9 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
       c.dispose();
     }
     for (final l in _enumCtrl.values) {
-      for (final c in l) { c.dispose(); }
+      for (final c in l) {
+        c.dispose();
+      }
     }
     super.dispose();
   }
@@ -37,7 +39,9 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
     final a = _answers[q['id']];
     if (a == null) return false;
     if (a.containsKey('t')) return (a['t'] as String).trim().isNotEmpty;
-    if (a.containsKey('items')) return (a['items'] as List).any((s) => (s as String).trim().isNotEmpty);
+    if (a.containsKey('items')) {
+      return (a['items'] as List).any((s) => (s as String).trim().isNotEmpty);
+    }
     return true;
   }
 
@@ -87,9 +91,8 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
             DSTextField(
               label: 'Item ${i + 1}',
               controller: ctrls[i],
-              onChanged: (_) => _answers[id] = {
-                'items': ctrls.map((c) => c.text).toList()
-              },
+              onChanged: (_) =>
+                  _answers[id] = {'items': ctrls.map((c) => c.text).toList()},
             ),
         ];
       default: // multiple_choice
@@ -127,7 +130,9 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(widget.title,
-                    style: DSText.h2, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    style: DSText.h2,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               ),
             ]),
           ),
@@ -140,7 +145,8 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
   Widget _buildResult() {
     final score = _result!['score'] as num?;
     final s = (score ?? 0).toDouble();
-    return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+    return MaxWidth(
+        child: ListView(padding: const EdgeInsets.all(16), children: [
       DSCard(
         child: Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -165,7 +171,10 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
             ],
             const SizedBox(height: 16),
             DSButton(
-              onPressed: () { ref.invalidate(progressProvider); Navigator.of(context).pop(); },
+              onPressed: () {
+                ref.invalidate(progressProvider);
+                Navigator.of(context).pop();
+              },
               child: const Text('Done'),
             ),
             const SizedBox(height: 8),
@@ -179,14 +188,71 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
     return FutureBuilder<List<Json>>(
       future: repo.questions(widget.id),
       builder: (context, snap) {
-        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snap.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
         final qs = snap.data!;
         if (_qi >= qs.length) _qi = qs.length - 1;
         final answered = qs.where(_answered).length;
         final q = qs[_qi];
-        return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+        Future<void> doSubmit() async {
+          setState(() {
+            _busy = true;
+            _err = null;
+          });
+          try {
+            final r = await repo.submit(widget.id, _answers);
+            setState(() => _result = r);
+          } catch (e) {
+            setState(() => _err = '$e'.replaceFirst('Exception: ', ''));
+          } finally {
+            if (mounted) setState(() => _busy = false);
+          }
+        }
+
+        Future<void> trySubmit() async {
+          if (answered >= qs.length) return doSubmit();
+          final ok = await showDSModal<bool>(
+            context,
+            title: 'Submit anyway?',
+            body: Text(
+                '${qs.length - answered} ${qs.length - answered == 1 ? 'question' : 'questions'} unanswered. Submit anyway?'),
+            actions: [
+              DSButton(
+                variant: DSButtonVariant.outline,
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Keep going'),
+              ),
+              DSButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Submit'),
+              ),
+            ],
+          );
+          if (ok == true) await doSubmit();
+        }
+
+        return MaxWidth(
+            child: ListView(padding: const EdgeInsets.all(16), children: [
+          Row(children: [
+            Text('Question ${_qi + 1} of ${qs.length}', style: DSText.label),
+            const SizedBox(width: 12),
+            Expanded(
+                child: DSProgressBar(
+              value: answered / qs.length,
+              size: DSProgressBarSize.sm,
+            )),
+          ]),
+          const SizedBox(height: 12),
+          DSQuizNav(
+            count: qs.length,
+            current: _qi,
+            answered: [for (final qq in qs) _answered(qq)],
+            onSelect: (i) => setState(() => _qi = i),
+          ),
+          const SizedBox(height: 12),
           DSQuizCard(
-            tag: 'Question ${_qi + 1} of ${qs.length} · ${_typeLabel('${q['qtype']}')}',
+            tag: _typeLabel('${q['qtype']}'),
             title: Text('${q['prompt']}'),
             options: _options(q),
             footer: Text('$answered of ${qs.length} answered'),
@@ -207,25 +273,15 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
             else
               DSButton(
                 loading: _busy,
-                disabled: answered < qs.length,
-                onPressed: () async {
-                  setState(() { _busy = true; _err = null; });
-                  try {
-                    final r = await repo.submit(widget.id, _answers);
-                    setState(() => _result = r);
-                  } catch (e) {
-                    setState(() => _err = '$e'.replaceFirst('Exception: ', ''));
-                  } finally {
-                    if (mounted) setState(() => _busy = false);
-                  }
-                },
+                onPressed: _busy ? null : trySubmit,
                 child: const Text('Submit answers'),
               ),
           ]),
           if (_err != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(_err!, textAlign: TextAlign.center,
+              child: Text(_err!,
+                  textAlign: TextAlign.center,
                   style: DSText.caption.copyWith(color: DSColors.error)),
             ),
         ]));

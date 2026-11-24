@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Button, Card, EmptyState, Icon, QuizCard, QuizOption, RingChart, TextField,
+  Button, Card, EmptyState, Icon, Modal, ProgressBar, QuizCard, QuizNav,
+  QuizOption, RingChart, TextField,
 } from "../../design-system";
 import { fetchQuestions, submitAttempt } from "../../services/learning";
 import type { AnswerValue, AttemptResult, QuizQuestion } from "../../types";
@@ -98,6 +99,7 @@ export default function StudentQuiz() {
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [qi, setQi] = useState(0);
+  const [confirming, setConfirming] = useState(false);
 
   const submit = useMutation({
     mutationFn: () => submitAttempt(id, answers),
@@ -143,6 +145,10 @@ export default function StudentQuiz() {
   };
   const answered = qs.filter((q) => isAnswered(answers[q.id])).length;
   const q = qs[qi];
+  const trySubmit = () => {
+    if (answered < qs.length) setConfirming(true);
+    else submit.mutate();
+  };
 
   return (
     <div className="sd-stack">
@@ -156,8 +162,18 @@ export default function StudentQuiz() {
       {questions.error && <p className="sd-err">{String(questions.error)}</p>}
       {q && (
         <>
+          <div className="sd-quizhead">
+            <span className="ds-label">Question {qi + 1} of {qs.length}</span>
+            <ProgressBar value={(answered / qs.length) * 100} size="sm" />
+          </div>
+          <QuizNav
+            count={qs.length}
+            current={qi}
+            answered={qs.map((qq) => isAnswered(answers[qq.id]))}
+            onSelect={setQi}
+          />
           <QuizCard
-            tag={`Question ${qi + 1} of ${qs.length} · ${TYPE_LABEL[q.qtype] ?? "Question"}`}
+            tag={TYPE_LABEL[q.qtype] ?? "Question"}
             title={q.prompt}
             footer={<span>{answered} of {qs.length} answered</span>}
           >
@@ -175,16 +191,33 @@ export default function StudentQuiz() {
             {qi < qs.length - 1 ? (
               <Button onClick={() => setQi(qi + 1)}>Next</Button>
             ) : (
-              <Button
-                loading={submit.isPending}
-                disabled={answered < qs.length}
-                onClick={() => submit.mutate()}
-              >
+              <Button loading={submit.isPending} onClick={trySubmit}>
                 Submit answers
               </Button>
             )}
           </div>
           {submit.error && <p className="sd-err">{String(submit.error)}</p>}
+          <Modal
+            open={confirming}
+            onClose={() => setConfirming(false)}
+            title="Submit anyway?"
+            actions={
+              <>
+                <Button variant="outline" onClick={() => setConfirming(false)}>
+                  Keep going
+                </Button>
+                <Button
+                  loading={submit.isPending}
+                  onClick={() => { setConfirming(false); submit.mutate(); }}
+                >
+                  Submit
+                </Button>
+              </>
+            }
+          >
+            {qs.length - answered} {qs.length - answered === 1 ? "question" : "questions"} unanswered.
+            Submit anyway?
+          </Modal>
         </>
       )}
     </div>

@@ -48,6 +48,8 @@ export 'components/list_item_card.dart';
 export 'components/thumbnail.dart';
 export 'components/quiz_option.dart';
 export 'components/quiz_card.dart';
+export 'components/quiz_nav.dart';
+export 'components/flashcard.dart';
 export 'components/page_header.dart';
 export 'components/page_section.dart';
 export 'components/auth_shell.dart';
