@@ -1,18 +1,25 @@
+import { Avatar, ListItemCard, ProgressBar } from "../design-system";
 import type { StudentProgress } from "../types";
 
 export default function StudentProgressList({ students }: { students: StudentProgress[] }) {
   return (
-    <div className="card">
+    <div className="td-stack">
       {students.map((s) => (
-        <div key={s.student_id} className="perf">
-          <span className="avatar">{(s.full_name || "?")[0].toUpperCase()}</span>
-          <span>{s.full_name}</span>
-          <div className="bar"><div style={{ width: `${s.lessons_pct}%` }} /></div>
-          <span>{s.lessons_pct}%</span>
-          <small>Pre {s.pre_score ?? "–"} → Post {s.post_score ?? "–"}</small>
-        </div>
+        <ListItemCard
+          key={s.student_id}
+          leading={<Avatar name={s.full_name || "?"} />}
+          title={s.full_name}
+          subtitle={`Pre ${s.pre_score ?? "–"} → Post ${s.post_score ?? "–"}`}
+          trailing={
+            <span className="td-row" style={{ flexWrap: "nowrap" }}>
+              <span style={{ width: 96 }}>
+                <ProgressBar size="sm" value={s.lessons_pct ?? 0} />
+              </span>
+              <strong>{s.lessons_pct ?? 0}%</strong>
+            </span>
+          }
+        />
       ))}
-      {students.length === 0 && <p>No students yet.</p>}
     </div>
   );
 }

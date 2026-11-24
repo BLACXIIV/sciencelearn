@@ -2,10 +2,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
 final teacherClassesProvider = FutureProvider.autoDispose((ref) {
   ref.watch(authChangesProvider);
@@ -43,93 +42,132 @@ class _ClassesState extends ConsumerState<ClassesScreen> {
   Widget build(BuildContext context) {
     final classes = ref.watch(teacherClassesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Classes')),
-      body: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
-        AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Text('New class', style: TextStyle(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
-          TextField(controller: _name,
-              decoration: const InputDecoration(hintText: 'Class name, e.g. Grade 7 - Diamond')),
-          const SizedBox(height: 12),
-          Text('How do students join?', style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          const SizedBox(height: 6),
-          SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'open', label: Text('Instant'), icon: Icon(AppIcons.login)),
-                ButtonSegment(value: 'approval', label: Text('Approval'), icon: Icon(AppIcons.students)),
-              ],
-              selected: {_policy},
-              onSelectionChanged: (s) => setState(() => _policy = s.first),
+      body: Column(children: [
+        DSPageHeader(
+          child: SafeArea(
+            bottom: false,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Classes', style: DSText.h2),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            _policy == 'open'
-                ? 'Anyone with the code joins immediately.'
-                : 'You confirm each request before they see class content.',
-            style: TextStyle(fontSize: 12, color: AppColors.muted),
-          ),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _busy ? null : _create,
-            child: _busy
-                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Create class'),
-          ),
-        ])),
-        const SizedBox(height: 16),
-        classes.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => ErrorState(onRetry: () => ref.invalidate(teacherClassesProvider)),
-          data: (rows) {
-            if (rows.isEmpty) {
-              return const AppCard(child: EmptyState(icon: AppIcons.students,
-                  title: 'No classes yet', message: 'Create one above and share its join code.'));
-            }
-            return Column(children: [
-              for (final c in rows)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: AppCard(
-                    onTap: () => context.push('/teacher/class/${c['id']}', extra: c),
-                    child: Row(children: [
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('${c['name']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        Text(_subtitle(c),
-                            style: TextStyle(fontSize: 12, color: AppColors.muted)),
-                      ])),
-                      InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: '${c['code']}'));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Code copied')));
-                        },
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.line),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [
-                            Icon(AppIcons.copy, size: 14, color: AppColors.muted),
-                            const SizedBox(width: 5),
-                            Text('${c['code']}', style: const TextStyle(
-                                fontFamily: 'monospace', fontWeight: FontWeight.w700, letterSpacing: 1.5)),
-                          ]),
-                        ),
-                      ),
-                      Icon(AppIcons.chevron, color: AppColors.muted),
-                    ]),
-                  ),
-                ),
-            ]);
-          },
         ),
-      ])),
+        Expanded(child: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+          DSCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text('New class', style: DSText.title),
+            const SizedBox(height: 10),
+            DSTextField(
+              label: 'Class name',
+              hint: 'e.g. Grade 7 - Diamond',
+              controller: _name,
+              onSubmitted: (_) => _create(),
+            ),
+            const SizedBox(height: 12),
+            DSSegmentedControl(
+              options: const [
+                DSSegment('open', 'Instant'),
+                DSSegment('approval', 'Approval'),
+              ],
+              value: _policy,
+              onChanged: (v) => setState(() => _policy = v),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _policy == 'open'
+                  ? 'Anyone with the code joins immediately.'
+                  : 'You confirm each request before they see class content.',
+              style: DSText.caption.copyWith(color: DSColors.muted),
+            ),
+            const SizedBox(height: 12),
+            DSButton(
+              onPressed: _busy ? null : _create,
+              loading: _busy,
+              child: const Text('Create class'),
+            ),
+          ])),
+          const SizedBox(height: 16),
+          classes.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => DSEmptyState(
+              icon: DSIconName.offline,
+              title: "Couldn't load this right now",
+              body: 'Check your connection and try again.',
+              action: DSButton(
+                variant: DSButtonVariant.outline,
+                size: DSButtonSize.sm,
+                leadingIcon: DSIconName.retry,
+                onPressed: () => ref.invalidate(teacherClassesProvider),
+                child: const Text('Try again'),
+              ),
+            ),
+            data: (rows) {
+              if (rows.isEmpty) {
+                return const DSCard(child: DSEmptyState(icon: DSIconName.school,
+                    title: 'No classes yet', body: 'Create one above and share its join code.'));
+              }
+              return Column(children: [
+                for (final c in rows)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: DSListItemCard(
+                      onTap: () => context.push('/teacher/class/${c['id']}', extra: c),
+                      title: Text('${c['name']}'),
+                      subtitle: Text(_subtitle(c)),
+                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                        DSChip(child: Text('${c['code']}',
+                            style: DSText.label.copyWith(letterSpacing: 1.5))),
+                        const SizedBox(width: 4),
+                        DSIconButton(
+                          icon: DSIconName.copy,
+                          label: 'Copy join code',
+                          size: 36,
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: '${c['code']}'));
+                            DSToast.show(context, message: 'Code copied',
+                                tone: DSToastTone.success);
+                          },
+                        ),
+                        DSIconButton(
+                          icon: DSIconName.delete,
+                          label: 'Delete class',
+                          size: 36,
+                          onPressed: () => _confirmDelete(c),
+                        ),
+                        const DSIcon(DSIconName.chevron, size: 20),
+                      ]),
+                    ),
+                  ),
+              ]);
+            },
+          ),
+        ]))),
+      ]),
     );
+  }
+
+  Future<void> _confirmDelete(Json c) async {
+    final ok = await showDSModal<bool>(
+      context,
+      title: 'Delete class?',
+      body: Text('This removes "${c['name']}" and its lessons. Students lose access.',
+          style: DSText.body),
+      actions: [
+        DSButton(
+          variant: DSButtonVariant.ghost,
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Keep it'),
+        ),
+        DSButton(
+          variant: DSButtonVariant.danger,
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Delete'),
+        ),
+      ],
+    );
+    if (ok == true) {
+      await ref.read(repoProvider).deleteClass('${c['id']}');
+      ref.invalidate(teacherClassesProvider);
+    }
   }
 
   String _subtitle(Json c) {
@@ -141,6 +179,6 @@ class _ClassesState extends ConsumerState<ClassesScreen> {
       if (pending > 0) '$pending pending',
       if (c['join_policy'] == 'approval') 'Approval required',
     ];
-    return bits.join(' Â· ');
+    return bits.join(' · ');
   }
 }

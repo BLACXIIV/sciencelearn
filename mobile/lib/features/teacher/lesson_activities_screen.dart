@@ -1,11 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/icons.dart';
-import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
+import '../../design_system/design_system.dart';
 
-/// Teacher activity builder for one lesson â€” mirrors web LessonActivities.
+/// Teacher activity builder for one lesson — mirrors web LessonActivities.
 /// Manage assessments (kind, publish, delete) and per-type questions.
 class LessonActivitiesScreen extends ConsumerStatefulWidget {
   final Json lesson;
@@ -19,18 +18,14 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
     'pre_test': 'Pre-Test', 'post_test': 'Post-Test', 'topic_quiz': 'Topic Quiz',
     'problem_solving': 'Problem Solving', 'final_challenge': 'Final Challenge', 'practice': 'Practice',
   };
-  static const _qtypes = {
-    'multiple_choice': 'Multiple Choice',
-    'true_false': 'True or False',
-    'fill_blank': 'Fill in the Blank',
-    'identification': 'Identification',
-    'enumeration': 'Enumeration',
-  };
   final _title = TextEditingController();
   final _desc = TextEditingController();
   String _kind = 'topic_quiz';
   String? _open; // expanded assessment id
   int _refresh = 0;
+
+  @override
+  void dispose() { _title.dispose(); _desc.dispose(); super.dispose(); }
 
   Future<void> _createAssessment() async {
     if (_title.text.trim().isEmpty) return;
@@ -52,34 +47,36 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
     bool ordered = q?['answer']?['ordered'] == true;
     bool partial = q?['answer']?['partial'] != false;
 
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
-        Widget listRows(List<TextEditingController> ctrls, String hint, {bool choices_ = false}) =>
+    final saved = await showDSBottomSheet<bool>(
+      context,
+      child: StatefulBuilder(builder: (ctx, setS) {
+        Widget listRows(List<TextEditingController> ctrls, String hint) =>
             Column(children: [
               for (var i = 0; i < ctrls.length; i++)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(children: [
-                    Expanded(child: TextField(controller: ctrls[i],
-                        decoration: InputDecoration(hintText: '$hint ${i + 1}'))),
-                    if (choices_) ...[
-                      const SizedBox(width: 6),
-                      ChoiceChip(label: const Text('correct'), selected: correct == i,
-                          onSelected: (_) => setS(() => correct = i)),
-                    ],
-                    if (ctrls.length > (choices_ ? 2 : 1))
-                      IconButton(icon: const Icon(AppIcons.delete, size: 18),
-                          onPressed: () => setS(() => ctrls.removeAt(i))),
+                    Expanded(child: DSTextField(
+                      label: '$hint ${i + 1}',
+                      controller: ctrls[i],
+                    )),
+                    if (ctrls.length > (hint == 'Choice' ? 2 : 1))
+                      DSIconButton(
+                        icon: DSIconName.delete,
+                        label: 'Remove',
+                        size: 36,
+                        onPressed: () => setS(() => ctrls.removeAt(i)),
+                      ),
                   ]),
                 ),
               Align(
                 alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  icon: const Icon(AppIcons.add, size: 16),
-                  label: Text('Add $hint'),
+                child: DSButton(
+                  variant: DSButtonVariant.outline,
+                  size: DSButtonSize.sm,
+                  leadingIcon: DSIconName.add,
                   onPressed: () => setS(() => ctrls.add(TextEditingController())),
+                  child: Text('Add $hint'),
                 ),
               ),
             ]);
@@ -87,201 +84,280 @@ class _ActivitiesState extends ConsumerState<LessonActivitiesScreen> {
         return Padding(
           padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(ctx).viewInsets.bottom + 16),
           child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            DropdownButtonFormField<String>(
-              initialValue: qtype,
-              decoration: const InputDecoration(labelText: 'Question type'),
-              items: [for (final e in _qtypes.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+            DSSelect(
+              label: 'Question type',
+              value: qtype,
+              options: const [
+                DSSelectOption('multiple_choice', 'Multiple Choice'),
+                DSSelectOption('true_false', 'True or False'),
+                DSSelectOption('fill_blank', 'Fill in the Blank'),
+                DSSelectOption('identification', 'Identification'),
+                DSSelectOption('enumeration', 'Enumeration'),
+              ],
               onChanged: (v) => setS(() => qtype = v ?? qtype),
             ),
             const SizedBox(height: 10),
-            TextField(controller: prompt, maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Prompt')),
+            DSTextArea(label: 'Prompt', controller: prompt, minLines: 2),
             const SizedBox(height: 12),
-            if (qtype == 'multiple_choice')
-              listRows(choices, 'Choice', choices_: true),
-            if (qtype == 'true_false')
-              SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true, label: Text('True is correct')),
-                  ButtonSegment(value: false, label: Text('False is correct')),
+            if (qtype == 'multiple_choice') ...[
+              Text('Choices — pick the correct one:',
+                  style: DSText.caption.copyWith(color: DSColors.muted)),
+              const SizedBox(height: 8),
+              listRows(choices, 'Choice'),
+              const SizedBox(height: 8),
+              DSSelect(
+                label: 'Correct choice',
+                value: '$correct',
+                options: [
+                  for (var i = 0; i < choices.length; i++)
+                    DSSelectOption('$i', 'Choice ${i + 1}'),
                 ],
-                selected: {boolAnswer},
-                onSelectionChanged: (s) => setS(() => boolAnswer = s.first),
+                onChanged: (v) => setS(() => correct = int.tryParse(v ?? '0') ?? 0),
               ),
-            if (qtype == 'fill_blank' || qtype == 'identification')
-              listRows(accepted, 'Accepted answer'),
+            ],
+            if (qtype == 'true_false')
+              DSSegmentedControl(
+                options: const [
+                  DSSegment('true', 'True'),
+                  DSSegment('false', 'False'),
+                ],
+                value: boolAnswer ? 'true' : 'false',
+                onChanged: (v) => setS(() => boolAnswer = v == 'true'),
+              ),
+            if (qtype == 'fill_blank' || qtype == 'identification') ...[
+              Text('Accepted answers — matching ignores case and surrounding spaces:',
+                  style: DSText.caption.copyWith(color: DSColors.muted)),
+              const SizedBox(height: 8),
+              listRows(accepted, 'Answer'),
+            ],
             if (qtype == 'enumeration') ...[
+              Text('Expected items:',
+                  style: DSText.caption.copyWith(color: DSColors.muted)),
+              const SizedBox(height: 8),
               listRows(items, 'Item'),
-              CheckboxListTile(
-                value: ordered, dense: true, contentPadding: EdgeInsets.zero,
-                title: const Text('Order matters'),
-                onChanged: (v) => setS(() => ordered = v ?? false),
+              DSCheckbox(
+                label: 'Order matters — items must appear in this order',
+                value: ordered,
+                onChanged: (v) => setS(() => ordered = v),
               ),
-              CheckboxListTile(
-                value: partial, dense: true, contentPadding: EdgeInsets.zero,
-                title: const Text('Partial credit per item'),
-                onChanged: (v) => setS(() => partial = v ?? true),
+              DSCheckbox(
+                label: 'Partial credit — score each correct item, otherwise all-or-nothing',
+                value: partial,
+                onChanged: (v) => setS(() => partial = v),
               ),
             ],
             const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Save question'),
-              )),
-              const SizedBox(width: 8),
-              TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            ]),
+            DSButton(
+              fullWidth: true,
+              child: const Text('Save question'),
+              onPressed: () => Navigator.of(ctx).pop(true),
+            ),
           ])),
         );
       }),
     );
     if (saved != true) return;
 
-    final filledChoices = choices.map((c) => c.text.trim()).toList();
-    final body = <String, dynamic>{
+    final filled = choices.map((c) => c.text.trim()).where((c) => c.isNotEmpty).toList();
+    await ref.read(repoProvider).upsertQuestion({
+      if (q != null) 'id': q['id'],
       'assessment_id': assessmentId,
       'qtype': qtype,
       'prompt': prompt.text.trim(),
-      'position': (q?['position'] as num?)?.toInt() ?? 0,
-      'choices': qtype == 'multiple_choice' ? filledChoices.where((c) => c.isNotEmpty).toList() : null,
+      'position': q?['position'] ?? 0,
+      'choices': qtype == 'multiple_choice' ? filled : null,
       'correct_index': qtype == 'multiple_choice'
-          ? filledChoices.sublist(0, correct).where((c) => c.isNotEmpty).length
+          ? choices.take(correct).where((c) => c.text.trim().isNotEmpty).length
           : null,
-      'answer': switch (qtype) {
-        'true_false' => {'correct': boolAnswer},
-        'fill_blank' || 'identification' =>
-          {'accepted': accepted.map((a) => a.text.trim()).where((a) => a.isNotEmpty).toList()},
-        'enumeration' => {
-            'items': items.map((i) => i.text.trim()).where((i) => i.isNotEmpty).toList(),
-            'ordered': ordered, 'partial': partial,
-          },
-        _ => null,
-      },
-      if (q?['id'] != null) 'id': q!['id'],
-    };
-    await ref.read(repoProvider).upsertQuestion(body);
+      'answer': qtype == 'true_false' ? {'correct': boolAnswer}
+          : qtype == 'fill_blank' || qtype == 'identification'
+              ? {'accepted': accepted.map((a) => a.text.trim()).where((a) => a.isNotEmpty).toList()}
+              : qtype == 'enumeration'
+                  ? {'items': items.map((i) => i.text.trim()).where((i) => i.isNotEmpty).toList(),
+                     'ordered': ordered, 'partial': partial}
+                  : null,
+    });
     setState(() => _refresh++);
+  }
+
+  Future<bool> _confirm(String title, String body) async {
+    final ok = await showDSModal<bool>(
+      context,
+      title: title,
+      body: Text(body, style: DSText.body),
+      actions: [
+        DSButton(
+          variant: DSButtonVariant.ghost,
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Keep it'),
+        ),
+        DSButton(
+          variant: DSButtonVariant.danger,
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Delete'),
+        ),
+      ],
+    );
+    return ok == true;
   }
 
   @override
   Widget build(BuildContext context) {
     final repo = ref.read(repoProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('Activities: ${widget.lesson['title']}')),
-      body: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
-        AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Text('New activity', style: TextStyle(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            initialValue: _kind,
-            decoration: const InputDecoration(labelText: 'Type'),
-            items: [for (final e in _kinds.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
-            onChanged: (v) => setState(() => _kind = v ?? _kind),
+      body: Column(children: [
+        DSPageHeader(
+          compact: true,
+          child: SafeArea(
+            bottom: false,
+            child: Row(children: [
+              DSIconButton(
+                icon: DSIconName.back,
+                label: 'Back',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Activities: ${widget.lesson['title']}', style: DSText.h2)),
+            ]),
           ),
-          const SizedBox(height: 10),
-          TextField(controller: _title, decoration: const InputDecoration(labelText: 'Title')),
-          const SizedBox(height: 10),
-          TextField(controller: _desc, decoration: const InputDecoration(labelText: 'Description (optional)')),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: _createAssessment, child: const Text('Create activity')),
-        ])),
-        const SizedBox(height: 16),
-        FutureBuilder<List<Json>>(
-          key: ValueKey(_refresh),
-          future: repo.lessonAssessments('${widget.lesson['id']}'),
-          builder: (context, snap) {
-            if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-            final rows = snap.data!;
-            if (rows.isEmpty) {
-              return const AppCard(child: EmptyState(
-                  icon: AppIcons.assessment, title: 'No activities yet',
-                  message: 'Create one above, then add questions.'));
-            }
-            return Column(children: [
-              for (final a in rows)
-                AppCard(child: Column(children: [
-                  Row(children: [
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('${a['title']}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                      Text('${_kinds[a['kind']] ?? a['kind']}${a['is_published'] == true ? ' Â· published' : ' Â· draft'}',
-                          style: TextStyle(fontSize: 12, color: AppColors.muted)),
-                    ])),
-                    IconButton(
-                      icon: const Icon(AppIcons.delete, size: 18),
-                      onPressed: () async {
-                        await repo.deleteAssessment('${a['id']}');
-                        setState(() => _refresh++);
-                      },
-                    ),
-                  ]),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Wrap(spacing: 4, children: [
-                      TextButton(
-                        onPressed: () => setState(() => _open = _open == a['id'] ? null : '${a['id']}'),
-                        child: Text(_open == a['id'] ? 'Close' : 'Questions'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await repo.setAssessmentPublished('${a['id']}', a['is_published'] != true);
-                          setState(() => _refresh++);
-                        },
-                        child: Text(a['is_published'] == true ? 'Unpublish' : 'Publish'),
-                      ),
-                    ]),
-                  ),
-                  _ScoreRelease(
-                    mode: '${a['release_scores'] ?? 'immediate'}',
-                    released: a['scores_released'] == true,
-                    repo: repo,
-                    assessmentId: '${a['id']}',
-                    onChanged: () => setState(() => _refresh++),
-                  ),
-                  if (_open == a['id'])
-                    FutureBuilder<List<Json>>(
-                      key: ValueKey('${a['id']}-$_refresh'),
-                      future: repo.questionsFull('${a['id']}'),
-                      builder: (context, qs) {
-                        if (!qs.hasData) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8), child: CircularProgressIndicator());
-                        }
-                        return Column(children: [
-                          const Divider(),
-                          for (var i = 0; i < qs.data!.length; i++)
-                            ListTile(
-                              dense: true, contentPadding: EdgeInsets.zero,
-                              leading: Text('${i + 1}', style: TextStyle(color: AppColors.muted)),
-                              title: Text('${qs.data![i]['prompt']}', maxLines: 1, overflow: TextOverflow.ellipsis),
-                              subtitle: Text('${qs.data![i]['qtype']}'.replaceAll('_', ' '),
-                                  style: const TextStyle(fontSize: 11)),
-                              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                                IconButton(icon: const Icon(AppIcons.edit, size: 16),
-                                    onPressed: () => _editQuestion('${a['id']}', qs.data![i])),
-                                IconButton(icon: const Icon(AppIcons.delete, size: 16),
-                                    onPressed: () async {
-                                      await repo.deleteQuestion('${qs.data![i]['id']}');
-                                      setState(() => _refresh++);
-                                    }),
-                              ]),
-                            ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              icon: const Icon(AppIcons.add, size: 16),
-                              label: const Text('Add question'),
-                              onPressed: () => _editQuestion('${a['id']}'),
-                            ),
-                          ),
-                        ]);
-                      },
-                    ),
-                ])),
-            ]);
-          },
         ),
-      ])),
+        Expanded(child: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+          DSCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text('New activity', style: DSText.title),
+            const SizedBox(height: 10),
+            DSSelect(
+              label: 'Type',
+              value: _kind,
+              options: [for (final e in _kinds.entries) DSSelectOption(e.key, e.value)],
+              onChanged: (v) => setState(() => _kind = v ?? _kind),
+            ),
+            const SizedBox(height: 10),
+            DSTextField(label: 'Title', controller: _title),
+            const SizedBox(height: 10),
+            DSTextField(label: 'Description (optional)', controller: _desc),
+            const SizedBox(height: 12),
+            DSButton(onPressed: _createAssessment, child: const Text('Create activity')),
+          ])),
+          const SizedBox(height: 16),
+          FutureBuilder<List<Json>>(
+            key: ValueKey(_refresh),
+            future: repo.lessonAssessments('${widget.lesson['id']}'),
+            builder: (context, snap) {
+              if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+              final rows = snap.data!;
+              if (rows.isEmpty) {
+                return const DSCard(child: DSEmptyState(
+                    icon: DSIconName.assessment, title: 'No activities yet',
+                    body: 'Create one above, then add questions.'));
+              }
+              return Column(children: [
+                for (final a in rows)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: DSCard(child: Column(children: [
+                      Row(children: [
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('${a['title']}', style: DSText.title),
+                          Text('${_kinds[a['kind']] ?? a['kind']}${a['is_published'] == true ? ' · published' : ' · draft'}',
+                              style: DSText.caption.copyWith(color: DSColors.muted)),
+                        ])),
+                        DSButton(
+                          variant: DSButtonVariant.outline,
+                          size: DSButtonSize.sm,
+                          onPressed: () => setState(() => _open = _open == a['id'] ? null : '${a['id']}'),
+                          child: Text(_open == a['id'] ? 'Close' : 'Questions'),
+                        ),
+                        const SizedBox(width: 4),
+                        DSButton(
+                          variant: DSButtonVariant.outline,
+                          size: DSButtonSize.sm,
+                          onPressed: () async {
+                            await repo.setAssessmentPublished('${a['id']}', a['is_published'] != true);
+                            setState(() => _refresh++);
+                          },
+                          child: Text(a['is_published'] == true ? 'Unpublish' : 'Publish'),
+                        ),
+                        DSIconButton(
+                          icon: DSIconName.delete,
+                          label: 'Delete activity',
+                          size: 36,
+                          onPressed: () async {
+                            if (await _confirm('Delete activity?',
+                                'This removes "${a['title']}" and its questions.')) {
+                              await repo.deleteAssessment('${a['id']}');
+                              setState(() => _refresh++);
+                            }
+                          },
+                        ),
+                      ]),
+                      _ScoreRelease(
+                        mode: '${a['release_scores'] ?? 'immediate'}',
+                        released: a['scores_released'] == true,
+                        repo: repo,
+                        assessmentId: '${a['id']}',
+                        onChanged: () => setState(() => _refresh++),
+                      ),
+                      if (_open == a['id'])
+                        FutureBuilder<List<Json>>(
+                          key: ValueKey('${a['id']}-$_refresh'),
+                          future: repo.questionsFull('${a['id']}'),
+                          builder: (context, qs) {
+                            if (!qs.hasData) {
+                              return const Padding(
+                                padding: EdgeInsets.all(8), child: CircularProgressIndicator());
+                            }
+                            return Column(children: [
+                              const DSDivider(),
+                              for (var i = 0; i < qs.data!.length; i++)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: DSListItemCard(
+                                    leading: Text('${i + 1}', style: DSText.label),
+                                    title: Text('${qs.data![i]['prompt']}',
+                                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    subtitle: Text('${qs.data![i]['qtype']}'.replaceAll('_', ' ')),
+                                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                                      DSIconButton(
+                                        icon: DSIconName.edit,
+                                        label: 'Edit',
+                                        size: 36,
+                                        onPressed: () => _editQuestion('${a['id']}', qs.data![i]),
+                                      ),
+                                      DSIconButton(
+                                        icon: DSIconName.delete,
+                                        label: 'Delete question',
+                                        size: 36,
+                                        onPressed: () async {
+                                          if (await _confirm('Delete question?',
+                                              '"${qs.data![i]['prompt']}"')) {
+                                            await repo.deleteQuestion('${qs.data![i]['id']}');
+                                            setState(() => _refresh++);
+                                          }
+                                        },
+                                      ),
+                                    ]),
+                                  ),
+                                ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: DSButton(
+                                  variant: DSButtonVariant.outline,
+                                  size: DSButtonSize.sm,
+                                  leadingIcon: DSIconName.add,
+                                  onPressed: () => _editQuestion('${a['id']}'),
+                                  child: const Text('Add question'),
+                                ),
+                              ),
+                            ]);
+                          },
+                        ),
+                    ])),
+                  ),
+              ]);
+            },
+          ),
+        ]))),
+      ]),
     );
   }
 }
@@ -301,42 +377,35 @@ class _ScoreRelease extends StatelessWidget {
     final manual = mode == 'manual';
     return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Icon(AppIcons.award, size: 14, color: AppColors.muted),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              manual
-                  ? (released ? 'Scores released' : 'Scores hidden until you release them')
-                  : 'Students see scores right after submitting',
-              style: TextStyle(fontSize: 12, color: AppColors.muted),
-            ),
+      child: Row(children: [
+        const DSIcon(DSIconName.award, size: 14, color: DSColors.muted),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            manual
+                ? (released ? 'Scores released' : 'Scores hidden until you release them')
+                : 'Students see scores right after submitting',
+            style: DSText.caption.copyWith(color: DSColors.muted),
           ),
-        ]),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Wrap(spacing: 4, children: [
-            TextButton(
-              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-              onPressed: () async {
-                await repo.setScoreRelease(assessmentId, manual ? 'immediate' : 'manual');
-                onChanged();
-              },
-              child: Text(manual ? 'Show after submit' : 'Release manually'),
-            ),
-            if (manual && !released)
-              TextButton(
-                style: TextButton.styleFrom(visualDensity: VisualDensity.compact,
-                    foregroundColor: AppColors.orange),
-                onPressed: () async {
-                  await repo.releaseScores(assessmentId);
-                  onChanged();
-                },
-                child: const Text('Release scores'),
-              ),
-          ]),
         ),
+        DSButton(
+          variant: DSButtonVariant.ghost,
+          size: DSButtonSize.sm,
+          onPressed: () async {
+            await repo.setScoreRelease(assessmentId, manual ? 'immediate' : 'manual');
+            onChanged();
+          },
+          child: Text(manual ? 'Show after submit' : 'Release manually'),
+        ),
+        if (manual && !released)
+          DSButton(
+            size: DSButtonSize.sm,
+            onPressed: () async {
+              await repo.releaseScores(assessmentId);
+              onChanged();
+            },
+            child: const Text('Release scores'),
+          ),
       ]),
     );
   }

@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/theme.dart';
-import 'data/settings.dart';
+import 'design_system/design_system.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/signup_screen.dart';
 import 'features/assessment/assessment_screen.dart';
@@ -41,10 +40,14 @@ Future<void> main() async {
 class _AuthRefresh extends ChangeNotifier {
   late final StreamSubscription _sub;
   _AuthRefresh() {
-    _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) => notifyListeners());
+    _sub = Supabase.instance.client.auth.onAuthStateChange
+        .listen((_) => notifyListeners());
   }
   @override
-  void dispose() { _sub.cancel(); super.dispose(); }
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 }
 
 final _router = GoRouter(
@@ -66,21 +69,28 @@ final _router = GoRouter(
       branches: [
         StatefulShellBranch(routes: [
           GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
-          GoRoute(path: '/assessments', builder: (_, __) => const AssessmentScreen()),
+          GoRoute(
+              path: '/assessments',
+              builder: (_, __) => const AssessmentScreen()),
           GoRoute(path: '/review', builder: (_, __) => const ReviewScreen()),
         ]),
         StatefulShellBranch(routes: [
-          GoRoute(path: '/classes', builder: (_, __) => const MyClassesScreen()),
+          GoRoute(
+              path: '/classes', builder: (_, __) => const MyClassesScreen()),
           GoRoute(
             path: '/class/:id',
             builder: (_, s) => StudentClassScreen(
                 classId: s.pathParameters['id']!,
                 name: s.uri.queryParameters['name'] ?? 'Class'),
           ),
-          GoRoute(path: '/lesson/:id', builder: (_, s) => LessonDetailScreen(id: s.pathParameters['id']!)),
+          GoRoute(
+              path: '/lesson/:id',
+              builder: (_, s) =>
+                  LessonDetailScreen(id: s.pathParameters['id']!)),
         ]),
         StatefulShellBranch(routes: [
-          GoRoute(path: '/progress', builder: (_, __) => const ProgressScreen()),
+          GoRoute(
+              path: '/progress', builder: (_, __) => const ProgressScreen()),
         ]),
         StatefulShellBranch(routes: [
           GoRoute(path: '/account', builder: (_, __) => const AccountScreen()),
@@ -90,7 +100,9 @@ final _router = GoRouter(
     // Full-screen focused task — intentionally covers the tab bar.
     GoRoute(
       path: '/quiz/:id',
-      builder: (_, s) => QuizRunnerScreen(id: s.pathParameters['id']!, title: s.uri.queryParameters['t'] ?? 'Quiz'),
+      builder: (_, s) => QuizRunnerScreen(
+          id: s.pathParameters['id']!,
+          title: s.uri.queryParameters['t'] ?? 'Quiz'),
     ),
     // Teacher/admin portal — same features as the web staff portal.
     // Branch indexes: 0 dashboard, 1 classes, 2 users (admin), 3 account.
@@ -98,45 +110,43 @@ final _router = GoRouter(
       builder: (_, __, shell) => TeacherShell(shell: shell),
       branches: [
         StatefulShellBranch(routes: [
-          GoRoute(path: '/teacher', builder: (_, __) => const TeacherDashboardScreen()),
+          GoRoute(
+              path: '/teacher',
+              builder: (_, __) => const TeacherDashboardScreen()),
         ]),
         StatefulShellBranch(routes: [
-          GoRoute(path: '/teacher/classes', builder: (_, __) => const ClassesScreen()),
+          GoRoute(
+              path: '/teacher/classes',
+              builder: (_, __) => const ClassesScreen()),
           GoRoute(
             path: '/teacher/class/:id',
             builder: (_, s) => ClassDetailScreen(
-                cls: s.extra as Map<String, dynamic>? ?? {'id': s.pathParameters['id']}),
+                cls: s.extra as Map<String, dynamic>? ??
+                    {'id': s.pathParameters['id']}),
           ),
         ]),
         StatefulShellBranch(routes: [
-          GoRoute(path: '/teacher/users', builder: (_, __) => const UsersScreen()),
+          GoRoute(
+              path: '/teacher/users', builder: (_, __) => const UsersScreen()),
         ]),
         StatefulShellBranch(routes: [
-          GoRoute(path: '/teacher/account', builder: (_, __) => const AccountScreen()),
+          GoRoute(
+              path: '/teacher/account',
+              builder: (_, __) => const AccountScreen()),
         ]),
       ],
     ),
   ],
 );
 
-class ScienceLearnApp extends ConsumerWidget {
+class ScienceLearnApp extends StatelessWidget {
   const ScienceLearnApp({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ap = ref.watch(appearanceProvider);
-    // Rebuild on OS dark/light flips so "system" mode re-applies AppColors.
-    MediaQuery.platformBrightnessOf(context);
-    AppColors.apply(palette: ap.palette, accent: ap.accent, surface: ap.surface);
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'ScienceLearn',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(palette: lightPalette, accent: ap.accent),
-      darkTheme: buildTheme(palette: darkPalette, accent: ap.accent),
-      themeMode: switch (ap.mode) {
-        AppMode.system => ThemeMode.system,
-        AppMode.dark => ThemeMode.dark,
-        AppMode.light => ThemeMode.light,
-      },
+      theme: buildDSTheme(),
       routerConfig: _router,
     );
   }

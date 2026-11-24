@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useClassDashboard } from "../hooks/useClassDashboard";
 import { fetchMyClasses } from "../services/classes";
-import Ring from "../components/Ring";
-import StatCards from "../components/StatCards";
+import { Card, EmptyState, RingChart, StatCard } from "../design-system";
 import StudentProgressList from "../components/StudentProgressList";
 import type { StudentProgress } from "../types";
+import "./teacher.css";
 
 /** Class-wide averages rendered as progress rings (same visual system as student progress). */
 function ClassChart({ students }: { students: StudentProgress[] }) {
@@ -12,28 +12,36 @@ function ClassChart({ students }: { students: StudentProgress[] }) {
     const have = vals.filter((v): v is number => v != null);
     return have.length ? Math.round(have.reduce((a, b) => a + b, 0) / have.length) : null;
   };
-  const rings = [
-    { label: "Lessons", pct: avg(students.map((s) => s.lessons_pct)), color: "#f5c518" },
-    { label: "Quizzes", pct: avg(students.map((s) => s.quizzes_pct)), color: "#4c8dff" },
-    { label: "Pre-Test", pct: avg(students.map((s) => s.pre_score)), color: "#f0759c" },
-    { label: "Post-Test", pct: avg(students.map((s) => s.post_score)), color: "#2ed3b7" },
+  const rings: { label: string; pct: number | null; series: 1 | 2 | 3 | 4 }[] = [
+    { label: "Lessons", pct: avg(students.map((s) => s.lessons_pct)), series: 1 },
+    { label: "Quizzes", pct: avg(students.map((s) => s.quizzes_pct)), series: 2 },
+    { label: "Pre-Test", pct: avg(students.map((s) => s.pre_score)), series: 3 },
+    { label: "Post-Test", pct: avg(students.map((s) => s.post_score)), series: 4 },
   ];
   return (
-    <div className="card">
-      <h3>Class Averages</h3>
+    <Card variant="white">
+      <h3 className="ds-h3" style={{ marginTop: 0 }}>Class Averages</h3>
       {students.length === 0 ? (
-        <p className="empty">No student data yet.</p>
+        <EmptyState icon="students" title="No student data yet" />
       ) : (
-        <div className="rings-row">
+        <div className="td-rings">
           {rings.map((r) => (
-            <div key={r.label} className="ring-item">
-              <Ring pct={r.pct ?? 0} color={r.color} />
-              <small className="ring-label">{r.pct == null ? `${r.label} (no data)` : r.label}</small>
+            <div key={r.label} className="td-ring">
+              <RingChart
+                slices={[
+                  { value: r.pct ?? 0, series: r.series },
+                  { value: Math.max(0, 100 - (r.pct ?? 0)), series: 0 },
+                ]}
+                size={84}
+              >
+                <span className="ds-label">{r.pct ?? 0}%</span>
+              </RingChart>
+              <span className="ds-caption">{r.pct == null ? `${r.label} (no data)` : r.label}</span>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -42,18 +50,29 @@ export default function Dashboard() {
   const classes = useQuery({ queryKey: ["my-classes"], queryFn: fetchMyClasses });
   const allStats = [
     ...stats,
-    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, color: "var(--ds-chart-3)" },
+    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, pastel: "mint" as const },
   ];
 
-  if (isLoading) return <p>Loading class dashboard…</p>;
-  if (error) return <p className="err">{String(error)}</p>;
+  if (isLoading) return <p className="ds-body">Loading class dashboard…</p>;
+  if (error) return <p className="td-err">{String(error)}</p>;
 
+  const students = data?.students ?? [];
   return (
     <>
-      <StatCards stats={allStats} />
-      <ClassChart students={data?.students ?? []} />
-      <h2>Student Performance</h2>
-      <StudentProgressList students={data?.students ?? []} />
+      <div className="td-stats">
+        {allStats.map((s) => (
+          <StatCard key={s.label} icon={s.icon!} value={String(s.value)} label={s.label} pastelColor={s.pastel} />
+        ))}
+      </div>
+      <ClassChart students={students} />
+      <h2 className="ds-h2 td-heading">Student Performance</h2>
+      {students.length === 0 ? (
+        <Card variant="white">
+          <EmptyState icon="students" title="No students yet" body="Students appear here after they join a class." />
+        </Card>
+      ) : (
+        <StudentProgressList students={students} />
+      )}
     </>
   );
 }

@@ -1,0 +1,20 @@
+/* Base reset — global element rules, all values from tokens. */
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--ds-paper);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ds-pastel-blue);
+  outline-offset: 2px;
+}
+
+a { color: var(--ds-blue); }
+
+img { max-width: 100%; }

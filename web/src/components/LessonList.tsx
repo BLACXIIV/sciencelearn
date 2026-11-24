@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Button, EmptyState, ListItemCard } from "../design-system";
 import type { Lesson } from "../types";
 
 interface Props {
@@ -7,17 +8,30 @@ interface Props {
 }
 
 export default function LessonList({ lessons, onTogglePublish }: Props) {
+  const nav = useNavigate();
+  if (lessons.length === 0) {
+    return <EmptyState icon="lessons" title="No lessons yet" body="Create the first one above." />;
+  }
   return (
-    <div className="card">
-      <h3>Lessons</h3>
+    <div className="td-stack">
       {lessons.map((l) => (
-        <div key={l.id} className="perf">
-          <span>{l.title} <small>({l.subject})</small></span>
-          <Link className="link-btn" to={`/teacher/lessons/${l.id}/activities`}>Activities</Link>
-          <button className="secondary" onClick={() => onTogglePublish(l)}>{l.is_published ? "Unpublish" : "Publish"}</button>
-        </div>
+        <ListItemCard
+          key={l.id}
+          title={l.title}
+          subtitle={`${l.subject} · ${l.is_published ? "Published" : "Draft"}`}
+          trailing={
+            <span className="td-actions">
+              <Button variant="outline" size="sm"
+                onClick={() => nav(`/teacher/lessons/${l.id}/activities`)}>
+                Activities
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onTogglePublish(l)}>
+                {l.is_published ? "Unpublish" : "Publish"}
+              </Button>
+            </span>
+          }
+        />
       ))}
-      {lessons.length === 0 && <p className="empty">No lessons yet, create the first one above.</p>}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import LandingPage from "./landing/LandingPage";
 export default function Landing() {
   const { session, profile, loading } = useAuth();
 
-  if (loading) return <div className="center"><p className="empty">Loading…</p></div>;
+  if (loading) return <div style={{ padding: "80px 24px", textAlign: "center" }}><p className="ds-body">Loading…</p></div>;
   if (session && profile) {
     return <Navigate to={profile.role === "student" ? "/student" : "/teacher"} replace />;
   }

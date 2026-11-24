@@ -3,24 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ScienceLearn • Teacher Portal</title>
+    <title>ScienceLearn · Learn · Explore · Excel</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@600;700;800&display=swap"
+    />
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Apply saved appearance before first paint (mirrors src/theme.ts).
-      try {
-        var p = JSON.parse(localStorage.getItem("sl.appearance") || "{}");
-        var mode = p.mode === "dark" || p.mode === "light" ? p.mode : "system";
-        if (mode === "system") mode = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-        document.documentElement.dataset.mode = mode;
-        document.documentElement.dataset.surface = p.surface || "flat";
-        var acc = { purple: "#9b7bff", teal: "#2ed3b7", green: "#3ecf8e", orange: "#f5a623", pink: "#f0759c", blue: "#4c8dff" }[p.accent];
-        if (acc) document.documentElement.style.setProperty("--blue", acc);
-        var on = { teal: "#06201a", green: "#062012", orange: "#241300", pink: "#2b0713" }[p.accent];
-        document.documentElement.style.setProperty("--on-accent", on || "#ffffff");
-      } catch (e) {}
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

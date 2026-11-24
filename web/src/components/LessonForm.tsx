@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Button, Card, Select, TextArea, TextField } from "../design-system";
 import { SUBJECTS, type NewLessonInput, type Subject } from "../types";
 
 interface Props {
@@ -27,23 +28,31 @@ export default function LessonForm({ onCreate, pending, error }: Props) {
   }
 
   return (
-    <form className="card form" onSubmit={onSubmit}>
-      <h3>New lesson</h3>
-      <label className="field"><span>Title</span>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} required />
-      </label>
-      <label className="field"><span>Subject</span>
-        <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
-          {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
-        </select>
-      </label>
-      <label className="field"><span>Objectives</span>
-        <textarea value={objectives} onChange={(e) => setObjectives(e.target.value)} />
-      </label>
-      <label className="field"><span>Thumbnail</span> <input type="file" accept="image/*" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} /></label>
-      <label className="field"><span>Material (PDF/video)</span> <input type="file" onChange={(e) => setMaterial(e.target.files?.[0] ?? null)} /></label>
-      <button disabled={pending}>{pending ? "Uploading…" : "Create lesson"}</button>
-      {Boolean(error) && <p className="err">{String(error)}</p>}
-    </form>
+    <Card variant="white">
+      <h3 className="ds-h3" style={{ marginTop: 0 }}>New lesson</h3>
+      <form className="td-stack" onSubmit={onSubmit}>
+        <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <Select label="Subject" value={subject}
+          onChange={(e) => setSubject(e.target.value as Subject)}
+          options={SUBJECTS.map((s) => ({ value: s, label: s }))} />
+        <TextArea label="Objectives" value={objectives} onChange={(e) => setObjectives(e.target.value)} />
+        <div className="td-row3">
+          <label className="td-field">
+            <span className="ds-caption">Thumbnail</span>
+            <input type="file" accept="image/*" onChange={(e) => setThumb(e.target.files?.[0] ?? null)} />
+          </label>
+          <label className="td-field">
+            <span className="ds-caption">Material (PDF/video)</span>
+            <input type="file" onChange={(e) => setMaterial(e.target.files?.[0] ?? null)} />
+          </label>
+        </div>
+        <div>
+          <Button type="submit" disabled={pending} loading={pending}>
+            Create lesson
+          </Button>
+        </div>
+        {Boolean(error) && <p className="td-err">{String(error)}</p>}
+      </form>
+    </Card>
   );
 }

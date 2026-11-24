@@ -3,6 +3,7 @@
      import { Button, TextField } from "@/design-system";
    Token CSS is loaded as a side effect of importing this module. */
 
+import "./tokens/base.css";
 import "./tokens/colors.css";
 import "./tokens/typography.css";
 import "./tokens/radii.css";

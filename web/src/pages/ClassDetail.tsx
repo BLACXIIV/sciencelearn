@@ -5,7 +5,10 @@ import { approveMember, fetchClass, fetchClassMembers, removeMember } from "../s
 import { useLessons } from "../hooks/useLessons";
 import LessonForm from "../components/LessonForm";
 import LessonList from "../components/LessonList";
-import { I } from "../components/icons";
+import {
+  Avatar, Button, Card, Chip, EmptyState, Icon, IconButton, ListItemCard, Toast,
+} from "../design-system";
+import "./teacher.css";
 
 /** Teacher class detail: header (code + policy), pending requests, roster, lessons. */
 export default function ClassDetail() {
@@ -26,14 +29,11 @@ export default function ClassDetail() {
 
   function copy() {
     if (!cls.data) return;
-    navigator.clipboard.writeText(cls.data.code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    navigator.clipboard.writeText(cls.data.code).then(() => setCopied(true));
   }
 
-  if (cls.isLoading) return <p className="empty">Loading class…</p>;
-  if (cls.error || !cls.data) return <p className="err">{String(cls.error ?? "Class not found")}</p>;
+  if (cls.isLoading) return <p className="ds-body">Loading class…</p>;
+  if (cls.error || !cls.data) return <p className="td-err">{String(cls.error ?? "Class not found")}</p>;
 
   const pending = (members.data ?? []).filter((m) => m.status === "pending");
   const active = (members.data ?? []).filter((m) => m.status === "active");
@@ -41,65 +41,77 @@ export default function ClassDetail() {
 
   return (
     <>
-      <div className="card">
-        <div className="perf">
+      <Card variant="white">
+        <div className="td-spread">
           <span>
-            <strong>{cls.data.name}</strong>
-            <small className="kind">
+            <h3 className="ds-h3" style={{ margin: 0 }}>{cls.data.name}</h3>
+            <span className="ds-caption" style={{ color: "var(--ds-muted)" }}>
               {active.length} student{active.length === 1 ? "" : "s"}
               {pending.length > 0 ? ` · ${pending.length} pending` : ""}
               {approval ? " · Approval required" : ""}
-            </small>
+            </span>
           </span>
-          <span className="kind">Join code</span>
-          <button className="code-chip" onClick={copy} title="Copy join code">
-            <I name={copied ? "done" : "copy"} size={14} /> {cls.data.code}
-          </button>
+          <span className="td-row" style={{ flexWrap: "nowrap" }}>
+            <span className="ds-caption" style={{ color: "var(--ds-muted)" }}>Join code</span>
+            <Chip><span className="td-code">{cls.data.code}</span></Chip>
+            <IconButton icon="copy" label="Copy join code" onClick={copy} />
+          </span>
         </div>
-      </div>
+      </Card>
 
       {pending.length > 0 && (
-        <div className="card">
-          <h3>Requests ({pending.length})</h3>
-          <div className="q-list">
+        <>
+          <h3 className="ds-h3 td-heading">Requests ({pending.length})</h3>
+          <div className="td-stack">
             {pending.map((m) => (
-              <div key={m.student_id} className="perf">
-                <span className="avatar"><I name="pending" size={16} /></span>
-                <span>{m.profiles?.full_name || "(no name)"}</span>
-                <button className="secondary" disabled={approve.isPending}
-                  onClick={() => approve.mutate(m.student_id)}>Approve</button>
-                <button className="icon-btn" title="Decline" disabled={remove.isPending}
-                  onClick={() => remove.mutate(m.student_id)}><I name="delete" size={15} /></button>
-              </div>
+              <ListItemCard
+                key={m.student_id}
+                leading={<Icon name="pending" />}
+                title={m.profiles?.full_name || "(no name)"}
+                trailing={
+                  <span className="td-actions">
+                    <Button variant="mint" size="sm" disabled={approve.isPending}
+                      onClick={() => approve.mutate(m.student_id)}>Approve</Button>
+                    <IconButton icon="delete" label="Decline" disabled={remove.isPending}
+                      onClick={() => remove.mutate(m.student_id)} />
+                  </span>
+                }
+              />
             ))}
           </div>
-        </div>
+        </>
       )}
 
-      <div className="card">
-        <h3>Students ({active.length})</h3>
-        {members.isLoading && <p className="empty">Loading students…</p>}
-        {members.error && <p className="err">{String(members.error)}</p>}
-        {members.data && active.length === 0 && (
-          <p className="empty">No students yet, share the class code.</p>
-        )}
-        <div className="q-list">
-          {active.map((m) => (
-            <div key={m.student_id} className="perf">
-              <span className="avatar">{(m.profiles?.full_name || "?")[0].toUpperCase()}</span>
-              <span>{m.profiles?.full_name || "(no name)"}</span>
-              <button className="icon-btn" title="Remove from class" disabled={remove.isPending}
-                onClick={() => remove.mutate(m.student_id)}><I name="delete" size={15} /></button>
-            </div>
-          ))}
-        </div>
+      <h3 className="ds-h3 td-heading">Students ({active.length})</h3>
+      {members.isLoading && <p className="ds-body">Loading students…</p>}
+      {members.error && <p className="td-err">{String(members.error)}</p>}
+      {members.data && active.length === 0 && (
+        <Card variant="white">
+          <EmptyState icon="students" title="No students yet" body="Share the class code." />
+        </Card>
+      )}
+      <div className="td-stack">
+        {active.map((m) => (
+          <ListItemCard
+            key={m.student_id}
+            leading={<Avatar name={m.profiles?.full_name || "?"} />}
+            title={m.profiles?.full_name || "(no name)"}
+            trailing={
+              <IconButton icon="delete" label="Remove from class" disabled={remove.isPending}
+                onClick={() => remove.mutate(m.student_id)} />
+            }
+          />
+        ))}
       </div>
 
-      <h3 style={{ margin: "20px 0 8px" }}>Lessons</h3>
-      <LessonForm onCreate={create.mutateAsync} pending={create.isPending} error={create.error} />
-      {lessons.error && <p className="err">{String(lessons.error)}</p>}
-      <LessonList lessons={lessons.data ?? []} onTogglePublish={togglePublish.mutate} />
-      <p className="empty"><Link to="/teacher/classes">← Back to classes</Link></p>
+      <h3 className="ds-h3 td-heading">Lessons</h3>
+      <div className="td-stack">
+        <LessonForm onCreate={create.mutateAsync} pending={create.isPending} error={create.error} />
+        {lessons.error && <p className="td-err">{String(lessons.error)}</p>}
+        <LessonList lessons={lessons.data ?? []} onTogglePublish={togglePublish.mutate} />
+      </div>
+      <p><Link to="/teacher/classes" className="td-link">← Back to classes</Link></p>
+      <Toast open={copied} message="Code copied" tone="success" onClose={() => setCopied(false)} />
     </>
   );
 }

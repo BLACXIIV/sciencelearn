@@ -6,8 +6,12 @@ import {
   createAssessment, deleteAssessment, deleteQuestion, fetchLessonAssessments,
   fetchQuestionsFull, releaseScores, setAssessmentPublished, setScoreRelease, upsertQuestion,
 } from "../services/activities";
-import { I } from "../components/icons";
+import {
+  Button, Card, Checkbox, Divider, EmptyState, Icon, IconButton,
+  ListItemCard, Modal, SegmentedControl, Select, TextArea, TextField,
+} from "../design-system";
 import type { AssessmentKind, Question, QuestionType } from "../types";
+import "./teacher.css";
 
 const KINDS: { value: AssessmentKind; label: string }[] = [
   { value: "pre_test", label: "Pre-Test" },
@@ -77,97 +81,113 @@ function draftValid(d: Draft): string | null {
   }
 }
 
+/** Dynamic list of short answers (choices / accepted / enumeration items). */
+function ListInput({ items, label, removable, onChange }: {
+  items: string[]; label: (i: number) => string; removable: boolean;
+  onChange: (items: string[]) => void;
+}) {
+  return (
+    <div className="td-stack">
+      {items.map((v, i) => (
+        <div key={i} className="td-row" style={{ flexWrap: "nowrap" }}>
+          <div style={{ flex: 1 }}>
+            <TextField label={label(i)} value={v}
+              onChange={(e) => onChange(items.map((x, xi) => (xi === i ? e.target.value : x)))} />
+          </div>
+          {removable && (
+            <IconButton icon="delete" label="Remove" style={{ alignSelf: "flex-end" }}
+              onClick={() => onChange(items.filter((_, xi) => xi !== i))} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function QuestionForm({ draft, onChange, onSave, onCancel, saving, error }: {
   draft: Draft; onChange: (d: Draft) => void; onSave: () => void; onCancel: () => void;
   saving: boolean; error: unknown;
 }) {
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => onChange({ ...draft, [k]: v });
-  const listRow = (key: "choices" | "accepted" | "items", i: number, label: string, removable: boolean) => (
-    <div key={i} className="list-input-row">
-      <input className="text-answer" placeholder={label} value={draft[key][i]}
-        onChange={(e) => set(key, draft[key].map((x, xi) => (xi === i ? e.target.value : x)))} />
-      {key === "choices" && (
-        <label className="correct-mark" title="Correct choice">
-          <input type="radio" name="correct" checked={draft.correct === i}
-            onChange={() => set("correct", i)} /> correct
-        </label>
-      )}
-      {removable && (
-        <button type="button" className="icon-btn" title="Remove"
-          onClick={() => set(key, draft[key].filter((_, xi) => xi !== i))}>
-          <I name="delete" size={15} />
-        </button>
-      )}
-    </div>
-  );
 
   return (
-    <div className="card q-editor">
-      <label className="field"><span>Question type</span>
-        <select value={draft.qtype} onChange={(e) => set("qtype", e.target.value as QuestionType)}>
-          {QTYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-      </label>
-      <label className="field"><span>Prompt</span>
-        <textarea rows={2} value={draft.prompt} onChange={(e) => set("prompt", e.target.value)} />
-      </label>
+    <Card variant="white">
+      <div className="td-stack">
+        <Select label="Question type" value={draft.qtype}
+          onChange={(e) => set("qtype", e.target.value as QuestionType)}
+          options={QTYPES.map((t) => ({ value: t.value, label: t.label }))} />
+        <TextArea label="Prompt" rows={2} value={draft.prompt}
+          onChange={(e) => set("prompt", e.target.value)} />
 
-      {draft.qtype === "multiple_choice" && (
-        <>
-          <p className="empty-sm" style={{ textAlign: "left" }}>Choices — mark the correct one:</p>
-          {draft.choices.map((_, i) => listRow("choices", i, `Choice ${i + 1}`, draft.choices.length > 2))}
-          {draft.choices.length < 6 && (
-            <button type="button" className="secondary" onClick={() => set("choices", [...draft.choices, ""])}>
-              <I name="add" size={14} /> Add choice
-            </button>
-          )}
-        </>
-      )}
-      {draft.qtype === "true_false" && (
-        <div className="tf-row">
-          {[true, false].map((v) => (
-            <label key={String(v)} className="choice">
-              <input type="radio" checked={draft.boolAnswer === v} onChange={() => set("boolAnswer", v)} />
-              {v ? "True" : "False"} is correct
-            </label>
-          ))}
+        {draft.qtype === "multiple_choice" && (
+          <>
+            <p className="ds-caption" style={{ margin: 0 }}>Choices — pick the correct one:</p>
+            <ListInput items={draft.choices} label={(i) => `Choice ${i + 1}`}
+              removable={draft.choices.length > 2}
+              onChange={(v) => set("choices", v)} />
+            <Select label="Correct choice" value={String(draft.correct)}
+              onChange={(e) => set("correct", Number(e.target.value))}
+              options={draft.choices.map((c, i) => ({
+                value: String(i), label: `Choice ${i + 1}${c.trim() ? ` — ${c.trim().slice(0, 24)}` : ""}`,
+              }))} />
+            {draft.choices.length < 6 && (
+              <div>
+                <Button variant="outline" size="sm" leadingIcon="add" type="button"
+                  onClick={() => set("choices", [...draft.choices, ""])}>
+                  Add choice
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+        {draft.qtype === "true_false" && (
+          <SegmentedControl ariaLabel="Correct answer"
+            options={[{ value: "true", label: "True" }, { value: "false", label: "False" }]}
+            value={draft.boolAnswer ? "true" : "false"}
+            onChange={(v) => set("boolAnswer", v === "true")} />
+        )}
+        {(draft.qtype === "fill_blank" || draft.qtype === "identification") && (
+          <>
+            <p className="ds-caption" style={{ margin: 0 }}>
+              Accepted answers — matching ignores case and surrounding spaces:
+            </p>
+            <ListInput items={draft.accepted} label={(i) => `Answer ${i + 1}`}
+              removable={draft.accepted.length > 1}
+              onChange={(v) => set("accepted", v)} />
+            <div>
+              <Button variant="outline" size="sm" leadingIcon="add" type="button"
+                onClick={() => set("accepted", [...draft.accepted, ""])}>
+                Add accepted answer
+              </Button>
+            </div>
+          </>
+        )}
+        {draft.qtype === "enumeration" && (
+          <>
+            <p className="ds-caption" style={{ margin: 0 }}>Expected items:</p>
+            <ListInput items={draft.items} label={(i) => `Item ${i + 1}`}
+              removable={draft.items.length > 2}
+              onChange={(v) => set("items", v)} />
+            <div>
+              <Button variant="outline" size="sm" leadingIcon="add" type="button"
+                onClick={() => set("items", [...draft.items, ""])}>
+                Add item
+              </Button>
+            </div>
+            <Checkbox label="Order matters — items must appear in this order"
+              checked={draft.ordered} onChange={(e) => set("ordered", e.target.checked)} />
+            <Checkbox label="Partial credit — score each correct item, otherwise all-or-nothing"
+              checked={draft.partial} onChange={(e) => set("partial", e.target.checked)} />
+          </>
+        )}
+
+        <div className="td-actions" style={{ justifyContent: "flex-start" }}>
+          <Button onClick={onSave} disabled={saving} loading={saving}>Save question</Button>
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
         </div>
-      )}
-      {(draft.qtype === "fill_blank" || draft.qtype === "identification") && (
-        <>
-          <p className="empty-sm" style={{ textAlign: "left" }}>
-            Accepted answers — matching ignores case and surrounding spaces:
-          </p>
-          {draft.accepted.map((_, i) => listRow("accepted", i, `Answer ${i + 1}`, draft.accepted.length > 1))}
-          <button type="button" className="secondary" onClick={() => set("accepted", [...draft.accepted, ""])}>
-            <I name="add" size={14} /> Add accepted answer
-          </button>
-        </>
-      )}
-      {draft.qtype === "enumeration" && (
-        <>
-          <p className="empty-sm" style={{ textAlign: "left" }}>Expected items:</p>
-          {draft.items.map((_, i) => listRow("items", i, `Item ${i + 1}`, draft.items.length > 2))}
-          <button type="button" className="secondary" onClick={() => set("items", [...draft.items, ""])}>
-            <I name="add" size={14} /> Add item
-          </button>
-          <label className="choice" style={{ marginTop: 10 }}>
-            <input type="checkbox" checked={draft.ordered} onChange={(e) => set("ordered", e.target.checked)} />
-            Order matters — items must appear in this order
-          </label>
-          <label className="choice">
-            <input type="checkbox" checked={draft.partial} onChange={(e) => set("partial", e.target.checked)} />
-            Partial credit — score each correct item, otherwise all-or-nothing
-          </label>
-        </>
-      )}
-
-      <div className="row-actions">
-        <button onClick={onSave} disabled={saving}>{saving ? "Saving…" : "Save question"}</button>
-        <button className="secondary" onClick={onCancel}>Cancel</button>
+        {error != null && <p className="td-err">{String(error)}</p>}
       </div>
-      {error != null && <p className="err">{String(error)}</p>}
-    </div>
+    </Card>
   );
 }
 
@@ -175,6 +195,7 @@ function AssessmentEditor({ assessmentId }: { assessmentId: string }) {
   const qc = useQueryClient();
   const questions = useQuery({ queryKey: ["questions-full", assessmentId], queryFn: () => fetchQuestionsFull(assessmentId) });
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [delQ, setDelQ] = useState<Question | null>(null);
 
   const save = useMutation({
     mutationFn: (d: Draft) => {
@@ -207,37 +228,52 @@ function AssessmentEditor({ assessmentId }: { assessmentId: string }) {
   const bad = draft ? draftValid(draft) : null;
 
   return (
-    <div className="q-list">
-      {questions.isLoading && <p className="empty">Loading questions…</p>}
-      {questions.error && <p className="err">{String(questions.error)}</p>}
+    <div className="td-stack" style={{ marginTop: "var(--ds-s3)" }}>
+      {questions.isLoading && <p className="ds-body">Loading questions…</p>}
+      {questions.error && <p className="td-err">{String(questions.error)}</p>}
       {qs.map((q, i) =>
         draft?.id === q.id ? (
           <QuestionForm key={q.id} draft={draft} onChange={setDraft}
             saving={save.isPending} error={save.error}
             onSave={() => !bad && save.mutate(draft)} onCancel={() => setDraft(null)} />
         ) : (
-          <div key={q.id} className="q-row">
-            <span className="q-num">{i + 1}</span>
-            <span className="q-body">
-              <strong>{q.prompt}</strong>
-              <small className="q-kind">{q.qtype.replace(/_/g, " ")}</small>
-            </span>
-            <button className="icon-btn" title="Edit" onClick={() => setDraft(toDraft(q))}><I name="edit" size={15} /></button>
-            <button className="icon-btn" title="Delete" disabled={del.isPending} onClick={() => del.mutate(q.id)}>
-              <I name="delete" size={15} />
-            </button>
-          </div>
+          <ListItemCard key={q.id}
+            leading={<span className="ds-label">{i + 1}</span>}
+            title={q.prompt}
+            subtitle={QTYPES.find((t) => t.value === q.qtype)?.label ?? q.qtype.replace(/_/g, " ")}
+            trailing={
+              <span className="td-row" style={{ flexWrap: "nowrap" }}>
+                <IconButton icon="edit" label="Edit" onClick={() => setDraft(toDraft(q))} />
+                <IconButton icon="delete" label="Delete" disabled={del.isPending}
+                  onClick={() => setDelQ(q)} />
+              </span>
+            } />
         ),
       )}
       {draft && !draft.id ? (
         <QuestionForm draft={draft} onChange={setDraft} saving={save.isPending} error={save.error}
           onSave={() => !bad && save.mutate(draft)} onCancel={() => setDraft(null)} />
       ) : (
-        <button className="secondary" onClick={() => setDraft(emptyDraft(qs.length))}>
-          <I name="add" size={15} /> Add question
-        </button>
+        <div>
+          <Button variant="outline" size="sm" leadingIcon="add"
+            onClick={() => setDraft(emptyDraft(qs.length))}>
+            Add question
+          </Button>
+        </div>
       )}
-      {bad && draft && <p className="err">{bad}</p>}
+      {bad && draft && <p className="td-err">{bad}</p>}
+      <Modal open={delQ != null} onClose={() => setDelQ(null)} title="Delete question?"
+        actions={
+          <>
+            <Button variant="ghost" onClick={() => setDelQ(null)}>Keep it</Button>
+            <Button variant="danger" disabled={del.isPending}
+              onClick={() => { del.mutate(delQ!.id); setDelQ(null); }}>
+              Delete
+            </Button>
+          </>
+        }>
+        <p className="ds-body">“{delQ?.prompt.slice(0, 80)}”</p>
+      </Modal>
     </div>
   );
 }
@@ -251,6 +287,7 @@ export default function LessonActivities() {
   const [kind, setKind] = useState<AssessmentKind>("topic_quiz");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [delA, setDelA] = useState<string | null>(null);
 
   const create = useMutation({
     mutationFn: () => createAssessment({ lesson_id: lessonId, kind, title: title.trim(), description: desc.trim() }),
@@ -273,78 +310,107 @@ export default function LessonActivities() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-assessments", lessonId] }),
   });
 
-  if (lesson.isLoading) return <p>Loading…</p>;
-  if (lesson.error) return <p className="err">{String(lesson.error)}</p>;
+  if (lesson.isLoading) return <p className="ds-body">Loading…</p>;
+  if (lesson.error) return <p className="td-err">{String(lesson.error)}</p>;
 
   return (
-    <>
-      <Link to={lesson.data?.class_id ? `/teacher/classes/${lesson.data.class_id}` : "/teacher/classes"} className="link-btn">← Back to class</Link>
-      <h2>Activities for “{lesson.data?.title}”</h2>
-
-      <div className="card">
-        <h3>New activity</h3>
-        <div className="row-3">
-          <label className="field"><span>Type</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as AssessmentKind)}>
-              {KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
-            </select>
-          </label>
-          <label className="field"><span>Title</span>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Volcanoes Quiz 1" />
-          </label>
-          <label className="field"><span>Description</span>
-            <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="optional" />
-          </label>
-        </div>
-        <button disabled={create.isPending || !title.trim()} onClick={() => create.mutate()}>
-          {create.isPending ? "Creating…" : "Create activity"}
-        </button>
-        {create.error != null && <p className="err">{String(create.error)}</p>}
+    <div className="td-stack">
+      <div>
+        <Link to={lesson.data?.class_id ? `/teacher/classes/${lesson.data.class_id}` : "/teacher/classes"} className="td-link">
+          ← Back to class
+        </Link>
+        <h2 className="ds-h2" style={{ margin: "var(--ds-s3) 0 0" }}>Activities for “{lesson.data?.title}”</h2>
       </div>
 
-      {assessments.isLoading && <p className="empty">Loading activities…</p>}
-      {assessments.error && <p className="err">{String(assessments.error)}</p>}
+      <Card variant="white">
+        <h3 className="ds-h3" style={{ marginTop: 0 }}>New activity</h3>
+        <div className="td-row3">
+          <Select label="Type" value={kind}
+            onChange={(e) => setKind(e.target.value as AssessmentKind)}
+            options={KINDS.map((k) => ({ value: k.value, label: k.label }))} />
+          <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Volcanoes Quiz 1" />
+          <TextField label="Description" value={desc} onChange={(e) => setDesc(e.target.value)}
+            placeholder="optional" />
+        </div>
+        <Button disabled={create.isPending || !title.trim()} loading={create.isPending}
+          onClick={() => create.mutate()}>
+          Create activity
+        </Button>
+        {create.error != null && <p className="td-err">{String(create.error)}</p>}
+      </Card>
+
+      {assessments.isLoading && <p className="ds-body">Loading activities…</p>}
+      {assessments.error && <p className="td-err">{String(assessments.error)}</p>}
       {assessments.data?.length === 0 && (
-        <div className="card"><p className="empty">No activities yet. Create one above, then add questions.</p></div>
+        <Card variant="white">
+          <EmptyState icon="assessment" title="No activities yet"
+            body="Create one above, then add questions." />
+        </Card>
       )}
       {assessments.data?.map((a) => (
-        <div key={a.id} className="card">
-          <div className="perf">
-            <span><strong>{a.title}</strong> <small className="kind">{KINDS.find((k) => k.value === a.kind)?.label}</small></span>
-            <button className="secondary" onClick={() => setOpen(open === a.id ? null : a.id)}>
-              {open === a.id ? "Close" : "Questions"}
-            </button>
-            <button className="secondary" disabled={pub.isPending}
-              onClick={() => pub.mutate({ id: a.id, published: !a.is_published })}>
-              {a.is_published ? "Unpublish" : "Publish"}
-            </button>
-            <button className="icon-btn" title="Delete" disabled={del.isPending} onClick={() => del.mutate(a.id)}>
-              <I name="delete" size={15} />
-            </button>
-          </div>
-          <div className="score-release">
-            <I name="award" size={13} />
+        <Card key={a.id} variant="white">
+          <div className="td-spread">
             <span>
+              <strong>{a.title}</strong>{" "}
+              <span className="ds-caption" style={{ color: "var(--ds-muted)" }}>
+                {KINDS.find((k) => k.value === a.kind)?.label}
+                {a.is_published ? " · published" : " · draft"}
+              </span>
+            </span>
+            <span className="td-actions">
+              <Button variant="outline" size="sm" onClick={() => setOpen(open === a.id ? null : a.id)}>
+                {open === a.id ? "Close" : "Questions"}
+              </Button>
+              <Button variant="outline" size="sm" disabled={pub.isPending}
+                onClick={() => pub.mutate({ id: a.id, published: !a.is_published })}>
+                {a.is_published ? "Unpublish" : "Publish"}
+              </Button>
+              <IconButton icon="delete" label="Delete" disabled={del.isPending}
+                onClick={() => setDelA(a.id)} />
+            </span>
+          </div>
+          <div className="td-release">
+            <Icon name="award" size={14} />
+            <span className="ds-caption">
               {a.release_scores === "manual"
                 ? (a.scores_released ? "Scores released" : "Scores hidden until you release them")
                 : "Students see scores right after submitting"}
             </span>
-            <button className="link-btn" disabled={release.isPending}
+            <Button variant="ghost" size="sm" disabled={release.isPending}
               onClick={() => release.mutate({
                 id: a.id, mode: a.release_scores === "manual" ? "immediate" : "manual",
               })}>
               {a.release_scores === "manual" ? "Show after submit" : "Release manually"}
-            </button>
+            </Button>
             {a.release_scores === "manual" && !a.scores_released && (
-              <button className="link-btn accent" disabled={release.isPending}
+              <Button variant="primary" size="sm" disabled={release.isPending}
                 onClick={() => release.mutate({ id: a.id })}>
                 Release scores
-              </button>
+              </Button>
             )}
           </div>
-          {open === a.id && <AssessmentEditor assessmentId={a.id} />}
-        </div>
+          {open === a.id && (
+            <>
+              <Divider />
+              <AssessmentEditor assessmentId={a.id} />
+            </>
+          )}
+        </Card>
       ))}
-    </>
+
+      <Modal open={delA != null} onClose={() => setDelA(null)} title="Delete activity?"
+        actions={
+          <>
+            <Button variant="ghost" onClick={() => setDelA(null)}>Keep it</Button>
+            <Button variant="danger" disabled={del.isPending}
+              onClick={() => { del.mutate(delA!); setDelA(null); }}>
+              Delete
+            </Button>
+          </>
+        }>
+        <p className="ds-body">This removes the activity and its questions.</p>
+      </Modal>
+    </div>
   );
 }
