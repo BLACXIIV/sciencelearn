@@ -13,6 +13,10 @@ class DSOptionTile extends StatelessWidget {
   final DSIconName? icon;
   final String label;
   final bool selected;
+
+  /// Pastel fill when selected. Default pastelMint (role picker uses
+  /// pastelMint for Student, pastelYellow for Teacher).
+  final Color selectedFill;
   final bool disabled;
   final VoidCallback? onTap;
 
@@ -21,6 +25,7 @@ class DSOptionTile extends StatelessWidget {
     this.icon,
     required this.label,
     this.selected = false,
+    this.selectedFill = DSColors.pastelMint,
     this.disabled = false,
     this.onTap,
   });
@@ -35,7 +40,7 @@ class DSOptionTile extends StatelessWidget {
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: selected ? DSColors.pastelMint : DSColors.surface,
+          color: selected ? selectedFill : DSColors.surface,
           borderRadius: DSRadii.inputBr,
           border: Border.all(
             color: selected ? DSColors.navy : DSColors.line,

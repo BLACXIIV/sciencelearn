@@ -19,6 +19,9 @@ class DSCard extends StatelessWidget {
   final DSCardVariant variant;
   final DSCardPastel pastel;
   final bool tilt;
+
+  /// Resting tilt of −1.2° instead of +1.2° (alternating mission cards).
+  final bool tiltLeft;
   final EdgeInsetsGeometry? padding;
   final Widget child;
 
@@ -27,6 +30,7 @@ class DSCard extends StatelessWidget {
     this.variant = DSCardVariant.white,
     this.pastel = DSCardPastel.blue,
     this.tilt = false,
+    this.tiltLeft = false,
     this.padding,
     required this.child,
   });
@@ -53,7 +57,7 @@ class DSCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (fill, shadow, border, restTilt) = _style();
-    final deg = tilt ? 1.2 : restTilt;
+    final deg = tilt ? 1.2 : tiltLeft ? -1.2 : restTilt;
     return Transform.rotate(
       angle: deg * 3.141592653589793 / 180,
       child: Container(

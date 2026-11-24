@@ -15,6 +15,9 @@ class DSPasswordField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final FocusNode? focusNode;
+  final Iterable<String>? autofillHints;
+  final bool enabled;
 
   const DSPasswordField({
     super.key,
@@ -26,6 +29,9 @@ class DSPasswordField extends StatefulWidget {
     this.onChanged,
     this.textInputAction,
     this.onSubmitted,
+    this.focusNode,
+    this.autofillHints,
+    this.enabled = true,
   });
 
   @override
@@ -45,6 +51,9 @@ class _DSPasswordFieldState extends State<DSPasswordField> {
       controller: widget.controller,
       onChanged: widget.onChanged,
       obscureText: !_show,
+      enabled: widget.enabled,
+      focusNode: widget.focusNode,
+      autofillHints: widget.autofillHints,
       textInputAction: widget.textInputAction,
       onSubmitted: widget.onSubmitted,
       trailing: SizedBox(

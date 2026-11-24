@@ -31,6 +31,7 @@
   background: var(--ds-pastel-mint);
   border: 2px solid var(--ds-navy);
 }
+.ds-option-tile.on.tone-yellow { background: var(--ds-pastel-yellow); }
 
 @media (prefers-reduced-motion: reduce) {
   .ds-option-tile { transition: none; }

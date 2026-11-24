@@ -1,0 +1,155 @@
+/* Auth pages — layout + decorative helpers for the DS AuthShell.
+   Every color/font/radius/shadow references a --ds-* token; nothing raw. */
+
+/* ---- hero panel internals (rendered inside AuthShell's navy hero) ---- */
+
+.a-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-s5);
+  height: 100%;
+}
+
+.a-hero-top { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s4); }
+
+.a-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ds-surface); text-decoration: none; }
+.a-brand img { width: 44px; height: 44px; object-fit: contain; }
+.a-brand strong { font: 800 20px var(--ds-font-display); letter-spacing: -0.3px; }
+
+.a-align {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: var(--ds-r-pill);
+  background: color-mix(in srgb, var(--ds-surface) 12%, transparent);
+  color: var(--ds-surface);
+  font: 600 12.5px var(--ds-font-display);
+  white-space: nowrap;
+}
+.a-align i { width: 9px; height: 9px; border-radius: 50%; background: var(--ds-mint); }
+
+.a-hero-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-evenly; gap: var(--ds-s5);
+  text-align: center;
+}
+
+/* Storyset art on a paper circle + the tilted dashed orbit with two
+   solid planets (no blurred glow — edges only). */
+.a-orb { position: relative; flex: none; }
+.a-orbit {
+  position: absolute; inset: -8% -13%;
+  transform: rotate(-7deg) scaleY(0.55);
+  pointer-events: none;
+}
+.a-orbit::before {
+  content: ""; position: absolute; inset: 0;
+  border: 2px dashed color-mix(in srgb, var(--ds-surface) 28%, transparent);
+  border-radius: 50%;
+}
+.a-orbit .spin { position: absolute; inset: 0; animation: a-orbit 24s linear infinite; }
+.a-orbit .s2 { animation-duration: 38s; animation-direction: reverse; animation-delay: -14s; }
+.a-orbit .spin i {
+  position: absolute; top: -7px; left: 50%;
+  width: 14px; height: 14px; margin-left: -7px;
+  border-radius: 50%; background: var(--ds-mint);
+  transform: scaleY(1.85); /* un-squash the planet inside the tilted plane */
+}
+.a-orbit .s2 i { width: 9px; height: 9px; margin-left: -4.5px; background: var(--ds-sun); }
+@keyframes a-orbit { to { transform: rotate(360deg); } }
+
+.a-ill {
+  position: relative; aspect-ratio: 1;
+  width: min(400px, 52vh);
+  background: var(--ds-paper); border-radius: 50%;
+  display: grid; place-items: center;
+}
+.a-ill img { width: 125%; }
+.a-ill::before, .a-ill::after {
+  content: ""; position: absolute; height: 5px;
+  border-radius: var(--ds-r-pill);
+  background: color-mix(in srgb, var(--ds-surface) 90%, transparent);
+}
+.a-ill::before { width: 24px; top: -1%; left: 27%; transform: rotate(-6deg); }
+.a-ill::after { width: 16px; top: -0.5%; right: 10%; transform: rotate(17deg); }
+
+.a-chip { position: absolute; white-space: nowrap; }
+.a-chip.c1 { top: 8%; left: -6%; }
+.a-chip.c2 { top: 30%; right: -8%; }
+
+/* rotating trivia card (DS Card variant="trivia" supplies the chrome) */
+.a-trivia { width: min(100%, 420px); text-align: left; position: relative; }
+.a-trivia-cap {
+  margin: 0 0 8px;
+  font: 600 var(--ds-fs-caption)/1.4 var(--ds-font-body);
+  letter-spacing: 0.7px;
+  color: var(--ds-blue);
+  text-transform: uppercase;
+}
+.a-trivia-fact {
+  margin: 0;
+  min-height: 3.4em; /* keeps the card from resizing as facts rotate */
+  font: 600 15px/1.55 var(--ds-font-display);
+  color: var(--ds-navy);
+  animation: a-fact-in 0.45s ease;
+}
+.a-trivia-shuffle { position: absolute; top: 12px; right: 12px; }
+@keyframes a-fact-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+/* ---- form column ---- */
+
+/* brand mark shown above the form only when the hero is hidden */
+.a-logo-m {
+  display: none;
+  align-items: center; gap: 10px;
+  text-decoration: none; color: var(--ds-navy);
+  font: 800 20px var(--ds-font-display); letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.a-logo-m img { width: 44px; height: 44px; object-fit: contain; }
+
+.a-title { margin: 0 0 6px; color: var(--ds-navy); }
+.a-sub { margin: 0 0 var(--ds-s5); color: var(--ds-muted); }
+
+.a-form { display: grid; gap: 14px; }
+.a-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.a-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.a-link {
+  color: var(--ds-blue);
+  font: 600 var(--ds-fs-body-sm) var(--ds-font-body);
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex; align-items: center;
+}
+.a-link:hover { text-decoration: underline; }
+
+.a-err {
+  display: flex; align-items: flex-start; gap: 7px;
+  margin: 0; padding: 11px 14px;
+  border-radius: var(--ds-r-chip);
+  background: var(--ds-error-surface);
+  font: 400 var(--ds-fs-body-sm)/1.4 var(--ds-font-body);
+  color: var(--ds-error);
+}
+.a-err svg { flex: none; margin-top: 1px; }
+
+.a-foot { margin-top: 22px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+.a-foot .cap { font: 400 var(--ds-fs-body-sm) var(--ds-font-body); color: var(--ds-muted); }
+.a-foot .a-link { font-weight: 700; min-height: 0; }
+
+.a-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.a-success { display: grid; justify-items: center; gap: var(--ds-s3); text-align: center; color: var(--ds-blue); }
+
+/* short viewports: tighten so nothing clips */
+@media (max-height: 840px) {
+  .a-trivia-fact { min-height: 3.2em; }
+}
+
+@media (max-width: 1024px) {
+  .a-logo-m { display: inline-flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a-trivia-fact { animation: none; }
+  .a-orbit .spin { animation: none; }
+}

@@ -25,6 +25,8 @@ class DSTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final Iterable<String>? autofillHints;
+  final TextCapitalization textCapitalization;
 
   const DSTextField({
     super.key,
@@ -43,6 +45,8 @@ class DSTextField extends StatelessWidget {
     this.focusNode,
     this.textInputAction,
     this.onSubmitted,
+    this.autofillHints,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -63,6 +67,8 @@ class DSTextField extends StatelessWidget {
           focusNode: focusNode,
           textInputAction: textInputAction,
           onSubmitted: onSubmitted,
+          autofillHints: autofillHints,
+          textCapitalization: textCapitalization,
           style: DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             hintText: hint,
