@@ -89,144 +89,90 @@ class _AuthSheetState extends State<_AuthSheet> {
     final noMotion = MediaQuery.disableAnimationsOf(context);
     final dur = noMotion ? Duration.zero : const Duration(milliseconds: 250);
     final tall = MediaQuery.sizeOf(context).height >= 700;
-    final artSize = _tab == AuthTab.login ? 250.0 : 150.0;
     return GestureDetector(
       // Tapping outside a field dismisses the keyboard.
       onTap: () => FocusScope.of(context).unfocus(),
       child: Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // ---- navy art zone (solid mint top edge, 32px corners) ----
-          // Art circle + "Did you know?" on top; the same SVG bleeds off
-          // the sheet's top-right corner as a blurred backdrop accent.
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [DSColors.navyDeep, DSColors.navy],
+        // White sheet only — the SVG art sits on the dimmed backdrop behind
+        // it, blurred, peeking from the sheet's top-right corner; the "Did
+        // you know?" card floats above the top edge on the left.
+        child: Stack(clipBehavior: Clip.none, children: [
+          Positioned(
+            top: -132,
+            right: -10,
+            child: IgnorePointer(
+              child: AnimatedSwitcher(
+                duration: dur,
+                child: ImageFiltered(
+                  key: ValueKey(_art),
+                  imageFilter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: SvgPicture.asset(_art, width: 200),
+                ),
               ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: DSColors.surface,
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DSRadii.panel)),
               boxShadow: dsEdgeTop(DSColors.mint.withValues(alpha: .4), h: 3),
             ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(DSRadii.panel)),
-              child: Stack(children: [
-                Positioned(
-                  top: -30,
-                  right: -30,
-                  child: IgnorePointer(
-                    child: AnimatedSwitcher(
-                      duration: dur,
-                      child: ImageFiltered(
-                        key: ValueKey(_art),
-                        imageFilter:
-                            ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: SvgPicture.asset(_art, width: 200),
-                      ),
-                    ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                        color: DSColors.track, borderRadius: DSRadii.pillBr),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                  child: Column(children: [
-                    AnimatedContainer(
-                      duration: dur,
-                      curve: Curves.easeInOut,
-                      width: artSize,
-                      height: artSize,
-                      child:
-                          _ArtCircle(art: _art, size: artSize, duration: dur),
-                    ),
-                    if (tall) ...[
-                      const SizedBox(height: 14),
-                      const _TriviaCard(),
-                    ],
-                  ]),
+                const SizedBox(height: 16),
+                DSSegmentedControl(
+                  options: const [
+                    DSSegment('login', 'Log in'),
+                    DSSegment('signup', 'Sign up'),
+                  ],
+                  value: _tab == AuthTab.login ? 'login' : 'signup',
+                  onChanged: (v) => setState(() =>
+                      _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
+                ),
+                const SizedBox(height: 16),
+                AnimatedSize(
+                  duration: dur,
+                  curve: Curves.easeInOut,
+                  child: AnimatedSwitcher(
+                    duration: dur,
+                    child: _tab == AuthTab.login
+                        ? _LoginForm(
+                            key: const ValueKey('login'),
+                            onGoSignup: () =>
+                                setState(() => _tab = AuthTab.signup),
+                          )
+                        : _SignupForm(
+                            key: const ValueKey('signup'),
+                            onGoLogin: () =>
+                                setState(() => _tab = AuthTab.login),
+                            onRoleArt: (role) => setState(() =>
+                                _signupArt = 'assets/illustrations/$role.svg'),
+                          ),
+                  ),
                 ),
               ]),
             ),
           ),
-          // ---- white sheet: handle + switcher + form ----
-          Flexible(
-            fit: FlexFit.loose,
-            child: Container(
-              color: DSColors.surface,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 5,
-                      decoration: BoxDecoration(
-                          color: DSColors.track, borderRadius: DSRadii.pillBr),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  DSSegmentedControl(
-                    options: const [
-                      DSSegment('login', 'Log in'),
-                      DSSegment('signup', 'Sign up'),
-                    ],
-                    value: _tab == AuthTab.login ? 'login' : 'signup',
-                    onChanged: (v) => setState(() =>
-                        _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
-                  ),
-                  const SizedBox(height: 16),
-                  AnimatedSize(
-                    duration: dur,
-                    curve: Curves.easeInOut,
-                    child: AnimatedSwitcher(
-                      duration: dur,
-                      child: _tab == AuthTab.login
-                          ? _LoginForm(
-                              key: const ValueKey('login'),
-                              onGoSignup: () =>
-                                  setState(() => _tab = AuthTab.signup),
-                            )
-                          : _SignupForm(
-                              key: const ValueKey('signup'),
-                              onGoLogin: () =>
-                                  setState(() => _tab = AuthTab.login),
-                              onRoleArt: (role) => setState(() => _signupArt =
-                                  'assets/illustrations/$role.svg'),
-                            ),
-                    ),
-                  ),
-                ]),
-              ),
+          if (tall)
+            const Positioned(
+              top: -128,
+              left: 16,
+              right: 168,
+              child: _TriviaCard(),
             ),
-          ),
         ]),
-      ),
-    );
-  }
-}
-
-/// Storyset SVG on the paper circle (125% bleed), cross-fading on swap.
-class _ArtCircle extends StatelessWidget {
-  final String art;
-  final double size;
-  final Duration duration;
-  const _ArtCircle(
-      {required this.art, required this.size, required this.duration});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration:
-          const BoxDecoration(color: DSColors.paper, shape: BoxShape.circle),
-      child: AnimatedSwitcher(
-        duration: duration,
-        child: Center(
-          key: ValueKey(art),
-          child: SvgPicture.asset(art, width: size * 1.25),
-        ),
       ),
     );
   }
