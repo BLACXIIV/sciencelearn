@@ -31,47 +31,29 @@ export default function SelectClassroom() {
   const student = profile.role === "student";
   return (
     <div className="sc">
-      {student ? (
-        <main className="sc-col sc-body">
-          <div className="sc-hero edge-6">
-            <PageHeader compact>
-              <div className="sc-head">
-                <div className="sc-who">
-                  <Avatar name={profile.full_name} size={46} pastelColor="mint" />
-                  <div className="sc-grow">
-                    <p className="ds-title sc-name">Hi, {profile.full_name}</p>
-                    <p className="ds-caption sc-role">{session.user.email}</p>
-                  </div>
-                  <span className="sc-chip edge-3"><Badge tone="sun">Student</Badge></span>
+      <main className="sc-col sc-body">
+        <div className="sc-hero edge-6">
+          <PageHeader compact>
+            <div className="sc-head">
+              <div className="sc-who">
+                <Avatar name={profile.full_name} size={46} pastelColor="mint" />
+                <div className="sc-grow">
+                  <p className="ds-title sc-name">Hi, {profile.full_name}</p>
+                  <p className="ds-caption sc-role">{session.user.email}</p>
                 </div>
-                <h1 className="sc-h1">Choose your classroom</h1>
-                <p className="ds-body-sm sc-sub">Pick a class to continue to your lessons and quizzes.</p>
+                <span className="sc-chip edge-3"><Badge tone="sun">{student ? "Student" : "Teacher"}</Badge></span>
               </div>
-            </PageHeader>
-          </div>
-          <StudentPick />
-        </main>
-      ) : (
-        <>
-          <header className="sc-top">
-            <div className="sc-col sc-top-in">
-              <div className="sc-brand"><img src="/logo.png" alt="" /><span>ScienceLearn</span></div>
-              <div className="sc-who-t">
-                <div>
-                  <p className="ds-label sc-name-t">{profile.full_name}</p>
-                  <p className="ds-caption">Teacher</p>
-                </div>
-                <Avatar name={profile.full_name} size={40} />
-              </div>
+              <h1 className="sc-h1">Choose your classroom</h1>
+              <p className="ds-body-sm sc-sub">
+                {student
+                  ? "Pick a class to continue to your lessons and quizzes."
+                  : "Pick a class to open its lessons, quizzes and reports."}
+              </p>
             </div>
-          </header>
-          <main className="sc-col sc-body">
-            <h1 className="ds-h1 sc-title-t">Choose your classroom</h1>
-            <p className="ds-body-sm sc-sub-t">Pick a class to open its lessons, quizzes and reports.</p>
-            <TeacherPick />
-          </main>
-        </>
-      )}
+          </PageHeader>
+        </div>
+        {student ? <StudentPick /> : <TeacherPick />}
+      </main>
     </div>
   );
 }

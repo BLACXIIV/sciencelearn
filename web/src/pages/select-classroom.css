@@ -34,18 +34,6 @@
 .sc-h1 { margin: 0; font: 800 27px/1.2 var(--ds-font-display); letter-spacing: -.6px; }
 .sc-sub { margin: 6px 0 0; opacity: .75; font-size: 13.5px; line-height: 1.5; }
 
-/* ---- teacher slim top bar (white nav, per mockup) ---- */
-.sc-top { background: var(--ds-surface); border-bottom: 1px solid var(--ds-line); padding: var(--ds-s3) var(--ds-gutter-narrow); }
-.sc-top-in { display: flex; align-items: center; justify-content: space-between; }
-.sc-brand { display: inline-flex; align-items: center; gap: 10px; font: 800 18px var(--ds-font-display); }
-.sc-brand img { width: 36px; height: 36px; object-fit: contain; }
-.sc-top .sc-brand { color: var(--ds-navy); }
-.sc-who-t { display: flex; align-items: center; gap: var(--ds-s3); text-align: right; }
-.sc-who-t p { margin: 0; }
-.sc-who-t .ds-caption { color: var(--ds-muted); }
-.sc-title-t { margin: var(--ds-s2) 0 var(--ds-s2); color: var(--ds-navy); }
-.sc-sub-t { margin: 0 0 var(--ds-s5); color: var(--ds-muted); }
-
 /* ---- pastel subject tiles ---- */
 .sc-tile { width: 50px; height: 50px; border-radius: var(--ds-r-chip); display: grid; place-items: center; flex: none; }
 .sc-tile.b { background: var(--ds-pastel-blue); color: var(--ds-blue-dark); }
