@@ -22,6 +22,8 @@
   --ds-ink: var(--ds-navy);
   --ds-ink-soft: #2B3466;
   --ds-muted: #5A6480;
+  --ds-note: #3B4A8F;   /* stat-card reason line */
+  --ds-nav-dim: #8FA3F0; /* muted text on the navy rail */
   --ds-line: #DDE4F5;
 
   /* solid bottom-edge ("edge") colors — a darker shade of the fill above */
@@ -29,6 +31,8 @@
   --ds-edge-white: #9FB4FF;
   --ds-edge-blue: var(--ds-blue-dark);
   --ds-edge-mint: #2BB5A0;
+  --ds-edge-sun: #C99400;
+  --ds-edge-soft: #D5DEFF; /* softer card edge (island bar, big panels) */
   --ds-edge-navy: var(--ds-navy-deep);
   --ds-edge-chip: rgba(0, 0, 0, 0.2); /* sticker-chip drop on pastel fills */
 

@@ -1,14 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
 import TopNav from "./TopNav";
-import { Button, Chip, Icon, NavBar, type IconName } from "../design-system";
+import { Avatar, Badge, Icon, NavBar, type NavSection } from "../design-system";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
-import { fetchClass } from "../services/classes";
+import { fetchClass, fetchClassMembers } from "../services/classes";
+import { getR2Url } from "../services/storage";
 import "./shell.css";
 
-/** Staff shell: DS NavBar rail + top bar + routed content. Inside
- *  /teacher/c/:classId the rail becomes that class's portal (4 tabs). */
+const NEW = <Badge tone="mint">NEW</Badge>;
+
+/** Staff shell: DS NavBar rail (brand + class switcher + grouped nav) +
+ *  top bar + routed content. Inside /teacher/c/:classId the rail becomes
+ *  that class's portal — TEACH / CLASS groups; admins also get ADMIN. */
 export default function AppLayout() {
   const { profile } = useAuth();
   const nav = useNavigate();
@@ -19,38 +23,95 @@ export default function AppLayout() {
     queryFn: () => fetchClass(classId!),
     enabled: !!classId,
   });
+  const members = useQuery({
+    queryKey: ["class-members", classId],
+    queryFn: () => fetchClassMembers(classId!),
+    enabled: !!classId,
+  });
+  const avatarKey = profile?.avatar_url ?? null;
+  const avatar = useQuery({
+    queryKey: ["r2-url", avatarKey],
+    queryFn: () => getR2Url(avatarKey!),
+    enabled: !!avatarKey,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const items: { to: string; label: string; icon: IconName; end: boolean }[] = classId
-    ? [
-        { to: `/teacher/c/${classId}`, label: "Dashboard", icon: "dashboard", end: true },
-        { to: `/teacher/c/${classId}/lessons`, label: "Lessons", icon: "lessons", end: false },
-        { to: `/teacher/c/${classId}/quiz`, label: "Create Quiz", icon: "quiz", end: false },
-        { to: `/teacher/c/${classId}/students`, label: "Students", icon: "students", end: false },
-      ]
-    : [];
-  if (profile?.role === "admin")
-    items.push({ to: "/teacher/users", label: "Users", icon: "userAdmin", end: false });
+  const base = classId ? `/teacher/c/${classId}` : null;
+  const pending = (members.data ?? []).filter((m) => m.status === "pending").length;
 
-  // Same match semantics as NavLink: exact for `end`, prefix otherwise.
-  const active = [...items]
-    .sort((a, b) => b.to.length - a.to.length)
-    .find((i) => i.end ? path === i.to : path === i.to || path.startsWith(`${i.to}/`))?.to;
+  const sections: NavSection[] = [];
+  if (base) {
+    sections.push(
+      {
+        label: "TEACH",
+        items: [
+          { key: base, label: "Dashboard", icon: "dashboard" },
+          { key: `${base}/lessons`, label: "Lessons", icon: "lessons" },
+          { key: `${base}/quiz`, label: "Create Quiz", icon: "quiz" },
+          { key: `${base}/review`, label: "Review Content", icon: "review", badge: NEW },
+        ],
+      },
+      {
+        label: "CLASS",
+        items: [
+          {
+            key: `${base}/students`, label: "Students", icon: "students",
+            badge: pending > 0 ? <Badge tone="sun">{pending}</Badge> : undefined,
+          },
+          { key: `${base}/reports`, label: "Reports", icon: "progress", badge: NEW },
+        ],
+      },
+    );
+  }
+  if (profile?.role === "admin") {
+    sections.push({
+      label: "ADMIN",
+      items: [{ key: "/teacher/users", label: "Users", icon: "userAdmin" }],
+    });
+  }
+
+  // Exact match wins; otherwise longest prefix — but the bare class root only
+  // matches itself (Dashboard shouldn't stay lit on every sub-page).
+  const keys = sections.flatMap((s) => s.items.map((i) => i.key));
+  const active = keys.includes(path)
+    ? path
+    : keys.filter((k) => k !== base).sort((a, b) => b.length - a.length)
+        .find((k) => path.startsWith(`${k}/`));
 
   return (
     <div className="sh">
       <NavBar
         brand={<div className="sh-brand"><img src="/logo.png" alt="" /><span>ScienceLearn</span></div>}
-        items={items.map((i) => ({ key: i.to, label: i.label, icon: i.icon }))}
+        context={
+          cls.data ? (
+            <div className="sh-class">
+              <div className="sh-class-cap">Classroom</div>
+              <div className="sh-class-name">{cls.data.name}</div>
+              <div className="sh-class-row">
+                <span className="sh-class-code">{cls.data.code}</span>
+                <button type="button" className="sh-class-switch"
+                  onClick={() => nav("/select-classroom")}>
+                  Switch
+                </button>
+              </div>
+            </div>
+          ) : undefined
+        }
+        sections={sections}
         active={active}
         onSelect={(key) => nav(key)}
         footer={
           <>
-            <button type="button" className="ds-nav-item" onClick={() => nav("/select-classroom")}>
-              <Icon name="school" size={20} />
-              <span className="ds-nav-label">Switch class</span>
+            <button type="button" className="sh-user-card sh-user-btn"
+              onClick={() => nav("/teacher/account")}>
+              <Avatar name={profile?.full_name ?? ""} src={avatar.data} size={38} />
+              <span className="sh-user-who">
+                <span className="sh-user-nm">{profile?.full_name ?? "…"}</span>
+                <span className="sh-user-rl">{profile?.role ?? ""}</span>
+              </span>
             </button>
             <button type="button" className="ds-nav-item" onClick={signOut}>
-              <Icon name="signOut" size={20} />
+              <Icon name="signOut" size={22} />
               <span className="ds-nav-label">Sign out</span>
             </button>
           </>
@@ -58,27 +119,6 @@ export default function AppLayout() {
       />
       <main className="sh-main">
         <TopNav />
-        <header className="sh-head">
-          {cls.data ? (
-            <div className="sh-spread">
-              <div>
-                <h1 className="ds-h2">{cls.data.name}</h1>
-                <p className="ds-body-sm sh-dim">
-                  {cls.data.join_policy === "approval" ? "Approval required" : "Instant join"}
-                </p>
-              </div>
-              <div className="sh-actions">
-                <Chip><span className="sh-code">{cls.data.code}</span></Chip>
-                <Button variant="outline" size="sm" leadingIcon="school"
-                  onClick={() => nav("/select-classroom")}>
-                  Switch class
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div><h1 className="ds-h2">Good Day, {profile?.full_name}!</h1><p className="ds-body-sm sh-dim">Manage. Monitor. Support.</p></div>
-          )}
-        </header>
         <Outlet />
       </main>
     </div>

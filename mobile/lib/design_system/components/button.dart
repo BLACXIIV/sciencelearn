@@ -6,7 +6,8 @@ import '../tokens/shadows.dart';
 import '../tokens/typography.dart';
 import 'icon.dart';
 
-enum DSButtonVariant { primary, mint, white, outline, danger, ghost }
+enum DSButtonVariant { primary, mint, sun, white, outline, danger, ghost }
+
 enum DSButtonSize { md, sm }
 
 /// Chunky button — the signature SL control: solid fill + solid bottom edge
@@ -44,18 +45,60 @@ class DSButton extends StatefulWidget {
 
 class _DSButtonState extends State<DSButton> {
   bool _pressed = false;
-  bool get _inactive => widget.disabled || widget.loading || widget.onPressed == null;
+  bool get _inactive =>
+      widget.disabled || widget.loading || widget.onPressed == null;
 
   // Disabled = muted sticker: line fill, edge-card edge, muted label.
   (Color, Color, Color?, Color) _colors() => switch (widget.variant) {
         // (fill, text, border, edge)
-        _ when widget.disabled => (DSColors.line, DSColors.muted, null, DSColors.edgeCard),
-        DSButtonVariant.primary => (DSColors.blue, DSColors.surface, null, DSColors.edgeBlue),
-        DSButtonVariant.mint => (DSColors.mint, DSColors.navy, null, DSColors.edgeMint),
-        DSButtonVariant.white => (DSColors.surface, DSColors.navy, null, DSColors.edgeWhite),
-        DSButtonVariant.outline => (DSColors.surface, DSColors.blue, DSColors.line, DSColors.edgeCard),
-        DSButtonVariant.danger => (DSColors.errorSurface, DSColors.error, null, DSColors.error),
-        DSButtonVariant.ghost => (Colors.transparent, DSColors.surface, DSColors.surface, Colors.transparent),
+        _ when widget.disabled => (
+            DSColors.line,
+            DSColors.muted,
+            null,
+            DSColors.edgeCard
+          ),
+        DSButtonVariant.primary => (
+            DSColors.blue,
+            DSColors.surface,
+            null,
+            DSColors.edgeBlue
+          ),
+        DSButtonVariant.mint => (
+            DSColors.mint,
+            DSColors.navy,
+            null,
+            DSColors.edgeMint
+          ),
+        DSButtonVariant.sun => (
+            DSColors.sun,
+            DSColors.navy,
+            null,
+            DSColors.edgeSun
+          ),
+        DSButtonVariant.white => (
+            DSColors.surface,
+            DSColors.navy,
+            null,
+            DSColors.edgeWhite
+          ),
+        DSButtonVariant.outline => (
+            DSColors.surface,
+            DSColors.blue,
+            DSColors.line,
+            DSColors.edgeCard
+          ),
+        DSButtonVariant.danger => (
+            DSColors.errorSurface,
+            DSColors.error,
+            null,
+            DSColors.error
+          ),
+        DSButtonVariant.ghost => (
+            Colors.transparent,
+            DSColors.surface,
+            DSColors.surface,
+            Colors.transparent
+          ),
       };
 
   void _set(bool v) {
@@ -80,11 +123,16 @@ class _DSButtonState extends State<DSButton> {
         transform: Matrix4.translationValues(0, _pressed ? 4 : 0, 0),
         width: widget.fullWidth ? double.infinity : null,
         constraints: BoxConstraints(minHeight: isSm ? 44 : 52),
-        padding: EdgeInsets.symmetric(horizontal: isSm ? 20 : 26, vertical: isSm ? 10 : 14),
+        padding: EdgeInsets.symmetric(
+            horizontal: isSm ? 20 : 26, vertical: isSm ? 10 : 14),
         decoration: BoxDecoration(
           color: fill,
           borderRadius: DSRadii.buttonBr,
-          border: border != null ? Border.all(color: border, width: widget.variant == DSButtonVariant.ghost ? 2 : 1) : null,
+          border: border != null
+              ? Border.all(
+                  color: border,
+                  width: widget.variant == DSButtonVariant.ghost ? 2 : 1)
+              : null,
           boxShadow: widget.variant == DSButtonVariant.ghost
               ? const []
               : dsEdge(edge, h: _pressed ? 1 : h),
@@ -95,7 +143,8 @@ class _DSButtonState extends State<DSButton> {
           children: [
             if (widget.loading)
               SizedBox(
-                width: 20, height: 20,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2.4, color: text),
               )
             else ...[

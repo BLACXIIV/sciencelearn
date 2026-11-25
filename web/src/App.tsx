@@ -14,6 +14,7 @@ import ClassDashboard from "./pages/teacher/ClassDashboard";
 import ClassLessons from "./pages/teacher/ClassLessons";
 import ClassQuiz from "./pages/teacher/ClassQuiz";
 import ClassStudents from "./pages/teacher/ClassStudents";
+import ComingSoon from "./pages/teacher/ComingSoon";
 import Users from "./pages/Users";
 import { pickedClassId } from "./services/classes";
 import StudentHome from "./pages/student/Home";
@@ -72,12 +73,15 @@ export default function App() {
           <Route path="/teacher/classes/:id" element={<Navigate to="/teacher" replace />} />
           <Route path="/teacher/lessons/:lessonId/activities" element={<Navigate to="/teacher" replace />} />
           <Route path="/teacher/users" element={<Users />} />
+          <Route path="/teacher/account" element={<ComingSoon />} />
           <Route path="/teacher/c/:classId">
             <Route index element={<ClassDashboard />} />
             <Route path="lessons" element={<ClassLessons />} />
             <Route path="lessons/:lessonId/activities" element={<LessonActivities />} />
             <Route path="quiz" element={<ClassQuiz />} />
             <Route path="students" element={<ClassStudents />} />
+            <Route path="review" element={<ComingSoon />} />
+            <Route path="reports" element={<ComingSoon />} />
           </Route>
         </Route>
       </Route>

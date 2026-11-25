@@ -1,7 +1,84 @@
 /* Teacher screens — layout only; every visual value is a design-system token. */
 
-.td-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--ds-s5); margin-bottom: var(--ds-s6); }
-.td-rings { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--ds-s7); padding: var(--ds-s4) var(--ds-s2); }
+/* class hero — navy panel, 32px radius, deep edge (mockup dashboard banner) */
+.td-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s6);
+  margin-bottom: var(--ds-s6);
+  padding: var(--ds-s6) var(--ds-s7);
+  border-radius: 32px;
+  background: linear-gradient(135deg, var(--ds-navy-deep) 0%, var(--ds-navy) 100%);
+  box-shadow: 0 8px 0 var(--ds-edge-navy);
+  color: var(--ds-surface);
+}
+.td-hero-info { min-width: 0; }
+.td-hero-pill {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: var(--ds-r-pill);
+  background: rgb(255 255 255 / 0.14);
+  color: var(--ds-pastel-blue);
+  font: 700 12px/1 var(--ds-font-display);
+}
+.td-hero-title {
+  margin: 12px 0 16px;
+  font: 800 44px/1.05 var(--ds-font-display);
+  letter-spacing: -1px;
+  color: var(--ds-surface);
+}
+.td-hero-row { display: flex; align-items: center; gap: var(--ds-s4); flex-wrap: wrap; }
+.td-code-chip {
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: var(--ds-mint);
+  box-shadow: 0 4px 0 var(--ds-edge-mint);
+  color: var(--ds-navy);
+  font: 800 16px/1 var(--ds-font-display);
+  letter-spacing: 0.12em;
+}
+.td-hero-cap { font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-pastel-blue); }
+.td-hero-art { width: 260px; height: 150px; margin-left: auto; flex: none; }
+.td-hero-art img { width: 100%; height: 100%; object-fit: contain; }
+
+/* stat tiles — 5 up at desktop; the pending tile drops to a full-width
+   alert row once the grid can't hold all five. */
+.td-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--ds-s5);
+  margin-bottom: var(--ds-s6);
+}
+
+/* dashboard second row: averages + needs-attention side by side */
+.td-grid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--ds-s5);
+  align-items: stretch;
+}
+.td-attn-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ds-s3); margin-bottom: var(--ds-s2); }
+.td-attn-head .ds-h3 { margin: 0; }
+.td-attn-art { display: flex; justify-content: center; padding-top: var(--ds-s3); }
+.td-chip-soft {
+  display: inline-grid; place-items: center;
+  min-width: 28px; height: 24px; padding: 0 8px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-pastel-yellow);
+  color: var(--ds-navy);
+  font: 800 13px/1 var(--ds-font-display);
+}
+
+/* quick actions */
+.td-quick { display: flex; gap: var(--ds-s4); flex-wrap: wrap; margin-top: var(--ds-s6); }
+
+.td-rings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  gap: var(--ds-s5) var(--ds-s3);
+  padding: var(--ds-s4) var(--ds-s2) 0;
+}
 .td-ring { display: flex; flex-direction: column; align-items: center; gap: var(--ds-s2); }
 .td-stack { display: flex; flex-direction: column; }
 .td-stack > * + * { margin-top: var(--ds-s3); }
@@ -20,3 +97,22 @@
 .td-release > .ds-caption { color: var(--ds-muted); flex: 1; min-width: 180px; }
 .td-quest { display: flex; align-items: center; gap: var(--ds-s2); }
 .td-quest .ds-caption { min-width: 90px; }
+
+@media (max-width: 1240px) {
+  .td-stats { grid-template-columns: repeat(4, 1fr); }
+  .td-stats .ds-stat-alert { grid-column: 1 / -1; }
+}
+@media (max-width: 1200px) {
+  .td-grid2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .td-hero { padding: var(--ds-s5); }
+  .td-hero-title { font-size: 32px; }
+  .td-hero-art { display: none; }
+}
+@media (max-width: 700px) {
+  .td-stats { grid-template-columns: repeat(2, 1fr); }
+  .td-rings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .td-quick { flex-direction: column; }
+  .td-quick .ds-btn { width: 100%; }
+}

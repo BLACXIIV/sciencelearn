@@ -25,6 +25,8 @@ abstract final class DSColors {
   static const edgeWhite = Color(0xFF9FB4FF);
   static const edgeBlue = blueDark;
   static const edgeMint = Color(0xFF2BB5A0);
+  static const edgeSun = Color(0xFFC99400);
+  static const edgeSoft = Color(0xFFD5DEFF); // softer edge (island bar, panels)
   static const edgeNavy = navyDeep;
   static const edgeChip = Color(0x33000000); // sticker-chip drop (0,0,0,.2)
 

@@ -103,6 +103,6 @@ export type { PageSectionProps } from "./components/PageSection/PageSection";
 export { AuthShell } from "./components/AuthShell/AuthShell";
 export type { AuthShellProps } from "./components/AuthShell/AuthShell";
 export { NavBar } from "./components/NavBar/NavBar";
-export type { NavBarProps, NavItem } from "./components/NavBar/NavBar";
+export type { NavBarProps, NavItem, NavSection } from "./components/NavBar/NavBar";
 export { IslandNavBar } from "./components/IslandNavBar/IslandNavBar";
 export type { IslandNavBarProps } from "./components/IslandNavBar/IslandNavBar";

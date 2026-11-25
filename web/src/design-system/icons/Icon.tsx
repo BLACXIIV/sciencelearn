@@ -38,13 +38,13 @@ export interface IconProps {
   className?: string;
 }
 
-/** Renders a registered line icon at strokeWidth 2. */
+/** Renders a registered line icon at strokeWidth 2.2. */
 export function Icon({ name, size = 20, color, className }: IconProps) {
   const C: LucideIcon = registry[name];
   return (
     <C
       size={size}
-      strokeWidth={2}
+      strokeWidth={2.2}
       color={color}
       className={className}
       aria-hidden="true"

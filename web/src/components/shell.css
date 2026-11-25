@@ -8,40 +8,95 @@
 .sh-brand {
   display: flex; align-items: center; gap: 10px;
   color: var(--ds-surface);
-  font: 800 18px var(--ds-font-display); letter-spacing: -0.3px;
+  font: 800 24px var(--ds-font-display); letter-spacing: -0.5px;
 }
-.sh-brand img { width: 34px; height: 34px; object-fit: contain; }
+.sh-brand img { width: 40px; height: 40px; object-fit: contain; }
 
-/* sticky top bar — chrome comes from Card variant="flat" */
+/* class switcher card (NavBar context slot) */
+.sh-class {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.1);
+}
+.sh-class-cap {
+  font: 800 11px/1 var(--ds-font-display);
+  letter-spacing: 1.5px;
+  color: var(--ds-nav-dim);
+  text-transform: uppercase;
+}
+.sh-class-name {
+  margin-top: 4px;
+  font: 800 18px/1.25 var(--ds-font-display);
+  color: var(--ds-surface);
+}
+.sh-class-row { display: flex; align-items: center; gap: var(--ds-s3); margin-top: 10px; }
+.sh-class-code {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--ds-surface);
+  color: var(--ds-blue);
+  font: 800 13px/1 var(--ds-font-display);
+  letter-spacing: 0.12em;
+}
+.sh-class-switch {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ds-mint);
+  font: 700 14px/1 var(--ds-font-display);
+  cursor: pointer;
+}
+.sh-class-switch:hover { text-decoration: underline; }
+
+/* footer profile block (NavBar footer) — whole row opens Account */
+.sh-user-card { display: flex; align-items: center; gap: 10px; padding: var(--ds-s2) var(--ds-s3) var(--ds-s3); }
+.sh-user-btn {
+  width: 100%;
+  border: 0;
+  background: none;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+.sh-user-btn:hover { background: color-mix(in srgb, var(--ds-surface) 8%, transparent); }
+.sh-user-who { min-width: 0; display: grid; }
+.sh-user-nm {
+  font: 700 15px/1.2 var(--ds-font-display); color: var(--ds-surface);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sh-user-rl {
+  font: 400 12px/1.4 var(--ds-font-body); color: var(--ds-nav-dim);
+  text-transform: capitalize;
+}
+
+/* top bar — no chrome; title floats, profile is its own white pill */
 .sh-top {
-  position: sticky; top: 8px; z-index: 20;
   display: flex; align-items: center;
-  padding: 10px 14px;
+  padding: 4px 0;
   margin-bottom: var(--ds-s4);
 }
-.sh-user { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.sh-who { text-align: right; }
-.sh-nm { font: 700 var(--ds-fs-body-sm) var(--ds-font-display); color: var(--ds-navy); line-height: 1.1; }
-.sh-rl { font: 400 var(--ds-fs-caption) var(--ds-font-body); color: var(--ds-muted); text-transform: capitalize; }
-
-/* greeting header */
-.sh-head { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
-.sh-head h1 { margin: 0; }
-.sh-head p { margin: 2px 0 var(--ds-s5); }
-.sh-dim { color: var(--ds-muted); }
+.sh-title { font: 700 17px/1 var(--ds-font-display); color: var(--ds-navy); }
+.sh-profile {
+  margin-left: auto; display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px 6px 14px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  box-shadow: 0 3px 0 var(--ds-edge-card);
+  text-decoration: none;
+}
+.sh-pnm { font: 600 14px/1 var(--ds-font-display); color: var(--ds-navy); }
 
 @media (max-width: 1024px) {
   /* DS NavBar shrinks to an icon rail — brand text hides with the labels */
   .sh-brand span { display: none; }
+  .sh-user-card { display: none; }
 }
 
 @media (max-width: 760px) {
   .sh { grid-template-columns: 1fr; }
   .sh-brand span { display: inline; }
+  .sh-user-card { display: flex; }
   .sh-main { padding: var(--ds-s4) var(--ds-s5); }
 }
-
-/* class-context header (AppLayout inside /teacher/c/:classId) */
-.sh-spread { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s3); flex-wrap: wrap; width: 100%; }
-.sh-actions { display: flex; align-items: center; gap: var(--ds-s3); flex-wrap: nowrap; }
-.sh-code { letter-spacing: 0.12em; }

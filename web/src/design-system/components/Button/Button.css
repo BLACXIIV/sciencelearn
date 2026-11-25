@@ -33,6 +33,7 @@
 /* variants: fill / text / edge color */
 .ds-btn-primary { background: var(--ds-blue); color: var(--ds-surface); --ds-edge: var(--ds-edge-blue); box-shadow: 0 5px 0 var(--ds-edge); }
 .ds-btn-mint    { background: var(--ds-mint); color: var(--ds-navy); --ds-edge: var(--ds-edge-mint); box-shadow: 0 5px 0 var(--ds-edge); }
+.ds-btn-sun     { background: var(--ds-sun); color: var(--ds-navy); --ds-edge: var(--ds-edge-sun); box-shadow: 0 5px 0 var(--ds-edge); }
 .ds-btn-white   { background: var(--ds-surface); color: var(--ds-navy); --ds-edge: var(--ds-edge-white); box-shadow: 0 5px 0 var(--ds-edge); }
 .ds-btn-outline {
   background: var(--ds-surface); color: var(--ds-blue);

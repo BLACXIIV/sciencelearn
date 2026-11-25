@@ -31,15 +31,15 @@ class DSIslandNavBar extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 560),
+            constraints: const BoxConstraints(maxWidth: 560, minHeight: 68),
             padding: const EdgeInsets.all(DSSpacing.s2),
             decoration: BoxDecoration(
               color: DSColors.surface,
-              borderRadius: DSRadii.panelBr,
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(color: DSColors.line),
-              boxShadow: dsEdge(DSColors.edgeCard, h: 5),
+              boxShadow: dsEdge(DSColors.edgeSoft, h: 6),
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,

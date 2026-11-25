@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "../../icons/Icon";
 import "./Button.css";
 
-export type ButtonVariant = "primary" | "mint" | "white" | "outline" | "danger" | "ghost";
+export type ButtonVariant = "primary" | "mint" | "sun" | "white" | "outline" | "danger" | "ghost";
 export type ButtonSize = "md" | "sm";
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "disabled"> {

@@ -21,6 +21,7 @@ import 'features/progress/progress_screen.dart';
 import 'features/review/review_screen.dart';
 import 'features/shell.dart';
 import 'features/teacher/teacher_shell.dart';
+import 'features/teacher/coming_soon_screen.dart';
 import 'features/teacher/class_dashboard_screen.dart';
 import 'features/teacher/class_lessons_screen.dart';
 import 'features/teacher/class_quiz_screen.dart';
@@ -54,7 +55,8 @@ class _AuthRefresh extends ChangeNotifier {
 }
 
 final _router = GoRouter(
-  refreshListenable: Listenable.merge([_AuthRefresh(), classPicked, currentClass]),
+  refreshListenable:
+      Listenable.merge([_AuthRefresh(), classPicked, currentClass]),
   redirect: (context, state) {
     final loggedIn = Supabase.instance.client.auth.currentSession != null;
     const publicPages = {'/welcome', '/login', '/signup'};
@@ -87,8 +89,7 @@ final _router = GoRouter(
     GoRoute(path: '/signup', builder: (_, __) => const SignupScreen()),
     // Post-login gate: pick a classroom before entering the portal.
     GoRoute(
-        path: '/select-class',
-        builder: (_, __) => const SelectClassScreen()),
+        path: '/select-class', builder: (_, __) => const SelectClassScreen()),
     StatefulShellRoute.indexedStack(
       builder: (_, __, shell) => Shell(shell: shell),
       branches: [
@@ -161,7 +162,13 @@ final _router = GoRouter(
       ],
     ),
     // Full-screen sub-pages pushed over the shell (class header avatar → account).
-    GoRoute(path: '/teacher/account', builder: (_, __) => const AccountScreen()),
+    GoRoute(
+        path: '/teacher/account', builder: (_, __) => const AccountScreen()),
+    // More-sheet destinations with no screen yet.
+    GoRoute(
+        path: '/teacher/review', builder: (_, __) => const ComingSoonScreen()),
+    GoRoute(
+        path: '/teacher/reports', builder: (_, __) => const ComingSoonScreen()),
   ],
 );
 
