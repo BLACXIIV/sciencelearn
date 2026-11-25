@@ -104,3 +104,6 @@ button.sc-ghost:hover { border-color: var(--ds-edge-card); }
 .sc-ok { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-success); margin: var(--ds-s2) 0 0; }
 .sc-dim { font-family: var(--ds-font-body); font-size: 13px; color: var(--ds-muted); margin: var(--ds-s2) 0; }
 .sc-load { padding: 80px 24px; text-align: center; }
+
+/* create-class modal form */
+.sc-create { display:flex; flex-direction:column; gap:var(--ds-s3) }

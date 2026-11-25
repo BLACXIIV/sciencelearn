@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Avatar, Badge, Button, Card, CodeInput, EmptyState, Icon, ListItemCard, PageHeader, type IconName,
+  Avatar, Badge, Button, Card, CodeInput, EmptyState, Icon, ListItemCard, Modal, PageHeader,
+  SegmentedControl, TextField, type IconName,
 } from "../design-system";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
-import { fetchAwaitingByClass, fetchEnrolledClasses, fetchMyClasses, joinClass, markClassPicked } from "../services/classes";
+import { createClass, fetchAwaitingByClass, fetchEnrolledClasses, fetchMyClasses, joinClass, markClassPicked } from "../services/classes";
 import "./select-classroom.css";
 
 /** Pastel subject tiles — color cycles by list position, like the mockup. */
@@ -188,8 +189,24 @@ function StudentPick() {
 
 function TeacherPick() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const classes = useQuery({ queryKey: ["my-classes"], queryFn: fetchMyClasses });
   const [sel, setSel] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [policy, setPolicy] = useState<"open" | "approval">("open");
+
+  /** Create stays inside the picker: on success the new class lands in the
+   *  list already selected, so Continue opens it right away. */
+  const create = useMutation({
+    mutationFn: () => createClass(name.trim(), policy),
+    onSuccess: (c) => {
+      setCreateOpen(false);
+      setName("");
+      qc.invalidateQueries({ queryKey: ["my-classes"] });
+      setSel(c.id);
+    },
+  });
 
   return (
     <>
@@ -202,7 +219,7 @@ function TeacherPick() {
               icon="school"
               title="No classes yet"
               body="Create one and share its join code with students."
-              action={<Button onClick={() => { markClassPicked(); nav("/teacher/classes"); }}>Create a class</Button>}
+              action={<Button onClick={() => setCreateOpen(true)}>Create a class</Button>}
             />
           </Card>
         )}
@@ -244,7 +261,7 @@ function TeacherPick() {
           );
         })}
         {(classes.data?.length ?? 0) > 0 && (
-          <button type="button" className="sc-ghost" onClick={() => { markClassPicked(); nav("/teacher/classes"); }}>
+          <button type="button" className="sc-ghost" onClick={() => setCreateOpen(true)}>
             <span className="sc-plus"><Icon name="add" size={15} /></span>
             <span className="sc-grow">
               <span className="sc-ghost-title">Create a new class</span>
@@ -255,6 +272,35 @@ function TeacherPick() {
         )}
       </div>
       <Foot sel={sel} onGo={() => { markClassPicked(); nav(`/teacher/classes/${sel}`); }} />
+
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create a class">
+        <div className="sc-create">
+          <TextField
+            label="Class name" placeholder="e.g. Grade 7 - Diamond" value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && name.trim() && create.mutate()}
+          />
+          <SegmentedControl
+            ariaLabel="How do students join?"
+            options={[
+              { value: "open", label: "Instant" },
+              { value: "approval", label: "Approval" },
+            ]}
+            value={policy}
+            onChange={(v) => setPolicy(v as "open" | "approval")}
+          />
+          <p className="ds-caption sc-dim">
+            {policy === "open"
+              ? "Anyone with the code joins immediately."
+              : "You confirm each request before they see class content."}
+          </p>
+          {create.error != null && <p className="sc-err">{String(create.error)}</p>}
+          <Button fullWidth loading={create.isPending} disabled={create.isPending || !name.trim()}
+            onClick={() => create.mutate()}>
+            Create class
+          </Button>
+        </div>
+      </Modal>
     </>
   );
 }

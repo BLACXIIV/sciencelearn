@@ -613,9 +613,17 @@ class _TeacherPick extends ConsumerStatefulWidget {
 class _TeacherPickState extends ConsumerState<_TeacherPick> {
   Json? _sel;
 
-  void _goCreate() {
-    classPicked.value = true;
-    context.go('/teacher/classes');
+  /// Create-class flow stays in the picker: the modal returns the new row,
+  /// which lands in the refreshed list already selected.
+  Future<void> _openCreate() async {
+    final created = await showDSModal<Json>(
+      context,
+      title: 'Create a class',
+      body: const _CreateClassForm(),
+    );
+    if (created == null || !mounted) return;
+    ref.invalidate(teacherClassesProvider);
+    setState(() => _sel = created);
   }
 
   @override
@@ -647,7 +655,7 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
                       title: 'No classes yet',
                       body: 'Create one and share its join code with students.',
                       action: DSButton(
-                        onPressed: _goCreate,
+                        onPressed: _openCreate,
                         child: const Text('Create a class'),
                       ),
                     ),
@@ -693,7 +701,7 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
                   _GhostTile(
                     title: 'Create a new class',
                     subtitle: 'Get a join code to share with students',
-                    onTap: _goCreate,
+                    onTap: _openCreate,
                   ),
                 ]);
               },
@@ -711,4 +719,84 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
       ),
     ]);
   }
+}
+
+// --- Create-class form (inside showDSModal) ---------------------------------
+
+/// Self-contained create form: it owns the name field + join-policy picker,
+/// calls the repo, and pops with the created class row.
+class _CreateClassForm extends ConsumerStatefulWidget {
+  const _CreateClassForm();
+
+  @override
+  ConsumerState<_CreateClassForm> createState() => _CreateClassFormState();
+}
+
+class _CreateClassFormState extends ConsumerState<_CreateClassForm> {
+  final _name = TextEditingController();
+  String _policy = 'open';
+  bool _busy = false;
+  String? _err;
+
+  @override
+  void dispose() { _name.dispose(); super.dispose(); }
+
+  Future<void> _create() async {
+    final name = _name.text.trim();
+    if (name.isEmpty || _busy) return;
+    setState(() { _busy = true; _err = null; });
+    try {
+      final row = await ref.read(repoProvider).createClass(name, _policy);
+      if (mounted) Navigator.of(context).pop(row);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _err = '$e'.replaceFirst('Exception: ', '');
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DSTextField(
+            label: 'Class name',
+            hint: 'e.g. Grade 7 - Diamond',
+            controller: _name,
+            onChanged: (_) => setState(() {}),
+            onSubmitted: (_) => _create(),
+          ),
+          const SizedBox(height: 12),
+          DSSegmentedControl(
+            options: const [
+              DSSegment('open', 'Instant'),
+              DSSegment('approval', 'Approval'),
+            ],
+            value: _policy,
+            onChanged: (v) => setState(() => _policy = v),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _policy == 'open'
+                ? 'Anyone with the code joins immediately.'
+                : 'You confirm each request before they see class content.',
+            style: DSText.caption.copyWith(color: DSColors.muted),
+          ),
+          if (_err != null) ...[
+            const SizedBox(height: 10),
+            Text(_err!, style: DSText.caption.copyWith(color: DSColors.error)),
+          ],
+          const SizedBox(height: 16),
+          DSButton(
+            fullWidth: true,
+            loading: _busy,
+            onPressed: _busy || _name.text.trim().isEmpty ? null : _create,
+            child: const Text('Create class'),
+          ),
+        ],
+      );
 }
