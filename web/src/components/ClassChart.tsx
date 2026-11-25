@@ -1,13 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { useClassDashboard } from "../hooks/useClassDashboard";
-import { fetchMyClasses } from "../services/classes";
-import { Card, EmptyState, RingChart, StatCard } from "../design-system";
-import StudentProgressList from "../components/StudentProgressList";
+import { Card, EmptyState, RingChart } from "../design-system";
 import type { StudentProgress } from "../types";
-import "./teacher.css";
+import "../pages/teacher.css";
 
 /** Class-wide averages rendered as progress rings (same visual system as student progress). */
-function ClassChart({ students }: { students: StudentProgress[] }) {
+export default function ClassChart({ students }: { students: StudentProgress[] }) {
   const avg = (vals: (number | null)[]) => {
     const have = vals.filter((v): v is number => v != null);
     return have.length ? Math.round(have.reduce((a, b) => a + b, 0) / have.length) : null;
@@ -42,37 +38,5 @@ function ClassChart({ students }: { students: StudentProgress[] }) {
         </div>
       )}
     </Card>
-  );
-}
-
-export default function Dashboard() {
-  const { data, stats, isLoading, error } = useClassDashboard();
-  const classes = useQuery({ queryKey: ["my-classes"], queryFn: fetchMyClasses });
-  const allStats = [
-    ...stats,
-    { label: "Classes", value: classes.data?.length ?? 0, icon: "students" as const, pastel: "mint" as const },
-  ];
-
-  if (isLoading) return <p className="ds-body">Loading class dashboard…</p>;
-  if (error) return <p className="td-err">{String(error)}</p>;
-
-  const students = data?.students ?? [];
-  return (
-    <>
-      <div className="td-stats">
-        {allStats.map((s) => (
-          <StatCard key={s.label} icon={s.icon!} value={String(s.value)} label={s.label} pastelColor={s.pastel} />
-        ))}
-      </div>
-      <ClassChart students={students} />
-      <h2 className="ds-h2 td-heading">Student Performance</h2>
-      {students.length === 0 ? (
-        <Card variant="white">
-          <EmptyState icon="students" title="No students yet" body="Students appear here after they join a class." />
-        </Card>
-      ) : (
-        <StudentProgressList students={students} />
-      )}
-    </>
   );
 }

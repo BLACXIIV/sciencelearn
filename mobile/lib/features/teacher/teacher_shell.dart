@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
 
-/// Teacher/admin shell. Branch indexes are fixed in the router:
-/// 0 dashboard, 1 classes, 2 users (admin), 3 account.
-/// Teachers hide branch 2; visible tabs map onto the same branches.
+/// Teacher/admin shell — class-scoped portal. Branch indexes are fixed in the
+/// router: 0 dashboard, 1 lessons, 2 quiz, 3 students, 4 users (admin).
+/// Teachers hide branch 4; visible tabs map onto the same branches.
+/// Account lives outside the shell (pushed over it from the class header).
 class TeacherShell extends ConsumerWidget {
   final StatefulNavigationShell shell;
   const TeacherShell({super.key, required this.shell});
@@ -41,12 +42,13 @@ class TeacherShell extends ConsumerWidget {
     }
 
     // Branch indexes visible as tabs; admins also get Users.
-    final visible = role == 'admin' ? const [0, 1, 2, 3] : const [0, 1, 3];
+    final visible = role == 'admin' ? const [0, 1, 2, 3, 4] : const [0, 1, 2, 3];
     const items = [
       DSNavItem('0', 'Dashboard', DSIconName.dashboard),
-      DSNavItem('1', 'Classes', DSIconName.students),
-      DSNavItem('2', 'Users', DSIconName.userAdmin),
-      DSNavItem('3', 'Account', DSIconName.account),
+      DSNavItem('1', 'Lessons', DSIconName.lessons),
+      DSNavItem('2', 'Quiz', DSIconName.quiz),
+      DSNavItem('3', 'Students', DSIconName.students),
+      DSNavItem('4', 'Users', DSIconName.userAdmin),
     ];
     final active =
         visible.indexOf(shell.currentIndex).clamp(0, visible.length - 1);

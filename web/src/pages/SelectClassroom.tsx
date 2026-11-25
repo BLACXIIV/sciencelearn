@@ -182,7 +182,7 @@ function StudentPick() {
           )}
         </div>
       </div>
-      <Foot sel={sel} onGo={() => { markClassPicked(); nav(`/student/classes/${sel}`); }} />
+      <Foot sel={sel} onGo={() => { markClassPicked(sel ?? undefined); nav(`/student/classes/${sel}`); }} />
     </>
   );
 }
@@ -271,7 +271,7 @@ function TeacherPick() {
           </button>
         )}
       </div>
-      <Foot sel={sel} onGo={() => { markClassPicked(); nav(`/teacher/classes/${sel}`); }} />
+      <Foot sel={sel} onGo={() => { markClassPicked(sel ?? undefined); nav(`/teacher/c/${sel}`); }} />
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create a class">
         <div className="sc-create">

@@ -1,5 +1,6 @@
 import type { Session, Subscription } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { clearPickedClass } from "./classes";
 import type { Profile } from "../types";
 
 /** Current persisted session, or null when signed out. */
@@ -30,9 +31,12 @@ export async function signInWithPassword(email: string, password: string): Promi
   if (error) throw error;
 }
 
-export const signOut = (): Promise<void> => supabase.auth.signOut().then(({ error }) => {
-  if (error) throw error;
-});
+export const signOut = (): Promise<void> => {
+  clearPickedClass(); // next session re-gates at the classroom picker
+  return supabase.auth.signOut().then(({ error }) => {
+    if (error) throw error;
+  });
+};
 
 /** Creates an account (DB trigger assigns role=student).
  *  Returns true when a session was issued (email confirmation disabled),

@@ -9,11 +9,13 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import SelectClassroom from "./pages/SelectClassroom";
-import Dashboard from "./pages/Dashboard";
 import LessonActivities from "./pages/LessonActivities";
-import Classes from "./pages/Classes";
-import ClassDetail from "./pages/ClassDetail";
+import ClassDashboard from "./pages/teacher/ClassDashboard";
+import ClassLessons from "./pages/teacher/ClassLessons";
+import ClassQuiz from "./pages/teacher/ClassQuiz";
+import ClassStudents from "./pages/teacher/ClassStudents";
 import Users from "./pages/Users";
+import { pickedClassId } from "./services/classes";
 import StudentHome from "./pages/student/Home";
 import StudentClasses from "./pages/student/Classes";
 import StudentClassDetail from "./pages/student/ClassDetail";
@@ -24,6 +26,12 @@ import StudentReview from "./pages/student/Review";
 import StudentProgressPage from "./pages/student/Progress";
 import StudentAccount from "./pages/student/Account";
 import UiKit from "./pages/dev/UiKit";
+
+/** /teacher root: drop into the class picked this session, else re-gate. */
+function TeacherHome() {
+  const id = pickedClassId();
+  return <Navigate to={id ? `/teacher/c/${id}` : "/select-classroom"} replace />;
+}
 
 export default function App() {
   return (
@@ -55,14 +63,22 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Teacher/admin portal. */}
+      {/* Teacher/admin portal — class-scoped after /select-classroom. */}
       <Route element={<RequireTeacher />}>
         <Route element={<AppLayout />}>
-          <Route path="/teacher" element={<Dashboard />} />
-          <Route path="/teacher/lessons/:lessonId/activities" element={<LessonActivities />} />
-          <Route path="/teacher/classes" element={<Classes />} />
-          <Route path="/teacher/classes/:id" element={<ClassDetail />} />
+          <Route path="/teacher" element={<TeacherHome />} />
+          {/* Compat redirects for the removed cross-class pages. */}
+          <Route path="/teacher/classes" element={<Navigate to="/teacher" replace />} />
+          <Route path="/teacher/classes/:id" element={<Navigate to="/teacher" replace />} />
+          <Route path="/teacher/lessons/:lessonId/activities" element={<Navigate to="/teacher" replace />} />
           <Route path="/teacher/users" element={<Users />} />
+          <Route path="/teacher/c/:classId">
+            <Route index element={<ClassDashboard />} />
+            <Route path="lessons" element={<ClassLessons />} />
+            <Route path="lessons/:lessonId/activities" element={<LessonActivities />} />
+            <Route path="quiz" element={<ClassQuiz />} />
+            <Route path="students" element={<ClassStudents />} />
+          </Route>
         </Route>
       </Route>
 

@@ -190,6 +190,21 @@ class Repo {
   Future<List<Json>> classLessons(String classId) async => List<Json>.from(await sb
       .from('lessons').select().eq('class_id', classId).order('created_at'));
 
+  /// Per-class progress rows — one per active member, metrics filtered to
+  /// this class's lessons (v_class_student_progress, migration 0011).
+  Future<List<Json>> classStudentProgress(String classId) async => List<Json>.from(await sb
+      .from('v_class_student_progress')
+      .select()
+      .eq('class_id', classId)
+      .order('full_name'));
+
+  /// Fully completed lesson_progress rows inside one class.
+  Future<int> classCompletedCount(String classId) async => (await sb
+      .from('lesson_progress')
+      .select('lesson_id, lessons!inner(class_id)')
+      .eq('lessons.class_id', classId)
+      .eq('percent', 100)).length;
+
   /// Student: classes they belong to (status = active | pending).
   /// profiles!classes_teacher_id_fkey embeds the teacher's name
   /// (FK hint required — classes↔profiles also joins via enrollments;
@@ -270,6 +285,11 @@ final repoProvider = Provider((_) => Repo());
 /// resets on app restart, matching "choose a classroom after sign-in".
 final classPicked = ValueNotifier<bool>(false);
 
+/// The class a teacher/admin opened at /select-class this session — drives
+/// the whole /teacher portal (4 tabs are all scoped to this row). Null until
+/// picked; cleared on "Switch class" so the router re-gates.
+final currentClass = ValueNotifier<Json?>(null);
+
 /// Emits on every auth change; user-scoped providers watch it so a sign-out
 /// + sign-in as a different user never shows the previous user's data.
 final authChangesProvider = StreamProvider(
@@ -293,15 +313,15 @@ final lessonsProvider = FutureProvider((ref) {
   return ref.read(repoProvider).lessons(subject: ref.watch(subjectProvider));
 });
 
-// teacher portal
-final classProgressProvider = FutureProvider((ref) {
-  ref.watch(authChangesProvider);
-  return ref.read(repoProvider).classProgress();
-});
-final completedCountProvider = FutureProvider((ref) {
-  ref.watch(authChangesProvider);
-  return ref.read(repoProvider).completedLessonsCount();
-});
+// teacher portal — all scoped to the class in currentClass
+final classMembersProvider = FutureProvider.autoDispose
+    .family<List<Json>, String>((ref, id) => ref.read(repoProvider).classMembers(id));
+final classLessonsProvider = FutureProvider.autoDispose
+    .family<List<Json>, String>((ref, id) => ref.read(repoProvider).classLessons(id));
+final classProgressProvider = FutureProvider.autoDispose
+    .family<List<Json>, String>((ref, id) => ref.read(repoProvider).classStudentProgress(id));
+final classCompletedProvider = FutureProvider.autoDispose
+    .family<int, String>((ref, id) => ref.read(repoProvider).classCompletedCount(id));
 final allLessonsProvider = FutureProvider((ref) {
   ref.watch(authChangesProvider);
   return ref.read(repoProvider).allLessons();

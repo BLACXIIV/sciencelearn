@@ -713,8 +713,10 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
         enabled: _sel != null,
         onGo: () {
           if (_sel == null) return;
+          // The picked class becomes the whole portal's context.
+          currentClass.value = _sel;
           classPicked.value = true;
-          context.go('/teacher/class/${_sel!['id']}', extra: _sel);
+          context.go('/teacher');
         },
       ),
     ]);

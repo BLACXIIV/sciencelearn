@@ -22,7 +22,7 @@ export default function LessonList({ lessons, onTogglePublish }: Props) {
           trailing={
             <span className="td-actions">
               <Button variant="outline" size="sm"
-                onClick={() => nav(`/teacher/lessons/${l.id}/activities`)}>
+                onClick={() => nav(`/teacher/c/${l.class_id}/lessons/${l.id}/activities`)}>
                 Activities
               </Button>
               <Button variant="outline" size="sm" onClick={() => onTogglePublish(l)}>

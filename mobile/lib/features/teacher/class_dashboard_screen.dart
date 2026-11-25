@@ -1,31 +1,28 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
+import 'class_portal_header.dart';
 
-/// Mirrors the web Dashboard: class stat cards + per-student progress list.
-class TeacherDashboardScreen extends ConsumerWidget {
-  const TeacherDashboardScreen({super.key});
+/// Class-scoped dashboard: is THIS class on track? Stat cards, class-average
+/// rings, then the students who need attention (roster lives in Students).
+class ClassDashboardScreen extends ConsumerWidget {
+  const ClassDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final students = ref.watch(classProgressProvider);
-    final completed = ref.watch(completedCountProvider);
-    final me = ref.watch(meProvider);
+    final cls = currentClass.value;
+    if (cls == null) return const Scaffold(body: SizedBox.shrink());
+    final classId = '${cls['id']}';
+    final students = ref.watch(classProgressProvider(classId));
+    final members = ref.watch(classMembersProvider(classId));
+    final completed = ref.watch(classCompletedProvider(classId));
 
     return Scaffold(
       body: Column(children: [
-        DSPageHeader(
-          child: SafeArea(
-            bottom: false,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Good Day, ${me.valueOrNull?['full_name'] ?? ''}!',
-                  style: DSText.h2),
-            ),
-          ),
-        ),
+        const ClassPortalHeader(),
         Expanded(child: students.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => DSEmptyState(
@@ -37,8 +34,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
               size: DSButtonSize.sm,
               leadingIcon: DSIconName.retry,
               onPressed: () {
-                ref.invalidate(classProgressProvider);
-                ref.invalidate(completedCountProvider);
+                ref.invalidate(classProgressProvider(classId));
+                ref.invalidate(classCompletedProvider(classId));
               },
               child: const Text('Try again'),
             ),
@@ -54,6 +51,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 : (both.fold<num>(0, (a, s) => a + ((s['post_score'] as num) - (s['pre_score'] as num))) /
                         both.length)
                     .round();
+            final pending = (members.valueOrNull ?? [])
+                .where((m) => m['status'] == 'pending')
+                .length;
             num? avgOf(String key) {
               final have = rows.map((s) => s[key] as num?).whereType<num>().toList();
               return have.isEmpty ? null : have.fold<num>(0, (a, b) => a + b) / have.length;
@@ -65,16 +65,26 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ('Post-Test', (avgOf('post_score') ?? 0) / 100, 4),
             ];
             final stats = <(String, String, DSIconName, DSStatPastel)>[
-              ('Total Students', '${rows.length}', DSIconName.students, DSStatPastel.blue),
-              ('Completed Lessons', '${completed.valueOrNull ?? 0}', DSIconName.done, DSStatPastel.mint),
+              ('Students', '${rows.length}', DSIconName.students, DSStatPastel.blue),
+              ('Completed', '${completed.valueOrNull ?? 0}', DSIconName.done, DSStatPastel.mint),
               ('Average Score', '$avg%', DSIconName.progress, DSStatPastel.yellow),
               ('Class Gain', '${gain >= 0 ? '+' : ''}$gain%', DSIconName.gain, DSStatPastel.purple),
+              ('Requests', '$pending', DSIconName.pending, DSStatPastel.yellow),
             ];
+
+            // Lowest scores first; nulls (no attempts) sort below 0.
+            final attention = [...rows]
+              ..sort((a, b) => ((a['quizzes_pct'] as num?) ?? -1)
+                  .compareTo((b['quizzes_pct'] as num?) ?? -1));
+            final flagged = attention
+                .where((r) => r['quizzes_pct'] == null || (r['quizzes_pct'] as num) < 70)
+                .take(5)
+                .toList();
 
             return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
               GridView.extent(
                 maxCrossAxisExtent: 260, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10, crossAxisSpacing: 10, mainAxisExtent: 96,
+                mainAxisSpacing: 10, crossAxisSpacing: 10, mainAxisExtent: 142,
                 children: [
                   for (final s in stats)
                     DSStatCard(icon: s.$3, value: s.$2, label: s.$1, pastel: s.$4),
@@ -105,28 +115,32 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         ]),
               ),
               const SizedBox(height: 20),
-              Text('Student Performance', style: DSText.title),
+              Text('Needs attention', style: DSText.title),
               const SizedBox(height: 8),
-              if (rows.isEmpty)
-                const DSCard(child: DSEmptyState(icon: DSIconName.students, title: 'No students yet')),
-              for (final s in rows)
+              if (flagged.isEmpty)
+                const DSCard(child: DSEmptyState(
+                    icon: DSIconName.done,
+                    title: "Everyone's on track",
+                    body: 'No students are behind on quizzes right now.')),
+              for (final s in flagged)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: DSListItemCard(
                     leading: DSAvatar(name: '${s['full_name'] ?? '?'}'),
                     title: Text('${s['full_name']}'),
-                    subtitle: Text('Pre ${s['pre_score'] ?? '–'} → Post ${s['post_score'] ?? '–'}'),
-                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                      SizedBox(
-                        width: 80,
-                        child: DSProgressBar(
-                          value: (((s['lessons_pct'] as num?) ?? 0) / 100).clamp(0.0, 1.0),
-                          size: DSProgressBarSize.sm,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text('${((s['lessons_pct'] as num?) ?? 0).round()}%', style: DSText.label),
-                    ]),
+                    subtitle: Text(s['quizzes_pct'] == null
+                        ? 'No quiz attempts yet'
+                        : 'Quiz average ${(s['quizzes_pct'] as num).round()}%'),
+                  ),
+                ),
+              if (flagged.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: DSButton(
+                    variant: DSButtonVariant.ghost,
+                    size: DSButtonSize.sm,
+                    onPressed: () => context.go('/teacher/students'),
+                    child: const Text('View all students'),
                   ),
                 ),
             ]));

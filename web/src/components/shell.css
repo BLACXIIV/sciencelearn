@@ -40,3 +40,8 @@
   .sh-brand span { display: inline; }
   .sh-main { padding: var(--ds-s4) var(--ds-s5); }
 }
+
+/* class-context header (AppLayout inside /teacher/c/:classId) */
+.sh-spread { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s3); flex-wrap: wrap; width: 100%; }
+.sh-actions { display: flex; align-items: center; gap: var(--ds-s3); flex-wrap: nowrap; }
+.sh-code { letter-spacing: 0.12em; }

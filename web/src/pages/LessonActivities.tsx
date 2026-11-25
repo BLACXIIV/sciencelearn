@@ -278,10 +278,10 @@ function AssessmentEditor({ assessmentId }: { assessmentId: string }) {
   );
 }
 
-export default function LessonActivities() {
-  const { lessonId = "" } = useParams();
+/** Assessment/quiz builder for one lesson — reused by the Activities page
+ *  and by the class portal's Create Quiz tab (behind a lesson picker). */
+export function ActivitiesBuilder({ lessonId }: { lessonId: string }) {
   const qc = useQueryClient();
-  const lesson = useQuery({ queryKey: ["lesson", lessonId], queryFn: () => fetchLesson(lessonId) });
   const assessments = useQuery({ queryKey: ["lesson-assessments", lessonId], queryFn: () => fetchLessonAssessments(lessonId) });
   const [open, setOpen] = useState<string | null>(null);
   const [kind, setKind] = useState<AssessmentKind>("topic_quiz");
@@ -310,18 +310,8 @@ export default function LessonActivities() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["lesson-assessments", lessonId] }),
   });
 
-  if (lesson.isLoading) return <p className="ds-body">Loading…</p>;
-  if (lesson.error) return <p className="td-err">{String(lesson.error)}</p>;
-
   return (
     <div className="td-stack">
-      <div>
-        <Link to={lesson.data?.class_id ? `/teacher/classes/${lesson.data.class_id}` : "/teacher/classes"} className="td-link">
-          ← Back to class
-        </Link>
-        <h2 className="ds-h2" style={{ margin: "var(--ds-s3) 0 0" }}>Activities for “{lesson.data?.title}”</h2>
-      </div>
-
       <Card variant="white">
         <h3 className="ds-h3" style={{ marginTop: 0 }}>New activity</h3>
         <div className="td-row3">
@@ -411,6 +401,27 @@ export default function LessonActivities() {
         }>
         <p className="ds-body">This removes the activity and its questions.</p>
       </Modal>
+    </div>
+  );
+}
+
+/** Per-lesson activities page — a heading over the shared ActivitiesBuilder. */
+export default function LessonActivities() {
+  const { lessonId = "" } = useParams();
+  const lesson = useQuery({ queryKey: ["lesson", lessonId], queryFn: () => fetchLesson(lessonId) });
+
+  if (lesson.isLoading) return <p className="ds-body">Loading…</p>;
+  if (lesson.error) return <p className="td-err">{String(lesson.error)}</p>;
+
+  return (
+    <div className="td-stack">
+      <div>
+        <Link to={lesson.data?.class_id ? `/teacher/c/${lesson.data.class_id}/lessons` : "/teacher"} className="td-link">
+          ← Back to lessons
+        </Link>
+        <h2 className="ds-h2" style={{ margin: "var(--ds-s3) 0 0" }}>Activities for “{lesson.data?.title}”</h2>
+      </div>
+      <ActivitiesBuilder lessonId={lessonId} />
     </div>
   );
 }

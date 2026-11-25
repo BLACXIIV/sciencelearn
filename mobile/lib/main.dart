@@ -21,9 +21,10 @@ import 'features/progress/progress_screen.dart';
 import 'features/review/review_screen.dart';
 import 'features/shell.dart';
 import 'features/teacher/teacher_shell.dart';
-import 'features/teacher/teacher_dashboard_screen.dart';
-import 'features/teacher/classes_screen.dart';
-import 'features/teacher/class_detail_screen.dart';
+import 'features/teacher/class_dashboard_screen.dart';
+import 'features/teacher/class_lessons_screen.dart';
+import 'features/teacher/class_quiz_screen.dart';
+import 'features/teacher/class_students_screen.dart';
 import 'features/teacher/users_screen.dart';
 
 // The defaults are the same public values web/.env ships in every build —
@@ -53,18 +54,31 @@ class _AuthRefresh extends ChangeNotifier {
 }
 
 final _router = GoRouter(
-  refreshListenable: Listenable.merge([_AuthRefresh(), classPicked]),
+  refreshListenable: Listenable.merge([_AuthRefresh(), classPicked, currentClass]),
   redirect: (context, state) {
     final loggedIn = Supabase.instance.client.auth.currentSession != null;
     const publicPages = {'/welcome', '/login', '/signup'};
-    final onPublicPage = publicPages.contains(state.matchedLocation);
-    if (!loggedIn) return onPublicPage ? null : '/welcome';
+    final loc = state.matchedLocation;
+    final onPublicPage = publicPages.contains(loc);
+    if (!loggedIn) {
+      // Signed out — drop the session's class context so the next login
+      // always re-gates at the picker.
+      classPicked.value = false;
+      currentClass.value = null;
+      return onPublicPage ? null : '/welcome';
+    }
     if (onPublicPage) return '/select-class';
     // Classroom gate: first screen of every app run — bounce any in-app
     // route back to the picker until a class is opened.
-    if (!classPicked.value && state.matchedLocation != '/select-class') {
-      return '/select-class';
+    if (loc.startsWith('/teacher')) {
+      // The whole teacher portal is scoped to currentClass; the global
+      // admin Users tab is the only classless teacher route.
+      if (loc != '/teacher/users' && currentClass.value == null) {
+        return '/select-class';
+      }
+      return null;
     }
+    if (!classPicked.value && loc != '/select-class') return '/select-class';
     return null;
   },
   routes: [
@@ -115,38 +129,39 @@ final _router = GoRouter(
           id: s.pathParameters['id']!,
           title: s.uri.queryParameters['t'] ?? 'Quiz'),
     ),
-    // Teacher/admin portal — same features as the web staff portal.
-    // Branch indexes: 0 dashboard, 1 classes, 2 users (admin), 3 account.
+    // Teacher/admin portal — class-scoped after /select-class.
+    // Branch indexes: 0 dashboard, 1 lessons, 2 quiz, 3 students, 4 users (admin).
     StatefulShellRoute.indexedStack(
       builder: (_, __, shell) => TeacherShell(shell: shell),
       branches: [
         StatefulShellBranch(routes: [
           GoRoute(
               path: '/teacher',
-              builder: (_, __) => const TeacherDashboardScreen()),
+              builder: (_, __) => const ClassDashboardScreen()),
         ]),
         StatefulShellBranch(routes: [
           GoRoute(
-              path: '/teacher/classes',
-              builder: (_, __) => const ClassesScreen()),
+              path: '/teacher/lessons',
+              builder: (_, __) => const ClassLessonsScreen()),
+        ]),
+        StatefulShellBranch(routes: [
           GoRoute(
-            path: '/teacher/class/:id',
-            builder: (_, s) => ClassDetailScreen(
-                cls: s.extra as Map<String, dynamic>? ??
-                    {'id': s.pathParameters['id']}),
-          ),
+              path: '/teacher/quiz',
+              builder: (_, __) => const ClassQuizScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(
+              path: '/teacher/students',
+              builder: (_, __) => const ClassStudentsScreen()),
         ]),
         StatefulShellBranch(routes: [
           GoRoute(
               path: '/teacher/users', builder: (_, __) => const UsersScreen()),
         ]),
-        StatefulShellBranch(routes: [
-          GoRoute(
-              path: '/teacher/account',
-              builder: (_, __) => const AccountScreen()),
-        ]),
       ],
     ),
+    // Full-screen sub-pages pushed over the shell (class header avatar → account).
+    GoRoute(path: '/teacher/account', builder: (_, __) => const AccountScreen()),
   ],
 );
 

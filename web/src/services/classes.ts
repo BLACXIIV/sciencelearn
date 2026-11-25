@@ -132,11 +132,60 @@ export async function joinClass(code: string): Promise<{ name: string; status: s
 // ---------- classroom gate ----------
 
 const PICKED_KEY = "sl-class-picked";
+const PICKED_ID_KEY = "sl-class-id";
 
 /** Set when the user leaves /select-classroom by entering (or creating) a class.
  *  sessionStorage = survives reloads within the tab session; a fresh tab
- *  re-gates, matching "choose a classroom after sign-in". */
-export const markClassPicked = () => sessionStorage.setItem(PICKED_KEY, "1");
+ *  re-gates, matching "choose a classroom after sign-in". The id lets /teacher
+ *  deep-route straight into the picked class portal. */
+export const markClassPicked = (classId?: string) => {
+  sessionStorage.setItem(PICKED_KEY, "1");
+  if (classId) sessionStorage.setItem(PICKED_ID_KEY, classId);
+};
 
 /** Route guards bounce to /select-classroom until this is true. */
 export const hasPickedClass = () => sessionStorage.getItem(PICKED_KEY) === "1";
+
+/** The class the teacher opened this session, if any. */
+export const pickedClassId = () => sessionStorage.getItem(PICKED_ID_KEY);
+
+/** Forget the picked class (sign-out, class deleted) — re-gates the portal. */
+export const clearPickedClass = () => {
+  sessionStorage.removeItem(PICKED_KEY);
+  sessionStorage.removeItem(PICKED_ID_KEY);
+};
+
+// ---------- class-scoped dashboard ----------
+
+/** One row per active member: lessons/quiz/pre-post metrics filtered to
+ *  this class's own lessons (v_class_student_progress, migration 0011). */
+export interface ClassStudentProgress {
+  class_id: string;
+  student_id: string;
+  full_name: string;
+  lessons_pct: number;
+  quizzes_pct: number | null;
+  pre_score: number | null;
+  post_score: number | null;
+}
+
+export async function fetchClassStudentProgress(classId: string): Promise<ClassStudentProgress[]> {
+  const { data, error } = await supabase
+    .from("v_class_student_progress")
+    .select("*")
+    .eq("class_id", classId)
+    .order("full_name");
+  if (error) throw error;
+  return (data ?? []) as ClassStudentProgress[];
+}
+
+/** Fully-completed lesson_progress rows inside this class only. */
+export async function fetchClassCompletedCount(classId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("lesson_progress")
+    .select("*, lessons!inner(class_id)", { count: "exact", head: true })
+    .eq("lessons.class_id", classId)
+    .eq("percent", 100);
+  if (error) throw error;
+  return count ?? 0;
+}
