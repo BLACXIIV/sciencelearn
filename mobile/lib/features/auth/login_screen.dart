@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'auth_sheet.dart';
+import 'auth_sheet_host.dart';
 
-/// /login route — opens the shared auth sheet on the Log in tab.
+/// /login route â€” opens the shared auth sheet on the Log in tab.
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 

@@ -2,18 +2,16 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../design_system/design_system.dart';
-import '../landing/landing_screen.dart';
 
 enum AuthTab { login, signup }
 
-/// Opens the shared auth bottom sheet (Sign up tab by default).
+/// Opens the shared auth bottom sheet (Sign in tab by default).
 /// Closes by drag-down, barrier tap, or Android back.
 Future<void> showAuthSheet(BuildContext context,
-        {AuthTab initial = AuthTab.signup}) =>
+        {AuthTab initial = AuthTab.login}) =>
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -25,34 +23,6 @@ Future<void> showAuthSheet(BuildContext context,
           duration: Duration(milliseconds: 320), curve: Curves.easeOutCubic),
       builder: (_) => _AuthSheet(initial: initial),
     );
-
-/// Host for the /login and /signup routes: renders the landing page and
-/// immediately opens the auth sheet on the matching tab. When the sheet
-/// closes without signing in, fall back to /welcome.
-class AuthSheetHost extends StatefulWidget {
-  final AuthTab tab;
-  const AuthSheetHost({super.key, required this.tab});
-
-  @override
-  State<AuthSheetHost> createState() => _AuthSheetHostState();
-}
-
-class _AuthSheetHostState extends State<AuthSheetHost> {
-  @override
-  void initState() {
-    super.initState();
-    // Let the navigator settle before pushing the sheet (first-frame races at
-    // app start can swallow the open call).
-    Future.delayed(const Duration(milliseconds: 350), () async {
-      if (!mounted) return;
-      await showAuthSheet(context, initial: widget.tab);
-      if (mounted) context.go('/welcome');
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) => const LandingScreen();
-}
 
 /// White sheet: the Storyset art is the sheet's background — a blurred
 /// copy bleeds off the top-right corner behind the handle + switcher.

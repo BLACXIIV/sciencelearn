@@ -517,12 +517,12 @@ class Repo {
         .from('assessments')
         .select('id, lessons!inner(class_id)')
         .eq('is_published', true));
-    final done = List<Json>.from(await sb
-            .from('attempts')
-            .select('assessment_id')
-            .eq('student_id', uid))
-        .map((r) => '${r['assessment_id']}')
-        .toSet();
+    // The RPC (not an attempts read) counts submitted-but-unreleased attempts
+    // that "attempts own read" hides — otherwise they show as still to do.
+    final done = {
+      for (final a in (await sb.rpc('my_attempted_assessment_ids') as List))
+        '$a'
+    };
     final m = <String, int>{};
     for (final a in acts) {
       if (done.contains('${a['id']}')) continue;

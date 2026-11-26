@@ -99,13 +99,15 @@ export async function fetchEnrolledClasses(): Promise<EnrolledClass[]> {
 /** class_id -> count of published assessments the student hasn't attempted
  *  ("N to do" on the picker's class cards). */
 export async function fetchAwaitingByClass(): Promise<Record<string, number>> {
-  const [{ data: acts, error: e1 }, { data: done, error: e2 }] = await Promise.all([
+  const [{ data: acts, error: e1 }, { data: doneIds, error: e2 }] = await Promise.all([
     supabase.from("assessments").select("id, lessons!inner(class_id)").eq("is_published", true),
-    supabase.from("attempts").select("assessment_id"),
+    // The RPC (not an attempts read) counts submitted-but-unreleased attempts
+    // that "attempts own read" hides — otherwise they show as still to do.
+    supabase.rpc("my_attempted_assessment_ids"),
   ]);
   if (e1) throw e1;
   if (e2) throw e2;
-  const doneSet = new Set((done ?? []).map((r) => (r as { assessment_id: string }).assessment_id));
+  const doneSet = new Set((doneIds ?? []) as string[]);
   const m: Record<string, number> = {};
   for (const a of (acts ?? []) as unknown as {
     id: string;

@@ -102,7 +102,7 @@ export default function LandingPage() {
               {NAV_LINKS.map((l) => (
                 <a key={l.label} className="ld-navlink d" href={l.href}>{l.label}</a>
               ))}
-              <Link className="d" to="/signup"><Button variant="white" size="sm">Get started</Button></Link>
+              <Link className="d" to="/login"><Button variant="white" size="sm">Get started</Button></Link>
               <Link className="m" to="/login"><Button variant="white" size="sm">Sign in</Button></Link>
             </div>
           </nav>
@@ -114,8 +114,8 @@ export default function LandingPage() {
               <p className="ds-body ld-sub d">Science lessons, quizzes and progress tracking for your class, on your phone or on the web.</p>
               <p className="ds-body ld-sub m">Science lessons, quizzes and progress tracking for your class.</p>
               <div className="ld-cta">
-                <Link to="/signup"><Button variant="mint" fullWidth>Start learning</Button></Link>
-                <Link className="d" to="/signup"><Button variant="ghost">I&rsquo;m a teacher</Button></Link>
+                <Link to="/login"><Button variant="mint" fullWidth>Start learning</Button></Link>
+                <Link className="d" to="/login"><Button variant="ghost">I&rsquo;m a teacher</Button></Link>
               </div>
             </div>
 

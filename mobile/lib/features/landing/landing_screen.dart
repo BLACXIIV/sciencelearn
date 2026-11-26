@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../design_system/design_system.dart';
+import '../auth/auth_sheet.dart';
 
 /// Public landing screen — rebuilt on the design system only: DSButton,
 /// DSCard, DSChip, DSQuizCard/DSQuizOption, DSProgressBar, DSStickerBadge,
@@ -85,8 +86,15 @@ class LandingScreen extends StatelessWidget {
 
   bool get _loggedIn => Supabase.instance.client.auth.currentSession != null;
 
-  void _openMission(BuildContext context, String dest) =>
-      context.push(_loggedIn ? dest : '/login');
+  void _openMission(BuildContext context, String dest) {
+    if (_loggedIn) {
+      context.push(dest);
+    } else {
+      // Open the sheet in place — pushing /login first would play a whole
+      // page transition before the sheet even slides up.
+      showAuthSheet(context, initial: AuthTab.login);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +112,7 @@ class LandingScreen extends StatelessWidget {
             _section(
                 'How it works',
                 'Built around your class, from the first code to the final score.',
-                _stepCards(),
-                topPad: 0),
+                _stepCards()),
             _section(
                 'Quizzes for every kind of question',
                 'Multiple-choice, identification, true or false, and problem-solving quizzes.',
@@ -152,7 +159,7 @@ class LandingScreen extends StatelessWidget {
             DSButton(
               variant: DSButtonVariant.white,
               size: DSButtonSize.sm,
-              onPressed: () => context.push('/login'),
+              onPressed: () => showAuthSheet(context, initial: AuthTab.login),
               child: const Text('Sign in'),
             ),
           ]),
@@ -226,7 +233,7 @@ class LandingScreen extends StatelessWidget {
           DSButton(
             variant: DSButtonVariant.mint,
             fullWidth: true,
-            onPressed: () => context.push('/signup'),
+            onPressed: () => showAuthSheet(context),
             child: const Text('Start learning'),
           ),
         ]),
@@ -280,8 +287,14 @@ class LandingScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(_missions[i].$3, style: DSText.h3),
                     const SizedBox(height: 4),
-                    Text(_missions[i].$4,
-                        style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
+                    // Reserve two caption lines so every card has the same
+                    // intrinsic height — a one-line subtitle can't shrink it.
+                    SizedBox(
+                      height: 40,
+                      child: Text(_missions[i].$4,
+                          maxLines: 2, overflow: TextOverflow.ellipsis,
+                          style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
+                    ),
                   ]),
             ),
           ),
@@ -303,7 +316,9 @@ class LandingScreen extends StatelessWidget {
 
   // ---- 3 · how it works ----
 
-  Widget _stepCards() => Column(children: [
+  Widget _stepCards() => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         for (var i = 0; i < _steps.length; i++)
           Padding(
             padding: EdgeInsets.only(bottom: i == _steps.length - 1 ? 0 : 14),
@@ -322,8 +337,14 @@ class LandingScreen extends StatelessWidget {
                     ),
                     Text(_steps[i].$2, style: DSText.h3),
                     const SizedBox(height: 6),
-                    Text(_steps[i].$3,
-                        style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
+                    // Reserve two caption lines so every step card has the
+                    // same intrinsic height.
+                    SizedBox(
+                      height: 40,
+                      child: Text(_steps[i].$3,
+                          maxLines: 2, overflow: TextOverflow.ellipsis,
+                          style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
+                    ),
                   ]),
             ),
           ),

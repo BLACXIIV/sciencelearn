@@ -32,10 +32,34 @@ Deno.serve(async (req) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return json({ error: "unauthorized" }, 401);
 
-  const { action, key, folder = "uploads", filename = "file", contentType } = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "bad json" }, 400);
+  }
+  const { action, key, folder = "uploads", filename = "file", contentType } = body;
 
   if (action === "get") {
-    const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: key }), { expiresIn: 3600 });
+    const k = String(key ?? "");
+    // Keys are folder/uuid-filename; anything else can't be one of ours, and
+    // rejecting it also keeps the .or() filter below injection-proof.
+    if (!/^[\w\-./]+$/.test(k)) return json({ error: "bad key" }, 400);
+    // Avatars render for any signed-in user (roster, teacher names on cards).
+    // Other objects only sign when a lesson referencing the key is visible
+    // under the caller's own RLS — this client carries their JWT, so a zero-row
+    // result means they may not read the file either.
+    let allowed = k.startsWith("avatars/");
+    if (!allowed) {
+      const { data: lesson } = await supabase
+        .from("lessons")
+        .select("id")
+        .or(`thumbnail_key.eq."${k}",content_key.eq."${k}"`)
+        .limit(1);
+      allowed = (lesson?.length ?? 0) > 0;
+    }
+    if (!allowed) return json({ error: "forbidden" }, 403);
+    const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: k }), { expiresIn: 3600 });
     return json({ url });
   }
 

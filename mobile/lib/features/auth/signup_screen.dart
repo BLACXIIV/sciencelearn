@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 
 import 'auth_sheet.dart';
+import 'auth_sheet_host.dart';
 
 /// /signup route — opens the shared auth sheet on the Sign up tab.
 class SignupScreen extends StatelessWidget {
