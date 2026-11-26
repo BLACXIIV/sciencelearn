@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
 import TopNav from "./TopNav";
 import { Avatar, Badge, Icon, NavBar, type NavSection } from "../design-system";
 import { useAuth } from "../hooks/useAuth";
@@ -35,6 +35,16 @@ export default function AppLayout() {
     enabled: !!avatarKey,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Ownership guard — the whole /teacher/c/:classId tree requires the class
+  // to belong to this teacher (or the viewer to be an admin). RLS already
+  // blocks writes; this stops the read-side leak (name, join code, counts).
+  if (
+    classId && cls.data && profile &&
+    cls.data.teacher_id !== profile.id && profile.role !== "admin"
+  ) {
+    return <Navigate to="/select-classroom" replace />;
+  }
 
   const base = classId ? `/teacher/c/${classId}` : null;
   const pending = (members.data ?? []).filter((m) => m.status === "pending").length;
@@ -73,7 +83,9 @@ export default function AppLayout() {
   // Exact match wins; otherwise longest prefix — but the bare class root only
   // matches itself (Dashboard shouldn't stay lit on every sub-page).
   const keys = sections.flatMap((s) => s.items.map((i) => i.key));
-  const active = keys.includes(path)
+  const active = path.startsWith(`${base}/reports/`)
+    ? `${base}/students` // student report lives under the roster
+    : keys.includes(path)
     ? path
     : keys.filter((k) => k !== base).sort((a, b) => b.length - a.length)
         .find((k) => path.startsWith(`${k}/`));

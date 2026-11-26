@@ -60,12 +60,19 @@ class DSStatCard extends StatelessWidget {
           child: Center(child: DSIcon(icon, size: 22, color: DSColors.navy)),
         ),
         Text(value,
-            style: DSText.h3.copyWith(fontSize: 26, color: DSColors.navy)),
+            style: DSText.h3.copyWith(fontSize: 26, color: DSColors.navy),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
         Text(label,
-            style: DSText.bodySm.copyWith(
-                fontWeight: FontWeight.w600, color: DSColors.inkSoft)),
+            style: DSText.bodySm
+                .copyWith(fontWeight: FontWeight.w600, color: DSColors.inkSoft),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
         if (note != null)
-          Text(note!, style: DSText.caption.copyWith(color: DSColors.muted)),
+          Text(note!,
+              style: DSText.caption.copyWith(color: DSColors.muted),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
         if (action != null)
           Padding(padding: const EdgeInsets.only(top: 8), child: action!),
       ],

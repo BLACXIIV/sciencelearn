@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
@@ -24,7 +24,10 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
   bool _err = false;
 
   Future<void> _join() async {
-    setState(() { _busy = true; _msg = null; });
+    setState(() {
+      _busy = true;
+      _msg = null;
+    });
     try {
       final r = await ref.read(repoProvider).joinClass(_code.trim());
       _code = '';
@@ -45,7 +48,8 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
   Widget build(BuildContext context) {
     final classes = ref.watch(enrolledClassesProvider);
     return Scaffold(
-      body: MaxWidth(child: Column(children: [
+      body: MaxWidth(
+          child: Column(children: [
         DSPageHeader(
           compact: true,
           child: SafeArea(
@@ -53,34 +57,40 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
             child: Text('My classes', style: DSText.h2),
           ),
         ),
-        Expanded(child: ListView(padding: const EdgeInsets.all(16), children: [
-          DSCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text('Join a class', style: DSText.title),
-            const SizedBox(height: 10),
-            Row(children: [
-              Expanded(child: DSCodeInput(
-                value: _code,
-                onChanged: (v) => setState(() => _code = v),
-                enabled: !_busy,
-              )),
-              const SizedBox(width: 8),
-              DSButton(
-                loading: _busy,
-                disabled: _busy || _code.trim().isEmpty,
-                onPressed: _join,
-                child: const Text('Join'),
-              ),
-            ]),
-            if (_msg != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(_msg!, style: DSText.caption.copyWith(
-                    color: _err ? DSColors.error : DSColors.success)),
-              ),
-          ])),
+        Expanded(
+            child: ListView(padding: const EdgeInsets.all(16), children: [
+          DSCard(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                Text('Join a class', style: DSText.title),
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(
+                      child: DSCodeInput(
+                    value: _code,
+                    onChanged: (v) => setState(() => _code = v),
+                    enabled: !_busy,
+                  )),
+                  const SizedBox(width: 8),
+                  DSButton(
+                    loading: _busy,
+                    disabled: _busy || _code.trim().isEmpty,
+                    onPressed: _join,
+                    child: const Text('Join'),
+                  ),
+                ]),
+                if (_msg != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(_msg!,
+                        style: DSText.caption.copyWith(
+                            color: _err ? DSColors.error : DSColors.success)),
+                  ),
+              ])),
           const SizedBox(height: 16),
           classes.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: DSLoadingIndicator()),
             error: (e, _) => DSEmptyState(
               icon: DSIconName.offline,
               title: "Couldn't load this right now",
@@ -95,8 +105,11 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
             ),
             data: (rows) {
               if (rows.isEmpty) {
-                return const DSCard(child: DSEmptyState(icon: DSIconName.students,
-                    title: 'No classes yet', body: 'Get a class code from your teacher.'));
+                return const DSCard(
+                    child: DSEmptyState(
+                        icon: DSIconName.students,
+                        title: 'No classes yet',
+                        body: 'Get a class code from your teacher.'));
               }
               return Column(children: [
                 for (final e in rows)
@@ -104,17 +117,23 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: e['status'] == 'active'
                         ? DSListItemCard(
-                            onTap: () => context.push('/class/${e['class_id']}?name=${Uri.encodeComponent('${e['classes']?['name'] ?? 'Class'}')}'),
-                            leading: const DSIcon(DSIconName.school, size: 20, color: DSColors.blue),
+                            onTap: () => context.push(
+                                '/class/${e['class_id']}?name=${Uri.encodeComponent('${e['classes']?['name'] ?? 'Class'}')}'),
+                            leading: const DSIcon(DSIconName.school,
+                                size: 20, color: DSColors.blue),
                             title: Text('${e['classes']?['name'] ?? 'Class'}'),
-                            trailing: const DSIcon(DSIconName.chevron, color: DSColors.muted),
+                            trailing: const DSIcon(DSIconName.chevron,
+                                color: DSColors.muted),
                           )
                         : DSListItemCard(
                             pending: true,
-                            leading: const DSIcon(DSIconName.pending, size: 20, color: DSColors.muted),
+                            leading: const DSIcon(DSIconName.pending,
+                                size: 20, color: DSColors.muted),
                             title: Text('${e['classes']?['name'] ?? 'Class'}'),
-                            subtitle: const Text('Waiting for teacher approval'),
-                            trailing: const DSBadge(tone: DSBadgeTone.sun, child: Text('Pending')),
+                            subtitle:
+                                const Text('Waiting for teacher approval'),
+                            trailing: const DSBadge(
+                                tone: DSBadgeTone.sun, child: Text('Pending')),
                           ),
                   ),
               ]);

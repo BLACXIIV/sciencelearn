@@ -11,13 +11,14 @@ Future<T?> showDSBottomSheet<T>(
   BuildContext context, {
   required Widget child,
   bool isDismissible = true,
+  Color? barrierColor,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     isDismissible: isDismissible,
-    barrierColor: Colors.black.withValues(alpha: 0.25),
+    barrierColor: barrierColor ?? Colors.black.withValues(alpha: 0.25),
     backgroundColor: Colors.transparent,
     transitionAnimationController: null,
     builder: (context) => DSBottomSheet(child: child),
@@ -37,27 +38,37 @@ class DSBottomSheet extends StatelessWidget {
       child: Container(
         decoration: const BoxDecoration(
           color: DSColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(DSRadii.sheet)),
         ),
         child: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-                DSSpacing.s5, 12, DSSpacing.s5, DSSpacing.s5),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: DSColors.track,
-                    borderRadius: DSRadii.pillBr,
+          // ListTile/InkWell need a Material ancestor below this Container's
+          // painted background — without it they can't ink and (in debug)
+          // ListTile throws, which would break every menu inside a sheet.
+          child: Material(
+            color: Colors.transparent,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(DSRadii.sheet)),
+            clipBehavior: Clip.antiAlias,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                  DSSpacing.s5, 12, DSSpacing.s5, DSSpacing.s5),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: DSColors.track,
+                      borderRadius: DSRadii.pillBr,
+                    ),
                   ),
-                ),
-                child,
-              ],
+                  child,
+                ],
+              ),
             ),
           ),
         ),

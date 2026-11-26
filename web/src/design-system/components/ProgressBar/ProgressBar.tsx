@@ -1,7 +1,7 @@
 import "./ProgressBar.css";
 
 export type ProgressBarSize = "lg" | "sm";
-export type ProgressBarTone = "blue" | "mint" | "sun" | "success";
+export type ProgressBarTone = "blue" | "mint" | "sun" | "success" | "teal";
 
 export interface ProgressBarProps {
   /** 0–100. */

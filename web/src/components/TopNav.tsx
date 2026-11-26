@@ -10,8 +10,11 @@ function pageTitle(path: string): string {
   if (path === "/teacher/users") return "Users";
   if (path === "/teacher/account") return "Account";
   const m = path.match(/^\/teacher\/c\/[^/]+(?:\/(.*))?$/);
+  if (m?.[1]?.startsWith("reports/")) return "Reports / student";
   if (m) {
-    switch (m[1]) {
+    // Match the first segment — e.g. "lessons/<id>/activities" still titles
+    // "Lessons" (the builder lives under the lessons tree).
+    switch (m[1]?.split("/")[0]) {
       case undefined: return "Dashboard";
       case "lessons": return "Lessons";
       case "quiz": return "Create Quiz";
@@ -39,7 +42,7 @@ export default function TopNav() {
   return (
     <div className="sh-top">
       <span className="sh-title">{pageTitle(path)}</span>
-      <Link to="/teacher/account" className="sh-profile">
+      <Link to="/teacher/account" className="sh-profile edge-3">
         <span className="sh-pnm">{profile?.full_name ?? "…"}</span>
         <Avatar name={profile?.full_name ?? ""} src={url.data} size={32} />
         <Icon name="chevron" size={16} color="var(--ds-muted)" />

@@ -39,10 +39,13 @@ class RoleGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
-    if (me.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final meV = me.valueOrNull;
+    // Gate on a missing VALUE, not isLoading: auth refresh emits AsyncLoading
+    // with the previous value attached — blanking on that flashes white.
+    if (meV == null && me.isLoading) {
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
-    if (me.hasError) {
+    if (meV == null && me.hasError) {
       return Scaffold(
         body: DSEmptyState(
           icon: DSIconName.offline,
@@ -61,7 +64,7 @@ class RoleGate extends ConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) GoRouter.maybeOf(context)?.go('/teacher');
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
     return child;
   }

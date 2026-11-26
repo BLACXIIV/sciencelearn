@@ -37,9 +37,15 @@ class _DSIconButtonState extends State<DSIconButton> {
       button: true,
       label: widget.label,
       child: GestureDetector(
-        onTapDown: (_) { if (!_inactive) setState(() => _pressed = true); },
-        onTapUp: (_) { if (_pressed) setState(() => _pressed = false); },
-        onTapCancel: () { if (_pressed) setState(() => _pressed = false); },
+        onTapDown: (_) {
+          if (!_inactive) setState(() => _pressed = true);
+        },
+        onTapUp: (_) {
+          if (_pressed) setState(() => _pressed = false);
+        },
+        onTapCancel: () {
+          if (_pressed) setState(() => _pressed = false);
+        },
         onTap: _inactive ? null : widget.onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
@@ -55,7 +61,8 @@ class _DSIconButtonState extends State<DSIconButton> {
           ),
           child: Opacity(
             opacity: widget.disabled ? 0.5 : 1,
-            child: Center(child: DSIcon(widget.icon, size: 20, color: DSColors.ink)),
+            child: Center(
+                child: DSIcon(widget.icon, size: 20, color: DSColors.ink)),
           ),
         ),
       ),

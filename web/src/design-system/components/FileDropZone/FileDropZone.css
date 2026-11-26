@@ -1,0 +1,48 @@
+/* FileDropZone — dashed 2px edge-white tile; the transparent file input
+   covers the zone so any click opens the picker and focus lands there. */
+.ds-drop {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--ds-s3);
+  min-height: 72px;
+  padding: var(--ds-s3) var(--ds-s4);
+  border: 2px dashed var(--ds-edge-white);
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  cursor: pointer;
+}
+.ds-drop:hover, .ds-drop.on { border-color: var(--ds-blue); }
+.ds-drop.on { background: var(--ds-paper); }
+.ds-drop:focus-within { outline: 3px solid var(--ds-blue); outline-offset: 2px; }
+.ds-drop-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.ds-drop-ic {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ds-r-sm);
+  background: var(--ds-pastel-blue);
+  color: var(--ds-ink);
+}
+.ds-drop-body { flex: 1; min-width: 0; }
+.ds-drop-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 700 14px/1.3 var(--ds-font-display);
+  color: var(--ds-navy);
+}
+.ds-drop-hint { display: block; font: 400 12px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+.ds-drop-browse { flex: none; font: 700 13px/1 var(--ds-font-display); color: var(--ds-blue); }
+.ds-drop-x { position: relative; z-index: 1; flex: none; }

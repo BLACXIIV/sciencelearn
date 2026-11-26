@@ -189,7 +189,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
       future: repo.questions(widget.id),
       builder: (context, snap) {
         if (!snap.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: DSLoadingIndicator());
         }
         final qs = snap.data!;
         if (_qi >= qs.length) _qi = qs.length - 1;

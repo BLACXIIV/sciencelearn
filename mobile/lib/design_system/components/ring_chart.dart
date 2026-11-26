@@ -57,7 +57,10 @@ class _RingPainter extends CustomPainter {
   _RingPainter(this.slices, this.thickness);
 
   static const _seriesColors = [
-    DSColors.chart1, DSColors.chart2, DSColors.chart3, DSColors.chart4,
+    DSColors.chart1,
+    DSColors.chart2,
+    DSColors.chart3,
+    DSColors.chart4,
   ];
 
   @override

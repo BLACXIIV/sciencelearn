@@ -37,7 +37,8 @@ class DSCheckbox extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(label, style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
+              child: Text(label,
+                  style: DSText.bodySm.copyWith(color: DSColors.inkSoft)),
             ),
           ],
         ),

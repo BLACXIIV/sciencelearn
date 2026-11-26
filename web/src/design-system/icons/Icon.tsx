@@ -1,7 +1,8 @@
 import {
   ArrowLeft, Atom, Award, BarChart3, BookOpen, Camera, Check, CheckCircle2,
   ChevronRight, CircleAlert, ClipboardCheck, ClipboardList, Clock, CloudOff,
-  Copy, ExternalLink, Eye, EyeOff, FlaskConical, GraduationCap, Home, Inbox,
+  Copy, Download, Ellipsis, ExternalLink, Eye, EyeOff, FlaskConical, Globe, GraduationCap,
+  Home, Inbox,
   Info, KeyRound, Layers, LayoutDashboard, Lightbulb, ListChecks, Lock,
   LogIn, LogOut, Mail, MailCheck, Pencil, Play, Plus, Presentation, Puzzle,
   RefreshCw, School, Search, Settings, Shield, Sigma, Timer, Trash2,
@@ -16,7 +17,7 @@ const registry = {
   assessment: ClipboardCheck, quiz: ListChecks, preTest: ClipboardList,
   postTest: Trophy, review: Layers, formulas: Sigma, keyTerms: KeyRound,
   puzzle: Puzzle, science: FlaskConical, atom: Atom, school: GraduationCap,
-  university: School, presentation: Presentation, shield: Shield,
+  university: School, presentation: Presentation, shield: Shield, globe: Globe,
   back: ArrowLeft, login: LogIn, signOut: LogOut, camera: Camera,
   done: CheckCircle2, settings: Settings, gain: TrendingUp, retry: RefreshCw,
   offline: CloudOff, history: Clock, inbox: Inbox, info: Info, lock: Lock,
@@ -24,6 +25,7 @@ const registry = {
   chevron: ChevronRight, alert: CircleAlert, openExternal: ExternalLink,
   copy: Copy, play: Play, add: Plus, tip: Lightbulb, pending: Timer,
   award: Award, delete: Trash2, search: Search, close: X, check: Check,
+  more: Ellipsis, export: Download,
 } as const;
 
 export type IconName = keyof typeof registry;

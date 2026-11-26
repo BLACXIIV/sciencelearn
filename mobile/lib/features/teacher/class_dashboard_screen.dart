@@ -1,12 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
+import 'class_portal_header.dart';
 
 /// Class-scoped dashboard (mobile): navy class hero (switch + account tiles),
 /// pastel stat tiles + pending-request alert card, class-average rings, then
@@ -25,10 +23,10 @@ class ClassDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: Column(children: [
-        _Hero(cls: cls),
+        ClassHeroHeader(cls: cls),
         Expanded(
           child: students.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: DSLoadingIndicator()),
             error: (e, _) => DSEmptyState(
               icon: DSIconName.offline,
               title: "Couldn't load this right now",
@@ -103,13 +101,19 @@ class ClassDashboardScreen extends ConsumerWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    GridView.count(
-                      crossAxisCount: 2,
+                    GridView(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 1.05,
+                      // Fixed row height — an aspect-ratio cell overflows on
+                      // narrow screens (content is ~160px tall regardless of
+                      // cell width).
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisExtent: 172,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                      ),
                       children: [
                         DSStatCard(
                           filled: true,
@@ -163,35 +167,47 @@ class ClassDashboardScreen extends ConsumerWidget {
                         children: [
                           Text('Class averages', style: DSText.title),
                           const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              for (final r in classRings)
-                                Column(children: [
-                                  DSRingChart(
-                                    size: 72,
-                                    thickness: 12,
-                                    slices: r.$2 == null
-                                        ? const []
-                                        : [
-                                            DSRingSlice(r.$2!.toDouble(),
-                                                series: r.$3),
-                                            DSRingSlice(100 - r.$2!.toDouble(),
-                                                series: 0),
-                                          ],
-                                    center: Text(
-                                      r.$2 == null ? '—' : '${r.$2!.round()}%',
-                                      style:
-                                          DSText.label.copyWith(fontSize: 12),
+                          Row(children: [
+                            for (final r in classRings)
+                              Expanded(
+                                child: Column(children: [
+                                  // FittedBox scales the fixed 72px ring down
+                                  // to its share — 4×72 overflows ~320px cards.
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: SizedBox(
+                                      width: 72,
+                                      height: 72,
+                                      child: DSRingChart(
+                                        size: 72,
+                                        thickness: 12,
+                                        slices: r.$2 == null
+                                            ? const []
+                                            : [
+                                                DSRingSlice(r.$2!.toDouble(),
+                                                    series: r.$3),
+                                                DSRingSlice(
+                                                    100 - r.$2!.toDouble(),
+                                                    series: 0),
+                                              ],
+                                        center: Text(
+                                          r.$2 == null
+                                              ? '—'
+                                              : '${r.$2!.round()}%',
+                                          style: DSText.label
+                                              .copyWith(fontSize: 12),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(r.$1,
                                       style: DSText.caption
-                                          .copyWith(color: DSColors.muted)),
+                                          .copyWith(color: DSColors.muted),
+                                      overflow: TextOverflow.ellipsis),
                                 ]),
-                            ],
-                          ),
+                              ),
+                          ]),
                         ],
                       ),
                     ),
@@ -251,197 +267,6 @@ class ClassDashboardScreen extends ConsumerWidget {
           ),
         ),
       ]),
-    );
-  }
-}
-
-/// Navy hero: bleeds to the screen edges — full width, top corners run under
-/// the status bar (only the bottom corners round). Content is padded for the
-/// status bar instead of wrapping the card in SafeArea.
-class _Hero extends StatelessWidget {
-  final Json cls;
-  const _Hero({required this.cls});
-
-  @override
-  Widget build(BuildContext context) {
-    // Transparent status bar + light icons — the navy hero shows through it
-    // instead of Android's dark scrim strip.
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-      ),
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [DSColors.navyDeep, DSColors.navy],
-          ),
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-          // The 8px edge is a bottom border INSIDE the rect — a boxShadow would
-          // overflow into the ListView and get painted over by scrolled cards.
-          border: Border(
-            bottom: BorderSide(color: DSColors.edgeNavy, width: 8),
-          ),
-        ),
-        // ClipRRect lets the dashed ring bleed past the card edge while still
-        // clipping it to the rounded shape; padding lives inside the Stack.
-        child: ClipRRect(
-          borderRadius:
-              const BorderRadius.vertical(bottom: Radius.circular(30)),
-          child: Stack(children: [
-            const Positioned(
-              top: -45,
-              right: -55,
-              child: CustomPaint(
-                size: Size(170, 170),
-                painter: _DashedRingPainter(),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                  20, MediaQuery.paddingOf(context).top + 18, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${cls['name'] ?? 'Class'}',
-                          style: DSText.h1
-                              .copyWith(fontSize: 28, color: DSColors.surface),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      _HeroTile(
-                        icon: DSIconName.school,
-                        label: 'Switch class',
-                        onTap: () {
-                          currentClass.value = null;
-                          classPicked.value = false;
-                          context.go('/select-class');
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      _HeroTile(
-                        icon: DSIconName.account,
-                        label: 'Account',
-                        onTap: () => context.push('/teacher/account'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Row(children: [
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                            ClipboardData(text: '${cls['code'] ?? ''}'));
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(const SnackBar(
-                              content: Text('Class code copied')));
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: DSColors.mint,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: dsEdge(DSColors.edgeMint, h: 4),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Text(
-                            '${cls['code'] ?? ''}',
-                            style: DSText.label.copyWith(
-                                fontSize: 15,
-                                letterSpacing: 1.8,
-                                color: DSColors.navy),
-                          ),
-                          const SizedBox(width: 8),
-                          const DSIcon(DSIconName.copy,
-                              size: 15, color: DSColors.navy),
-                        ]),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                      child: Text(
-                        cls['join_policy'] == 'approval'
-                            ? 'Approval required'
-                            : 'Instant join',
-                        style: DSText.caption.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: DSColors.pastelBlue),
-                      ),
-                    ),
-                  ]),
-                ],
-              ),
-            ),
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-/// Decorative broken circle bleeding off the hero's top-right corner.
-class _DashedRingPainter extends CustomPainter {
-  const _DashedRingPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..color = Colors.white.withValues(alpha: 0.22);
-    final rect = Rect.fromCircle(
-        center: size.center(Offset.zero), radius: size.width / 2 - 2);
-    const dashes = 14;
-    const sweep = 2 * math.pi / dashes;
-    for (var i = 0; i < dashes; i++) {
-      canvas.drawArc(rect, i * sweep, sweep * 0.65, false, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedRingPainter old) => false;
-}
-
-/// White rounded tile with a navy icon — hero actions on the navy panel.
-class _HeroTile extends StatelessWidget {
-  final DSIconName icon;
-  final String label;
-  final VoidCallback onTap;
-  const _HeroTile(
-      {required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: DSColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: dsEdge(DSColors.edgeWhite, h: 4),
-        ),
-        child: Center(child: DSIcon(icon, size: 22, color: DSColors.navy)),
-      ),
     );
   }
 }
@@ -512,7 +337,7 @@ class _SoftChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: DSColors.pastelYellow,
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: DSRadii.pillBr,
       ),
       child: Text(text,
           textAlign: TextAlign.center,

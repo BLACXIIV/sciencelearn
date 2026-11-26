@@ -7,9 +7,9 @@
   gap: var(--ds-s6);
   margin-bottom: var(--ds-s6);
   padding: var(--ds-s6) var(--ds-s7);
-  border-radius: 32px;
+  border-radius: var(--ds-r-panel);
   background: linear-gradient(135deg, var(--ds-navy-deep) 0%, var(--ds-navy) 100%);
-  box-shadow: 0 8px 0 var(--ds-edge-navy);
+  --ds-edge: var(--ds-edge-navy); /* edge-8 utility carries the shadow */
   color: var(--ds-surface);
 }
 .td-hero-info { min-width: 0; }
@@ -30,9 +30,9 @@
 .td-hero-row { display: flex; align-items: center; gap: var(--ds-s4); flex-wrap: wrap; }
 .td-code-chip {
   padding: 12px 20px;
-  border-radius: 14px;
+  border-radius: var(--ds-r-input);
   background: var(--ds-mint);
-  box-shadow: 0 4px 0 var(--ds-edge-mint);
+  --ds-edge: var(--ds-edge-mint); /* edge-4 */
   color: var(--ds-navy);
   font: 800 16px/1 var(--ds-font-display);
   letter-spacing: 0.12em;
@@ -115,4 +115,608 @@
   .td-rings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .td-quick { flex-direction: column; }
   .td-quick .ds-btn { width: 100%; }
+}
+
+/* ---------- Students screen ---------- */
+
+/* join-code strip — navy panel like the dashboard hero, slimmer */
+.ts-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s5);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-s5);
+  padding: var(--ds-s5) var(--ds-s6);
+  border-radius: var(--ds-r-strip);
+  background: linear-gradient(135deg, var(--ds-navy-deep) 0%, var(--ds-navy) 100%);
+  --ds-edge: var(--ds-edge-navy); /* edge-8 */
+}
+.ts-strip-cap {
+  display: block;
+  font: 700 12px/1 var(--ds-font-display);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ds-pastel-blue);
+}
+.ts-strip-sub {
+  display: block;
+  margin-top: 6px;
+  font: 400 13px/1.4 var(--ds-font-body);
+  color: var(--ds-pastel-blue);
+}
+.ts-strip-actions { display: flex; align-items: center; gap: var(--ds-s4); flex-wrap: wrap; }
+.ts-code {
+  padding: 10px 18px;
+  border-radius: var(--ds-r-input);
+  background: var(--ds-mint);
+  --ds-edge: var(--ds-edge-mint); /* edge-4 */
+  color: var(--ds-navy);
+  font: 800 26px/1 var(--ds-font-display);
+  letter-spacing: 4px;
+}
+
+/* section count pills */
+.ts-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-pastel-blue);
+  color: var(--ds-navy);
+  font: 800 12px/1 var(--ds-font-display);
+  vertical-align: middle;
+}
+.ts-count-sun { background: var(--ds-sun); }
+
+/* request cards */
+.ts-req {
+  display: flex !important;
+  align-items: center;
+  gap: var(--ds-s4);
+}
+.ts-req-info { flex: 1; min-width: 140px; }
+.ts-req-name { display: block; font: 800 15px/1.3 var(--ds-font-display); color: var(--ds-navy); }
+.ts-req-sub { display: block; font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+.ts-req-btns { display: flex; gap: var(--ds-s3); flex-wrap: wrap; }
+
+/* roster header: title + filters */
+.ts-roster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s4);
+  flex-wrap: wrap;
+  margin: var(--ds-s6) 0 var(--ds-s3);
+}
+.ts-filters { display: flex; align-items: center; gap: var(--ds-s3); flex-wrap: wrap; }
+.ts-filters .ds-field { width: 220px; }
+.ts-chips { display: flex; gap: var(--ds-s2); }
+.ts-chip {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+  font: 600 14px/1 var(--ds-font-display);
+  cursor: pointer;
+}
+.ts-chip.on {
+  background: var(--ds-navy);
+  border-color: var(--ds-navy);
+  color: var(--ds-surface);
+}
+
+/* roster row — one tappable card per student */
+.ts-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s4);
+  min-height: 44px;
+  padding: var(--ds-s3) var(--ds-s4);
+  border: 3px solid var(--ds-pastel-blue);
+  border-radius: var(--ds-r-row);
+  background: var(--ds-surface);
+  --ds-edge: var(--ds-edge-soft); /* edge-4 */
+  cursor: pointer;
+}
+.ts-row:focus-visible {
+  outline: 3px solid var(--ds-blue);
+  outline-offset: 2px;
+}
+.ts-row-id { min-width: 140px; }
+.ts-row-name { display: block; font: 800 15px/1.3 var(--ds-font-display); color: var(--ds-navy); }
+.ts-row-sub { display: block; font: 400 12px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+.ts-stat { flex: 1; min-width: 110px; }
+.ts-stat-cap { display: block; font: 400 12px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+.ts-stat-val { display: block; margin: 2px 0 4px; font: 800 14px/1 var(--ds-font-display); color: var(--ds-navy); }
+.ts-report {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-s1);
+  font: 700 13px/1 var(--ds-font-display);
+  color: var(--ds-blue);
+  white-space: nowrap;
+}
+.ts-menu { position: relative; }
+.ts-menu-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 190px;
+  padding: 6px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  /* edge-pop utility carries the composite shadow */
+}
+.ts-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s2);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--ds-r-sm);
+  background: none;
+  color: var(--ds-error);
+  font: 600 14px/1 var(--ds-font-body);
+  cursor: pointer;
+  text-align: left;
+}
+.ts-menu-item:hover { background: var(--ds-error-surface); }
+
+/* roster empty slot — dashed frame until SVG C arrives */
+.ts-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  padding: var(--ds-s5);
+  border: 2px dashed var(--ds-pastel-blue);
+  border-radius: var(--ds-r-row);
+  text-align: center;
+}
+
+/* danger zone */
+.ts-danger { display: flex; flex-direction: column; gap: 2px; }
+.ts-danger-t { font: 800 15px/1.3 var(--ds-font-display); color: var(--ds-navy); }
+.ts-danger-s { font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+
+/* ---------- Student report ---------- */
+
+.sr-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s4);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-s5);
+  padding: var(--ds-s5) var(--ds-s6);
+  border-radius: var(--ds-r-strip);
+  background: linear-gradient(135deg, var(--ds-navy-deep) 0%, var(--ds-navy) 100%);
+  --ds-edge: var(--ds-edge-navy); /* edge-8 */
+}
+.sr-back { flex: none; }
+.sr-head-id { min-width: 160px; }
+.sr-head-name {
+  display: block;
+  font: 800 24px/1.2 var(--ds-font-display);
+  color: var(--ds-surface);
+}
+.sr-head-sub {
+  display: block;
+  margin-top: 4px;
+  font: 400 13px/1.4 var(--ds-font-body);
+  color: var(--ds-pastel-blue);
+}
+.sr-head-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.sr-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 86px;
+  padding: 10px 14px;
+  border-radius: var(--ds-r-button);
+  background: var(--ds-surface);
+  --ds-edge: var(--ds-edge-soft); /* edge-4 */
+}
+.sr-tile-mint { background: var(--ds-mint); --ds-edge: var(--ds-edge-mint); }
+.sr-tile-val { font: 800 18px/1.1 var(--ds-font-display); color: var(--ds-navy); }
+.sr-tile-lab { margin-top: 3px; font: 600 11px/1 var(--ds-font-body); color: var(--ds-muted); }
+.sr-new {
+  padding: 3px 7px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-mint);
+  color: var(--ds-navy);
+  font: 800 10px/1 var(--ds-font-display);
+  letter-spacing: 0.6px;
+}
+
+.sr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-s5);
+  align-items: stretch;
+}
+.sr-grid > * { min-width: 0; }
+
+/* pre?post two-column chart */
+.sr-ppchart { display: block; width: 100%; max-width: 340px; margin: var(--ds-s4) auto 0; }
+.sr-pp-val { font: 800 15px var(--ds-font-display); fill: var(--ds-navy); }
+.sr-pp-lab { font: 600 12px var(--ds-font-body); fill: var(--ds-muted); }
+.sr-gain {
+  padding: 6px 12px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-mint);
+  --ds-edge: var(--ds-edge-mint); /* edge-3 */
+  color: var(--ds-navy);
+  font: 800 12px/1 var(--ds-font-display);
+}
+
+/* rings */
+.sr-rings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ds-s3);
+  margin-top: var(--ds-s4);
+}
+.sr-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.sr-ring-val { font: 800 16px/1 var(--ds-font-display); color: var(--ds-navy); }
+.sr-ring-lab { font: 600 12px/1 var(--ds-font-body); color: var(--ds-muted); }
+
+/* scores + lessons rows */
+.sr-score {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  margin-top: var(--ds-s3);
+}
+.sr-score-name { width: 150px; flex: none; font: 600 13px/1.4 var(--ds-font-body); color: var(--ds-ink); }
+.sr-score .ds-progress { flex: 1; }
+.sr-score-val { width: 64px; flex: none; text-align: right; font: 800 14px/1 var(--ds-font-display); color: var(--ds-navy); }
+.sr-score-dash {
+  flex: 1;
+  height: 14px;
+  border: 2px dashed var(--ds-track);
+  border-radius: var(--ds-r-pill);
+}
+.sr-unreleased {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-sun);
+  color: var(--ds-navy);
+  font: 800 11px/1 var(--ds-font-display);
+}
+.sr-score-sub {
+  display: block;
+  font: 400 11px/1.4 var(--ds-font-body);
+  color: var(--ds-muted);
+}
+
+/* class report — the roster card spans the full grid */
+.cr-roster { grid-column: 1 / -1; }
+
+/* report empty slot — dashed frame until SVG D arrives */
+.sr-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  margin-top: var(--ds-s3);
+  padding: var(--ds-s4);
+  border: 2px dashed var(--ds-pastel-blue);
+  border-radius: var(--ds-r-tile);
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .sr-grid { grid-template-columns: 1fr; }
+  .sr-rings { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .ts-row { flex-wrap: wrap; }
+  .ts-stat { min-width: calc(50% - var(--ds-s4)); }
+  .ts-report { display: none; }
+  .sr-head-stats { margin-left: 0; }
+  .sr-rings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sr-score-name { width: 110px; }
+  .ts-code { font-size: 20px; letter-spacing: 3px; }
+  .ts-filters .ds-field { width: 100%; }
+}
+
+/* search label is visual noise next to the chips — keep it for a11y only */
+.ts-filters .ds-label {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.ts-empty, .sr-empty { flex-direction: column; gap: var(--ds-s2); }
+
+/* ---------- Lessons screen ---------- */
+
+/* two-column page: lesson grid left, 372px create/edit panel right */
+.tl-page { display: flex; align-items: flex-start; gap: var(--ds-s5); }
+.tl-main { flex: 1; min-width: 0; }
+/* sticks in view while the lesson grid scrolls; the card itself scrolls
+   internally when taller than the viewport so the actions stay reachable */
+.tl-panel {
+  width: 372px; flex: none;
+  position: sticky; top: var(--ds-s5);
+  max-height: calc(100vh - var(--ds-s5) * 2);
+}
+.tl-panel-card {
+  padding: var(--ds-s5);
+  max-height: calc(100vh - var(--ds-s5) * 2);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-card);
+  background: var(--ds-surface);
+  --ds-edge: var(--ds-edge-soft); /* edge-4 */
+}
+
+/* heading row: title + count pill left, New lesson button right */
+.tl-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s4);
+  margin-bottom: var(--ds-s4);
+}
+.tl-heading { margin: 0; }
+
+/* subject chips left, status dropdown right */
+.tl-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s3);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-s4);
+}
+.tl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-s1);
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+  font: 600 14px/1 var(--ds-font-display);
+  cursor: pointer;
+  --ds-edge: var(--ds-edge-soft); /* edge-3 */
+}
+
+/* neutral menu item (ts-menu-item is the danger variant) */
+.tl-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--ds-r-sm);
+  background: none;
+  color: var(--ds-navy);
+  font: 600 14px/1 var(--ds-font-display);
+  cursor: pointer;
+  text-align: left;
+}
+.tl-menu-item:hover { background: var(--ds-paper); }
+.tl-menu-item.on { background: var(--ds-pastel-blue); }
+.ts-menu-item[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+.ts-menu-item[aria-disabled="true"]:hover { background: none; }
+
+/* 2-column card grid */
+.tl-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-s4);
+}
+.tl-card {
+  padding: var(--ds-s3);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-card);
+  background: var(--ds-surface);
+  --ds-edge: var(--ds-edge-soft); /* edge-4 */
+}
+
+/* 118px hero: pastel subject fill + centered white 56px icon tile, or the
+   uploaded thumbnail covering the area. Corner chips sit on top. */
+.tl-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 118px;
+  border-radius: var(--ds-r-tile);
+  overflow: hidden;
+}
+.tl-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tl-thumb-phys { background: var(--ds-pastel-blue); }
+.tl-thumb-chem { background: var(--ds-pastel-purple); }
+.tl-thumb-earth { background: var(--ds-pastel-mint); }
+.tl-thumb-def { background: var(--ds-pastel-yellow); }
+.tl-thumb-tile {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+}
+.tl-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 10px;
+  border-radius: var(--ds-r-pill);
+  font: 800 11px/1 var(--ds-font-display);
+  color: var(--ds-navy);
+}
+.tl-chip-pub { background: var(--ds-mint); }
+.tl-chip-draft { background: var(--ds-pastel-yellow); }
+.tl-pdf {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-surface);
+  font: 800 11px/1 var(--ds-font-display);
+  color: var(--ds-navy);
+}
+
+.tl-card-body { padding: var(--ds-s3) var(--ds-s1) 0; }
+.tl-subject { font: 600 13px/1 var(--ds-font-display); color: var(--ds-muted); }
+.tl-title {
+  margin: 4px 0 0;
+  font: 800 19px/1.25 var(--ds-font-display);
+  color: var(--ds-navy);
+}
+.tl-objs {
+  margin: 6px 0 0;
+  font: 400 14px/1.45 var(--ds-font-body);
+  color: var(--ds-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tl-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s3);
+  padding: var(--ds-s3) var(--ds-s1) var(--ds-s1);
+}
+.tl-foot-side { display: flex; align-items: center; gap: var(--ds-s2); }
+
+/* form header + subject select cards */
+.tl-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s3);
+  margin-bottom: 2px;
+}
+.tl-form-sub { margin: 0 0 var(--ds-s3); font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+/* fieldset defaults to min-inline-size: min-content — without this the
+   scrollable card row pushes the whole panel wider instead of scrolling */
+.tl-subjects { border: 0; padding: 0; margin: 0; min-width: 0; }
+.tl-subjects-leg {
+  padding: 0;
+  margin-bottom: var(--ds-s2);
+  font: 600 var(--ds-fs-label)/1.3 var(--ds-font-display);
+  color: var(--ds-ink);
+}
+.tl-subject-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ds-s2); }
+.tl-subject {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--ds-s3) var(--ds-s2);
+  border: 3px solid var(--ds-line);
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  cursor: pointer;
+}
+.tl-subject.on { background: var(--ds-pastel-blue); border-color: var(--ds-blue); }
+.tl-subject-ic {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ds-r-sm);
+  background: var(--ds-paper);
+  color: var(--ds-navy);
+}
+.tl-subject.on .tl-subject-ic { background: var(--ds-surface); }
+.tl-subject-name { font: 600 13px/1.2 var(--ds-font-display); color: var(--ds-navy); }
+
+/* dashed "+ Subject" card — same grid slot, broken border like FileDropZone */
+.tl-subject-add { border: 2px dashed var(--ds-edge-white); color: var(--ds-blue); }
+.tl-subject-add:hover { border-color: var(--ds-blue); }
+.tl-subject-add .tl-subject-ic { background: var(--ds-paper); color: var(--ds-blue); }
+
+/* subject picker: search above a horizontally scrolling row of
+   fixed-size cards (grid stays for the manage modal) */
+.tl-subj-search { margin-bottom: var(--ds-s3); }
+.tl-subject-row {
+  display: flex;
+  gap: var(--ds-s2);
+  overflow-x: auto;
+  padding-bottom: var(--ds-s1);
+}
+.tl-subject-row .tl-subject {
+  flex: none;
+  width: 96px;
+  height: 88px;
+  justify-content: center;
+}
+
+/* manage-subjects modal: fixed-height deletable cards with a centered × */
+.tl-add-subj { display: grid; gap: var(--ds-s4); }
+.tl-subject-del {
+  position: relative;
+  height: 88px;
+  justify-content: center;
+}
+.tl-subject-x {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-error-surface);
+  color: var(--ds-error);
+}
+
+/* drop zones — the dashed tile is the DS FileDropZone component; this is
+   just the stacked layout in the form */
+.tl-drops { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ds-s3); margin: var(--ds-s3) 0 var(--ds-s4); }
+.tl-form-btns { display: flex; gap: var(--ds-s3); }
+.tl-form-btns > * { flex: 1; }
+
+/* muted loading line */
+.tl-dim { margin: var(--ds-s2) 0 0; font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+
+/* empty state — the art slot is intentionally blank until the SVG lands */
+.tl-empty-art {
+  width: 220px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-empty-art img { object-fit: contain; }
+.tl-empty-t { margin: 0; font: 800 18px/1.2 var(--ds-font-display); color: var(--ds-navy); }
+.tl-empty-s { margin: 0; font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
+
+@media (max-width: 1100px) {
+  .tl-page { flex-direction: column; }
+  .tl-panel { width: 100%; position: static; }
+  .tl-grid { grid-template-columns: 1fr; }
 }

@@ -60,7 +60,8 @@ class DSOptionTile extends StatelessWidget {
               Flexible(
                 child: Text(
                   label,
-                  style: DSText.label.copyWith(fontSize: 14, color: DSColors.navy),
+                  style:
+                      DSText.label.copyWith(fontSize: 14, color: DSColors.navy),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

@@ -4,7 +4,8 @@ import '../tokens/colors.dart';
 import '../tokens/radii.dart';
 
 enum DSProgressBarSize { lg, sm }
-enum DSProgressBarTone { blue, mint, sun, success }
+
+enum DSProgressBarTone { blue, mint, sun, success, teal }
 
 /// ProgressBar — track + fill, radius 99. Sizes: lg 14px / sm 10px only.
 /// Track is DSColors.track; tone sets the fill color.
@@ -29,6 +30,7 @@ class DSProgressBar extends StatelessWidget {
       DSProgressBarTone.mint => DSColors.mint,
       DSProgressBarTone.sun => DSColors.sun,
       DSProgressBarTone.success => DSColors.success,
+      DSProgressBarTone.teal => DSColors.teal,
     };
     return Semantics(
       label: 'Progress ${(value.clamp(0, 1) * 100).round()}%',
@@ -38,12 +40,15 @@ class DSProgressBar extends StatelessWidget {
           color: DSColors.track,
           borderRadius: DSRadii.pillBr,
         ),
-        clipBehavior: Clip.antiAlias,
+        // hardEdge: the fill already carries the pill radius, so the clip is
+        // only a fallback — antiAlias would cost a saveLayer per bar per frame.
+        clipBehavior: Clip.hardEdge,
         child: FractionallySizedBox(
           alignment: Alignment.centerLeft,
           widthFactor: value.clamp(0.0, 1.0),
           child: Container(
-            decoration: BoxDecoration(color: fill, borderRadius: DSRadii.pillBr),
+            decoration:
+                BoxDecoration(color: fill, borderRadius: DSRadii.pillBr),
           ),
         ),
       ),

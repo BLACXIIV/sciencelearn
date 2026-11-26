@@ -21,6 +21,7 @@
   transition: translate 0.15s ease;
 }
 .ds-switch input:checked + .ds-switch-track { background: var(--ds-blue); border-color: var(--ds-blue); }
+.ds-switch.tone-teal input:checked + .ds-switch-track { background: var(--ds-teal); border-color: var(--ds-teal); }
 .ds-switch input:checked + .ds-switch-track .ds-switch-knob { translate: 20px 0; border-color: var(--ds-surface); }
 .ds-switch input:focus-visible + .ds-switch-track { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
 .ds-switch input:disabled + .ds-switch-track { opacity: 0.55; }

@@ -9,6 +9,7 @@ abstract final class DSColors {
   static const navy = Color(0xFF0A1A5C), navyDeep = Color(0xFF07124A);
   static const blue = Color(0xFF2F5BFF), blueDark = Color(0xFF1B3FC4);
   static const mint = Color(0xFF5EEAD4), sun = Color(0xFFFFC83D);
+  static const teal = Color(0xFF14B8A6);
   static const paper = Color(0xFFF4F7FF);
 
   // pastels
@@ -28,6 +29,7 @@ abstract final class DSColors {
   static const edgeSun = Color(0xFFC99400);
   static const edgeSoft = Color(0xFFD5DEFF); // softer edge (island bar, panels)
   static const edgeNavy = navyDeep;
+  static const edgeDanger = Color(0xFFE38A82); // destructive controls
   static const edgeChip = Color(0x33000000); // sticker-chip drop (0,0,0,.2)
 
   // status
@@ -44,5 +46,5 @@ abstract final class DSColors {
   static const chart1 = Color(0xFFFFC83D);
   static const chart2 = Color(0xFF2F5BFF);
   static const chart3 = Color(0xFFF0759C);
-  static const chart4 = Color(0xFF2ED3B7);
+  static const chart4 = Color(0xFF14B8A6);
 }

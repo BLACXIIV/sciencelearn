@@ -189,3 +189,224 @@ export async function fetchClassCompletedCount(classId: string): Promise<number>
   if (error) throw error;
   return count ?? 0;
 }
+
+// ---------- student report ----------
+
+/** Guard: this student's enrollment row in this class (null = not enrolled). */
+export async function fetchMembership(classId: string, studentId: string): Promise<ClassMember | null> {
+  const { data, error } = await supabase
+    .from("enrollments").select("student_id, status, profiles(full_name)")
+    .eq("class_id", classId).eq("student_id", studentId).maybeSingle();
+  if (error) throw error;
+  return data as unknown as ClassMember | null;
+}
+
+export interface ReportAssessment {
+  id: string;
+  title: string;
+  kind: string;
+  /** Latest submitted score; null = "Not taken". */
+  score: number | null;
+  /** false when release is manual and scores_released is still false. */
+  released: boolean;
+}
+
+/** This class's published assessments + the student's latest score on each.
+ *  Teacher RLS reads all attempts; unreleased ones get the "Not released" chip. */
+export async function fetchStudentAssessmentRows(
+  classId: string, studentId: string,
+): Promise<ReportAssessment[]> {
+  const [{ data: acts, error: e1 }, { data: atts, error: e2 }] = await Promise.all([
+    supabase.from("assessments")
+      .select("id, title, kind, release_scores, scores_released, lessons!inner(class_id)")
+      .eq("lessons.class_id", classId).eq("is_published", true).order("created_at"),
+    supabase.from("attempts")
+      .select("assessment_id, score, submitted_at")
+      .eq("student_id", studentId).not("submitted_at", "is", null)
+      .order("submitted_at", { ascending: false }),
+  ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  const latest = new Map<string, number>();
+  for (const a of (atts ?? []) as { assessment_id: string; score: number | null }[]) {
+    if (a.score != null && !latest.has(a.assessment_id)) latest.set(a.assessment_id, a.score);
+  }
+  return ((acts ?? []) as unknown as {
+    id: string; title: string; kind: string;
+    release_scores: string; scores_released: boolean;
+  }[]).map((a) => ({
+    id: a.id,
+    title: a.title,
+    kind: a.kind,
+    score: latest.get(a.id) ?? null,
+    released: a.release_scores !== "manual" || a.scores_released === true,
+  }));
+}
+
+export interface ReportLesson {
+  id: string;
+  title: string;
+  /** 0 when the student never opened the lesson. */
+  percent: number;
+}
+
+/** This class's published lessons + the student's lesson_progress percent. */
+export async function fetchStudentLessonRows(
+  classId: string, studentId: string,
+): Promise<ReportLesson[]> {
+  const [{ data: lessons, error: e1 }, { data: prog, error: e2 }] = await Promise.all([
+    supabase.from("lessons").select("id, title")
+      .eq("class_id", classId).eq("is_published", true).order("position"),
+    supabase.from("lesson_progress").select("lesson_id, percent")
+      .eq("student_id", studentId),
+  ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  const pct = new Map(
+    (prog ?? []).map((p) => [p.lesson_id as string, p.percent as number]),
+  );
+  return (lessons ?? []).map((l) => ({
+    id: l.id as string,
+    title: l.title as string,
+    percent: pct.get(l.id as string) ?? 0,
+  }));
+}
+
+// ---------- class report ----------
+
+export interface ClassAssessmentRow {
+  id: string;
+  title: string;
+  kind: string;
+  /** Mean of each student's LATEST submitted score; null = no attempts. */
+  avg: number | null;
+  /** Distinct students with at least one submitted attempt. */
+  attempts: number;
+  /** false when release is manual and scores_released is still false. */
+  released: boolean;
+}
+
+/** Class-wide assessment rollup: published assessments + every student's
+ *  submitted attempts, reduced to latest-per-student average + attempt count. */
+export async function fetchClassAssessmentRows(
+  classId: string,
+): Promise<ClassAssessmentRow[]> {
+  const { data: acts, error } = await supabase
+    .from("assessments")
+    .select("id, title, kind, release_scores, scores_released, lessons!inner(class_id)")
+    .eq("lessons.class_id", classId).eq("is_published", true).order("created_at");
+  if (error) throw error;
+  const rows = (acts ?? []) as unknown as {
+    id: string; title: string; kind: string;
+    release_scores: string; scores_released: boolean;
+  }[];
+  const ids = rows.map((a) => a.id);
+  if (ids.length === 0) return [];
+
+  const [{ data: atts, error: e2 }, { data: memberRows, error: e3 }] =
+    await Promise.all([
+      supabase.from("attempts")
+        .select("assessment_id, student_id, score, submitted_at")
+        .in("assessment_id", ids).not("submitted_at", "is", null)
+        .order("submitted_at", { ascending: false }),
+      supabase.from("enrollments").select("student_id")
+        .eq("class_id", classId).eq("status", "active"),
+    ]);
+  if (e2) throw e2;
+  if (e3) throw e3;
+  // Only active members count — removed students' attempts stay out of the
+  // rollup, consistent with the rest of the portal.
+  const activeIds = new Set(
+    ((memberRows ?? []) as { student_id: string }[]).map((m) => m.student_id));
+
+  // Latest score per student per assessment (rows arrive newest-first).
+  const latest = new Map<string, Map<string, number>>();
+  for (const a of (atts ?? []) as {
+    assessment_id: string; student_id: string; score: number | null;
+  }[]) {
+    if (a.score == null || !activeIds.has(a.student_id)) continue;
+    const per = latest.get(a.assessment_id) ?? new Map<string, number>();
+    if (!per.has(a.student_id)) per.set(a.student_id, a.score);
+    latest.set(a.assessment_id, per);
+  }
+  return rows.map((a) => {
+    const per = latest.get(a.id);
+    const scores = per ? [...per.values()] : [];
+    const avg = scores.length
+      ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length)
+      : null;
+    return {
+      id: a.id,
+      title: a.title,
+      kind: a.kind,
+      avg,
+      attempts: scores.length,
+      released: a.release_scores !== "manual" || a.scores_released === true,
+    };
+  });
+}
+
+export interface ClassLessonAvg {
+  id: string;
+  title: string;
+  /** Mean lesson_progress percent across ACTIVE members (unstarted = 0). */
+  avg: number;
+}
+
+/** Class-wide lesson rollup: published lessons + all member progress rows,
+ *  averaged across active enrollments so unstarted lessons count as 0. */
+export async function fetchClassLessonAvgs(
+  classId: string,
+): Promise<ClassLessonAvg[]> {
+  const [{ data: lessons, error: e1 }, { data: memberRows, error: e2 }] =
+    await Promise.all([
+      supabase.from("lessons").select("id, title")
+        .eq("class_id", classId).eq("is_published", true).order("position"),
+      supabase.from("enrollments").select("student_id")
+        .eq("class_id", classId).eq("status", "active"),
+    ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  // lesson_progress rows outlive enrollment removal — only sum progress from
+  // currently-active students so the average can never exceed 100%.
+  const activeIds = new Set(
+    ((memberRows ?? []) as { student_id: string }[]).map((m) => m.student_id));
+  const members = Math.max(1, activeIds.size);
+  const rows = (lessons ?? []) as { id: string; title: string }[];
+  const ids = rows.map((l) => l.id);
+  if (ids.length === 0) return [];
+
+  const { data: prog, error: e3 } = await supabase
+    .from("lesson_progress").select("lesson_id, student_id, percent")
+    .in("lesson_id", ids);
+  if (e3) throw e3;
+  const sum = new Map<string, number>();
+  for (const p of (prog ?? []) as {
+    lesson_id: string; student_id: string; percent: number | null;
+  }[]) {
+    if (!activeIds.has(p.student_id)) continue;
+    sum.set(p.lesson_id, (sum.get(p.lesson_id) ?? 0) + (p.percent ?? 0));
+  }
+  return rows.map((l) => ({
+    id: l.id,
+    title: l.title,
+    avg: Math.round((sum.get(l.id) ?? 0) / members),
+  }));
+}
+
+/** Per-lesson assessment counts for the curriculum rows ("N activities").
+ *  One joined query grouped client-side — teacher RLS reads all assessments. */
+export async function fetchLessonActivityCounts(
+  classId: string,
+): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("assessments")
+    .select("lesson_id, lessons!inner(class_id)")
+    .eq("lessons.class_id", classId);
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  for (const row of (data ?? []) as { lesson_id: string | null }[]) {
+    if (row.lesson_id) counts[row.lesson_id] = (counts[row.lesson_id] ?? 0) + 1;
+  }
+  return counts;
+}

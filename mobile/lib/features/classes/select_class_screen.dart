@@ -30,10 +30,13 @@ class SelectClassScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
-    if (me.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final meV = me.valueOrNull;
+    // Gate on a missing VALUE, not isLoading: auth refresh emits AsyncLoading
+    // with the previous value attached — blanking on that flashes white.
+    if (meV == null && me.isLoading) {
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
-    if (me.hasError) {
+    if (meV == null && me.hasError) {
       return Scaffold(
         body: DSEmptyState(
           icon: DSIconName.offline,
@@ -212,7 +215,8 @@ class _ClassTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: DSColors.surface,
             borderRadius: DSRadii.cardBr,
-            border: selected ? Border.all(color: DSColors.blue, width: 2.5) : null,
+            border:
+                selected ? Border.all(color: DSColors.blue, width: 2.5) : null,
             boxShadow: dsEdge(DSColors.edgeCard),
           ),
           child: GestureDetector(
@@ -224,22 +228,25 @@ class _ClassTile extends StatelessWidget {
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: BoxDecoration(
-                      color: t.$1, borderRadius: DSRadii.chipBr),
+                  decoration:
+                      BoxDecoration(color: t.$1, borderRadius: DSRadii.chipBr),
                   child: DSIcon(t.$2, size: 26, color: t.$3),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(title, style: DSText.title),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      DefaultTextStyle.merge(
-                        style: DSText.caption.copyWith(color: DSColors.muted),
-                        child: subtitle!,
-                      ),
-                    ],
-                  ]),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: DSText.title),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 2),
+                          DefaultTextStyle.merge(
+                            style:
+                                DSText.caption.copyWith(color: DSColors.muted),
+                            child: subtitle!,
+                          ),
+                        ],
+                      ]),
                 ),
                 if (trailing != null) ...[
                   const SizedBox(width: 8),
@@ -258,7 +265,8 @@ class _ClassTile extends StatelessWidget {
               height: 30,
               decoration: const BoxDecoration(
                   color: DSColors.mint, shape: BoxShape.circle),
-              child: const DSIcon(DSIconName.check, size: 15, color: DSColors.navy),
+              child: const DSIcon(DSIconName.check,
+                  size: 15, color: DSColors.navy),
             ),
           ),
       ]),
@@ -285,8 +293,7 @@ class _MetaChip extends StatelessWidget {
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         DSIcon(icon, size: 12, color: sun ? DSColors.navy : DSColors.muted),
         const SizedBox(width: 4),
-        Text(text,
-            style: DSText.label.copyWith(fontSize: 11, color: fg)),
+        Text(text, style: DSText.label.copyWith(fontSize: 11, color: fg)),
       ]),
     );
   }
@@ -301,8 +308,8 @@ class _CodeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-          color: DSColors.paper, borderRadius: DSRadii.pillBr),
+      decoration:
+          BoxDecoration(color: DSColors.paper, borderRadius: DSRadii.pillBr),
       child: Text(code,
           style: DSText.label.copyWith(
               fontSize: 11, letterSpacing: 1, color: DSColors.blueDark)),
@@ -318,7 +325,8 @@ class _GhostTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? child;
 
-  const _GhostTile({required this.title, required this.subtitle, this.onTap, this.child});
+  const _GhostTile(
+      {required this.title, required this.subtitle, this.onTap, this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -337,17 +345,22 @@ class _GhostTile extends StatelessWidget {
                   width: 34,
                   height: 34,
                   child: Center(
-                      child: DSIcon(DSIconName.add, size: 15, color: DSColors.muted)),
+                      child: DSIcon(DSIconName.add,
+                          size: 15, color: DSColors.muted)),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title,
-                      style: DSText.label.copyWith(fontSize: 14, color: DSColors.inkSoft)),
-                  Text(subtitle,
-                      style: DSText.caption.copyWith(color: DSColors.muted)),
-                ]),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: DSText.label
+                              .copyWith(fontSize: 14, color: DSColors.inkSoft)),
+                      Text(subtitle,
+                          style:
+                              DSText.caption.copyWith(color: DSColors.muted)),
+                    ]),
               ),
               const DSIcon(DSIconName.chevron, size: 20, color: DSColors.muted),
             ]),
@@ -404,7 +417,11 @@ class _Foot extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: Column(children: [
-          DSButton(fullWidth: true, disabled: !enabled, onPressed: onGo, child: const Text('Continue')),
+          DSButton(
+              fullWidth: true,
+              disabled: !enabled,
+              onPressed: onGo,
+              child: const Text('Continue')),
           TextButton(
             onPressed: () => Supabase.instance.client.auth.signOut(),
             child: Text.rich(TextSpan(
@@ -478,7 +495,7 @@ class _StudentPickState extends ConsumerState<_StudentPick> {
         child: MaxWidth(
           child: ListView(padding: const EdgeInsets.all(16), children: [
             classes.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: DSLoadingIndicator()),
               error: (e, _) => DSEmptyState(
                 icon: DSIconName.offline,
                 title: "Couldn't load this right now",
@@ -546,19 +563,21 @@ class _StudentPickState extends ConsumerState<_StudentPick> {
                                     ]),
                                 selected:
                                     _sel?['class_id'] == rows[i]['class_id'],
-                                onTap: () =>
-                                    setState(() => _sel = rows[i]),
+                                onTap: () => setState(() => _sel = rows[i]),
                                 trailing: const DSIcon(DSIconName.chevron,
                                     size: 20, color: DSColors.muted),
                               );
                             })
                           : _ClassTile(
                               index: i,
-                              title: '${rows[i]['classes']?['name'] ?? 'Class'}',
-                              subtitle: const Text('Waiting for teacher approval'),
+                              title:
+                                  '${rows[i]['classes']?['name'] ?? 'Class'}',
+                              subtitle:
+                                  const Text('Waiting for teacher approval'),
                               pending: true,
                               trailing: const DSBadge(
-                                  tone: DSBadgeTone.sun, child: Text('PENDING')),
+                                  tone: DSBadgeTone.sun,
+                                  child: Text('PENDING')),
                             ),
                     ),
                 ]);
@@ -570,28 +589,32 @@ class _StudentPickState extends ConsumerState<_StudentPick> {
               subtitle: 'Get the 6-letter code from your teacher',
               onTap: () => setState(() => _joinOpen = !_joinOpen),
               child: _joinOpen
-                  ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      DSCodeInput(
-                        value: _code,
-                        onChanged: (v) => setState(() => _code = v),
-                        enabled: !_busy,
-                      ),
-                      const SizedBox(height: 10),
-                      DSButton(
-                        fullWidth: true,
-                        loading: _busy,
-                        disabled: _busy || _code.trim().isEmpty,
-                        onPressed: _join,
-                        child: const Text('Join'),
-                      ),
-                      if (_msg != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(_msg!,
-                              style: DSText.caption.copyWith(
-                                  color: _err ? DSColors.error : DSColors.success)),
-                        ),
-                    ])
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                          DSCodeInput(
+                            value: _code,
+                            onChanged: (v) => setState(() => _code = v),
+                            enabled: !_busy,
+                          ),
+                          const SizedBox(height: 10),
+                          DSButton(
+                            fullWidth: true,
+                            loading: _busy,
+                            disabled: _busy || _code.trim().isEmpty,
+                            onPressed: _join,
+                            child: const Text('Join'),
+                          ),
+                          if (_msg != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(_msg!,
+                                  style: DSText.caption.copyWith(
+                                      color: _err
+                                          ? DSColors.error
+                                          : DSColors.success)),
+                            ),
+                        ])
                   : null,
             ),
           ]),
@@ -634,7 +657,7 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
         child: MaxWidth(
           child: ListView(padding: const EdgeInsets.all(16), children: [
             classes.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: DSLoadingIndicator()),
               error: (e, _) => DSEmptyState(
                 icon: DSIconName.offline,
                 title: "Couldn't load this right now",
@@ -675,21 +698,20 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
                         return _ClassTile(
                           index: i,
                           title: '${c['name'] ?? 'Class'}',
-                          subtitle: Wrap(
-                              spacing: 6,
-                              runSpacing: 4,
-                              children: [
-                                _MetaChip(
-                                    icon: DSIconName.students,
-                                    text: '$active student${active == 1 ? '' : 's'}'),
-                                if ('${c['code'] ?? ''}'.isNotEmpty)
-                                  _CodeChip('${c['code']}'),
-                                if (pending > 0)
-                                  _MetaChip(
-                                      icon: DSIconName.pending,
-                                      text: '$pending request${pending == 1 ? '' : 's'}',
-                                      sun: true),
-                              ]),
+                          subtitle: Wrap(spacing: 6, runSpacing: 4, children: [
+                            _MetaChip(
+                                icon: DSIconName.students,
+                                text:
+                                    '$active student${active == 1 ? '' : 's'}'),
+                            if ('${c['code'] ?? ''}'.isNotEmpty)
+                              _CodeChip('${c['code']}'),
+                            if (pending > 0)
+                              _MetaChip(
+                                  icon: DSIconName.pending,
+                                  text:
+                                      '$pending request${pending == 1 ? '' : 's'}',
+                                  sun: true),
+                          ]),
                           selected: _sel?['id'] == c['id'],
                           onTap: () => setState(() => _sel = c),
                           trailing: const DSIcon(DSIconName.chevron,
@@ -741,12 +763,18 @@ class _CreateClassFormState extends ConsumerState<_CreateClassForm> {
   String? _err;
 
   @override
-  void dispose() { _name.dispose(); super.dispose(); }
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
 
   Future<void> _create() async {
     final name = _name.text.trim();
     if (name.isEmpty || _busy) return;
-    setState(() { _busy = true; _err = null; });
+    setState(() {
+      _busy = true;
+      _err = null;
+    });
     try {
       final row = await ref.read(repoProvider).createClass(name, _policy);
       if (mounted) Navigator.of(context).pop(row);

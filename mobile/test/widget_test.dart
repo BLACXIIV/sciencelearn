@@ -58,7 +58,7 @@ void main() {
         .pumpWidget(_gateApp({'role': 'teacher', 'full_name': 'QA Teacher'}));
     await tester.pump();
     expect(find.text('student app content'), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(DSLoadingIndicator), findsOneWidget);
   });
 
   testWidgets('RoleGate redirects admins too', (WidgetTester tester) async {

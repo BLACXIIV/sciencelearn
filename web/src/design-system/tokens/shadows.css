@@ -10,6 +10,15 @@
 .edge-4 { box-shadow: 0 4px 0 var(--ds-edge, var(--ds-edge-card)); }
 .edge-5 { box-shadow: 0 5px 0 var(--ds-edge, var(--ds-edge-card)); }
 .edge-6 { box-shadow: 0 6px 0 var(--ds-edge, var(--ds-edge-card)); }
+/* 8px reserved for hero panels and navy strips (deep-navy edge). */
+.edge-8 { box-shadow: 0 8px 0 var(--ds-edge, var(--ds-edge-navy)); }
+
+/* popovers/menus — card edge plus a soft ambient lift. */
+.edge-pop {
+  box-shadow:
+    0 4px 0 var(--ds-edge, var(--ds-edge-soft)),
+    0 12px 32px rgb(10 26 92 / 0.14);
+}
 
 .edge-press {
   transition: transform 0.15s ease, box-shadow 0.15s ease;

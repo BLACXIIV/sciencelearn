@@ -37,8 +37,7 @@ class DSPageHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [DSColors.navy, DSColors.navyDeep],
         ),
-        borderRadius:
-            BorderRadius.vertical(bottom: Radius.circular(radius)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(radius)),
       ),
       child: DefaultTextStyle.merge(
         style: const TextStyle(color: DSColors.surface),

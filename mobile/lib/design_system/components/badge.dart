@@ -27,7 +27,8 @@ class DSBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(color: fill, borderRadius: DSRadii.pillBr),
       child: DefaultTextStyle.merge(
-        style: DSText.label.copyWith(fontSize: 11, fontWeight: FontWeight.w800, color: text),
+        style: DSText.label
+            .copyWith(fontSize: 11, fontWeight: FontWeight.w800, color: text),
         textAlign: TextAlign.center,
         child: child,
       ),

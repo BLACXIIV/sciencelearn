@@ -13,6 +13,7 @@ import '../tokens/spacing.dart';
 class DSAuthShell extends StatelessWidget {
   /// Navy header content — brand mark, illustration, sticker badges.
   final Widget header;
+
   /// Sheet body — segmented control + form.
   final Widget child;
 
@@ -38,7 +39,8 @@ class DSAuthShell extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [DSColors.navyDeep, DSColors.navy],
               ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(DSRadii.panel)),
+              borderRadius:
+                  BorderRadius.vertical(bottom: Radius.circular(DSRadii.panel)),
             ),
             child: DefaultTextStyle.merge(
               style: const TextStyle(color: DSColors.surface),
@@ -47,8 +49,8 @@ class DSAuthShell extends StatelessWidget {
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                  DSSpacing.gutter, DSSpacing.s5, DSSpacing.gutter, DSSpacing.s5),
+              padding: const EdgeInsets.fromLTRB(DSSpacing.gutter, DSSpacing.s5,
+                  DSSpacing.gutter, DSSpacing.s5),
               child: child,
             ),
           ),

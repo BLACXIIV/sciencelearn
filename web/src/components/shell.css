@@ -15,7 +15,7 @@
 /* class switcher card (NavBar context slot) */
 .sh-class {
   padding: 14px 16px;
-  border-radius: 18px;
+  border-radius: var(--ds-r-tile);
   background: rgb(255 255 255 / 0.1);
 }
 .sh-class-cap {
@@ -32,7 +32,7 @@
 .sh-class-row { display: flex; align-items: center; gap: var(--ds-s3); margin-top: 10px; }
 .sh-class-code {
   padding: 6px 12px;
-  border-radius: 10px;
+  border-radius: var(--ds-r-sm);
   background: var(--ds-surface);
   color: var(--ds-blue);
   font: 800 13px/1 var(--ds-font-display);
@@ -55,7 +55,7 @@
   width: 100%;
   border: 0;
   background: none;
-  border-radius: 14px;
+  border-radius: var(--ds-r-input);
   cursor: pointer;
   text-align: left;
 }
@@ -83,7 +83,7 @@
   border-radius: var(--ds-r-pill);
   background: var(--ds-surface);
   border: 1px solid var(--ds-line);
-  box-shadow: 0 3px 0 var(--ds-edge-card);
+  --ds-edge: var(--ds-edge-card); /* edge-3 utility carries the shadow */
   text-decoration: none;
 }
 .sh-pnm { font: 600 14px/1 var(--ds-font-display); color: var(--ds-navy); }

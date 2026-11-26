@@ -52,14 +52,14 @@ export default function ClassDashboard() {
   return (
     <>
       {cls.data && (
-        <section className="td-hero">
+        <section className="td-hero edge-8">
           <div className="td-hero-info">
             <span className="td-hero-pill">
               {cls.data.join_policy === "approval" ? "Approval required" : "Instant join"}
             </span>
             <h1 className="td-hero-title">{cls.data.name}</h1>
             <div className="td-hero-row">
-              <span className="td-code-chip">{cls.data.code}</span>
+              <span className="td-code-chip edge-4">{cls.data.code}</span>
               <Button variant="ghost" size="sm" leadingIcon="copy" onClick={copy}>
                 Copy code
               </Button>

@@ -9,6 +9,7 @@
   --ds-blue: #2F5BFF;
   --ds-blue-dark: #1B3FC4;
   --ds-mint: #5EEAD4;
+  --ds-teal: #14B8A6;
   --ds-sun: #FFC83D;
   --ds-paper: #F4F7FF;
 
@@ -34,6 +35,7 @@
   --ds-edge-sun: #C99400;
   --ds-edge-soft: #D5DEFF; /* softer card edge (island bar, big panels) */
   --ds-edge-navy: var(--ds-navy-deep);
+  --ds-edge-danger: #E38A82; /* destructive controls */
   --ds-edge-chip: rgba(0, 0, 0, 0.2); /* sticker-chip drop on pastel fills */
 
   /* status */
@@ -51,7 +53,7 @@
   --ds-chart-1: #FFC83D;
   --ds-chart-2: #2F5BFF;
   --ds-chart-3: #F0759C;
-  --ds-chart-4: #2ED3B7;
+  --ds-chart-4: #14B8A6;
 
   /* surfaces */
   --ds-surface: #FFFFFF;

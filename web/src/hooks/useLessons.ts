@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Lesson, NewLessonInput } from "../types";
-import { createLesson, fetchLessons, setLessonPublished } from "../services/lessons";
+import {
+  createLesson, deleteLesson, fetchLessonAttemptCounts, fetchLessons,
+  setLessonPublished, updateLesson,
+} from "../services/lessons";
+import { fetchLessonActivityCounts } from "../services/classes";
 
 /** Class-scoped lesson list + the mutations that operate on it. */
 export function useLessons(classId: string) {
@@ -9,6 +13,10 @@ export function useLessons(classId: string) {
   const invalidate = () => qc.invalidateQueries({ queryKey: KEY });
 
   const lessons = useQuery({ queryKey: KEY, queryFn: () => fetchLessons(classId) });
+  const counts = useQuery({
+    queryKey: ["lesson-activity-counts", classId],
+    queryFn: () => fetchLessonActivityCounts(classId),
+  });
 
   const create = useMutation({
     mutationFn: (input: NewLessonInput) =>
@@ -21,5 +29,22 @@ export function useLessons(classId: string) {
     onSuccess: invalidate,
   });
 
-  return { lessons, create, togglePublish };
+  const update = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: NewLessonInput }) =>
+      updateLesson(id, input),
+    onSuccess: invalidate,
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteLesson(id),
+    onSuccess: invalidate,
+  });
+
+  // Submitted-attempt count per lesson — gates the unpublish confirm.
+  const attemptCounts = useQuery({
+    queryKey: ["lesson-attempt-counts", classId],
+    queryFn: () => fetchLessonAttemptCounts(classId),
+  });
+
+  return { lessons, counts, attemptCounts, create, update, remove, togglePublish };
 }

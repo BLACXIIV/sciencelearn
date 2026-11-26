@@ -27,7 +27,9 @@ class DSSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final idx = options.indexWhere((o) => o.value == value).clamp(0, options.length - 1);
+    final idx = options
+        .indexWhere((o) => o.value == value)
+        .clamp(0, options.length - 1);
     return Container(
       height: 46,
       padding: const EdgeInsets.all(4),
@@ -66,7 +68,9 @@ class DSSegmentedControl extends StatelessWidget {
                             duration: const Duration(milliseconds: 200),
                             style: DSText.label.copyWith(
                               fontSize: 14,
-                              color: o.value == value ? DSColors.surface : DSColors.muted,
+                              color: o.value == value
+                                  ? DSColors.surface
+                                  : DSColors.muted,
                             ),
                             child: Text(o.label),
                           ),

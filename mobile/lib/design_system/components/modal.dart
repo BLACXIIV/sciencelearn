@@ -18,6 +18,11 @@ Future<T?> showDSModal<T>(
 }) {
   return showDialog<T>(
     context: context,
+    // Nearest navigator (shell branch), not root — callers close the dialog
+    // with Navigator.of(context).pop(), which resolves to the shell nav.
+    // On the root nav that pop would remove the screen route instead
+    // (white screen) and the action would never run.
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: Colors.black.withValues(alpha: 0.25),
     builder: (context) => DSModal(title: title, body: body, actions: actions),

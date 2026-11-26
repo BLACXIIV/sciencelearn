@@ -74,7 +74,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Image.asset('assets/brand/logo.png', width: 28, height: 28),
                   const SizedBox(width: 8),
-                  Text('ScienceLearn', style: DSText.h2),
+                  Flexible(
+                      child: Text('ScienceLearn',
+                          style: DSText.h2, overflow: TextOverflow.ellipsis)),
                 ]),
                 Text('Learn • Explore • Excel',
                     style: DSText.bodySm.copyWith(color: DSColors.muted)),

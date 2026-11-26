@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import '../tokens/colors.dart';
 import '../tokens/typography.dart';
 
-/// Switch — pill toggle. Track goes blue when on; row target ≥44px.
+/// Switch — pill toggle. Track goes [activeColor] (blue default) when on;
+/// row target ≥44px.
 class DSSwitch extends StatelessWidget {
   final String? label;
   final bool value;
   final ValueChanged<bool>? onChanged;
   final bool disabled;
+
+  /// Checked-track color. Default blue for settings; DSColors.teal for
+  /// publish toggles where "on" means live.
+  final Color activeColor;
 
   const DSSwitch({
     super.key,
@@ -16,6 +21,7 @@ class DSSwitch extends StatelessWidget {
     required this.value,
     this.onChanged,
     this.disabled = false,
+    this.activeColor = DSColors.blue,
   });
 
   @override
@@ -24,7 +30,7 @@ class DSSwitch extends StatelessWidget {
       value: value,
       onChanged: disabled ? null : onChanged,
       activeThumbColor: DSColors.surface,
-      activeTrackColor: DSColors.blue,
+      activeTrackColor: activeColor,
       inactiveThumbColor: DSColors.surface,
       inactiveTrackColor: DSColors.track,
       trackOutlineColor: const WidgetStatePropertyAll(DSColors.line),
@@ -40,7 +46,9 @@ class DSSwitch extends StatelessWidget {
           children: [
             sw,
             const SizedBox(width: 12),
-            Flexible(child: Text(label!, style: DSText.bodySm.copyWith(color: DSColors.inkSoft))),
+            Flexible(
+                child: Text(label!,
+                    style: DSText.bodySm.copyWith(color: DSColors.inkSoft))),
           ],
         ),
       ),

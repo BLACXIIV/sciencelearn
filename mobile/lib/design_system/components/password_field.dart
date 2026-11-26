@@ -62,7 +62,8 @@ class _DSPasswordFieldState extends State<DSPasswordField> {
         child: IconButton(
           tooltip: _show ? 'Hide password' : 'Show password',
           onPressed: () => setState(() => _show = !_show),
-          icon: DSIcon(_show ? DSIconName.hide : DSIconName.show, size: 18, color: DSColors.muted),
+          icon: DSIcon(_show ? DSIconName.hide : DSIconName.show,
+              size: 18, color: DSColors.muted),
         ),
       ),
     );

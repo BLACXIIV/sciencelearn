@@ -21,19 +21,25 @@ class ClassQuizScreen extends ConsumerWidget {
 
     return Scaffold(
       body: Column(children: [
-        const ClassPortalHeader(),
-        Expanded(child: MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
-          DSCard(child: Row(children: [
+        ClassHeroHeader(cls: cls),
+        Expanded(
+            child: MaxWidth(
+                child: ListView(padding: const EdgeInsets.all(16), children: [
+          DSCard(
+              child: Row(children: [
             const DSIcon(DSIconName.quiz, size: 22, color: DSColors.blue),
             const SizedBox(width: 10),
-            Expanded(child: Text(
+            Expanded(
+                child: Text(
               'Quizzes attach to lessons — pick the lesson this quiz is for.',
               style: DSText.bodySm.copyWith(color: DSColors.muted),
             )),
           ])),
           const SizedBox(height: 16),
           lessons.when(
-            loading: () => const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
+            loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: DSLoadingIndicator())),
             error: (e, _) => DSEmptyState(
               icon: DSIconName.offline,
               title: "Couldn't load this right now",
@@ -48,7 +54,8 @@ class ClassQuizScreen extends ConsumerWidget {
             ),
             data: (rows) {
               if (rows.isEmpty) {
-                return DSCard(child: DSEmptyState(
+                return DSCard(
+                    child: DSEmptyState(
                   icon: DSIconName.lessons,
                   title: 'No lessons yet',
                   body: 'Create a lesson first, then build its quizzes here.',
@@ -67,8 +74,10 @@ class ClassQuizScreen extends ConsumerWidget {
                           builder: (_) => LessonActivitiesScreen(lesson: l))),
                       leading: const DSIcon(DSIconName.assessment, size: 22),
                       title: Text('${l['title']}'),
-                      subtitle: Text('${l['subject']}${l['is_published'] == true ? ' · published' : ' · draft'}'),
-                      trailing: const DSIcon(DSIconName.chevron, size: 20, color: DSColors.muted),
+                      subtitle: Text(
+                          '${l['subject']}${l['is_published'] == true ? ' · published' : ' · draft'}'),
+                      trailing: const DSIcon(DSIconName.chevron,
+                          size: 20, color: DSColors.muted),
                     ),
                   ),
               ]);

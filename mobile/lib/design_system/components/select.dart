@@ -41,8 +41,10 @@ class DSSelect extends StatelessWidget {
         DropdownButtonFormField<String>(
           initialValue: value,
           onChanged: onChanged,
-          icon: const DSIcon(DSIconName.chevron, size: 18, color: DSColors.muted),
-          style: DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
+          icon:
+              const DSIcon(DSIconName.chevron, size: 18, color: DSColors.muted),
+          style:
+              DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             errorText: error,
             helperText: error == null ? helper : null,

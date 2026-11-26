@@ -23,6 +23,7 @@ enum DSIconName {
   atom(LucideIcons.atom),
   school(LucideIcons.graduationCap),
   university(LucideIcons.school),
+  globe(LucideIcons.globe),
   presentation(LucideIcons.presentation),
   shield(LucideIcons.shield),
   back(LucideIcons.arrowLeft),
@@ -56,7 +57,8 @@ enum DSIconName {
   search(LucideIcons.search),
   close(LucideIcons.x),
   check(LucideIcons.check),
-  more(LucideIcons.ellipsis);
+  more(LucideIcons.ellipsis),
+  export(LucideIcons.download);
 
   const DSIconName(this.data);
   final IconData data;

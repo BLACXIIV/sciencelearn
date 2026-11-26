@@ -45,6 +45,8 @@ export { OptionTile } from "./components/OptionTile/OptionTile";
 export type { OptionTileProps } from "./components/OptionTile/OptionTile";
 export { SearchField } from "./components/SearchField/SearchField";
 export { CodeInput } from "./components/CodeInput/CodeInput";
+export { FileDropZone } from "./components/FileDropZone/FileDropZone";
+export type { FileDropZoneProps } from "./components/FileDropZone/FileDropZone";
 export type { CodeInputProps } from "./components/CodeInput/CodeInput";
 
 /* surfaces */

@@ -32,19 +32,41 @@ class DSQuizOption extends StatefulWidget {
 
 class _DSQuizOptionState extends State<DSQuizOption> {
   bool _pressed = false;
-  bool get _inactive => widget.state == DSQuizOptionState.disabled || widget.onTap == null;
+  bool get _inactive =>
+      widget.state == DSQuizOptionState.disabled || widget.onTap == null;
 
   @override
   Widget build(BuildContext context) {
     final s = widget.state;
     final (fill, border, borderW, edge, badge) = switch (s) {
-      DSQuizOptionState.selected =>
-        (DSColors.pastelBlue, DSColors.blue, 2.0, DSColors.edgeBlue, DSColors.navy),
-      DSQuizOptionState.correct =>
-        (DSColors.pastelMint, DSColors.success, 2.0, DSColors.edgeMint, DSColors.success),
-      DSQuizOptionState.wrong =>
-        (DSColors.errorSurface, DSColors.error, 2.0, DSColors.error, DSColors.error),
-      _ => (DSColors.surface, Colors.transparent, 2.0, DSColors.edgeWhite, DSColors.navy),
+      DSQuizOptionState.selected => (
+          DSColors.pastelBlue,
+          DSColors.blue,
+          2.0,
+          DSColors.edgeBlue,
+          DSColors.navy
+        ),
+      DSQuizOptionState.correct => (
+          DSColors.pastelMint,
+          DSColors.success,
+          2.0,
+          DSColors.edgeMint,
+          DSColors.success
+        ),
+      DSQuizOptionState.wrong => (
+          DSColors.errorSurface,
+          DSColors.error,
+          2.0,
+          DSColors.error,
+          DSColors.error
+        ),
+      _ => (
+          DSColors.surface,
+          Colors.transparent,
+          2.0,
+          DSColors.edgeWhite,
+          DSColors.navy
+        ),
     };
     final mark = s == DSQuizOptionState.correct
         ? DSIconName.check
@@ -53,9 +75,15 @@ class _DSQuizOptionState extends State<DSQuizOption> {
             : null;
 
     return GestureDetector(
-      onTapDown: (_) { if (!_inactive) setState(() => _pressed = true); },
-      onTapUp: (_) { if (_pressed) setState(() => _pressed = false); },
-      onTapCancel: () { if (_pressed) setState(() => _pressed = false); },
+      onTapDown: (_) {
+        if (!_inactive) setState(() => _pressed = true);
+      },
+      onTapUp: (_) {
+        if (_pressed) setState(() => _pressed = false);
+      },
+      onTapCancel: () {
+        if (_pressed) setState(() => _pressed = false);
+      },
       onTap: _inactive ? null : widget.onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -77,7 +105,8 @@ class _DSQuizOptionState extends State<DSQuizOption> {
               Container(
                 width: 34,
                 height: 34,
-                decoration: BoxDecoration(color: badge, borderRadius: DSRadii.chipBr),
+                decoration:
+                    BoxDecoration(color: badge, borderRadius: DSRadii.chipBr),
                 child: Center(
                   child: Text(
                     widget.letter,
@@ -88,7 +117,8 @@ class _DSQuizOptionState extends State<DSQuizOption> {
               const SizedBox(width: 12),
               Expanded(
                 child: DefaultTextStyle.merge(
-                  style: DSText.label.copyWith(fontSize: 14, color: DSColors.navy),
+                  style:
+                      DSText.label.copyWith(fontSize: 14, color: DSColors.navy),
                   child: widget.child,
                 ),
               ),

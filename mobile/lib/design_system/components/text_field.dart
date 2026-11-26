@@ -69,7 +69,8 @@ class DSTextField extends StatelessWidget {
           onSubmitted: onSubmitted,
           autofillHints: autofillHints,
           textCapitalization: textCapitalization,
-          style: DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
+          style:
+              DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             hintText: hint,
             // triggers the themed errorBorder; the icon+message row renders below
@@ -85,10 +86,13 @@ class DSTextField extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: 1),
-                child: DSIcon(DSIconName.alert, size: 14, color: DSColors.error),
+                child:
+                    DSIcon(DSIconName.alert, size: 14, color: DSColors.error),
               ),
               const SizedBox(width: 6),
-              Expanded(child: Text(error!, style: DSText.caption.copyWith(color: DSColors.error))),
+              Expanded(
+                  child: Text(error!,
+                      style: DSText.caption.copyWith(color: DSColors.error))),
             ],
           ),
         ] else if (helper != null) ...[

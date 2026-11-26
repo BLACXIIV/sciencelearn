@@ -26,6 +26,8 @@ import 'features/teacher/class_dashboard_screen.dart';
 import 'features/teacher/class_lessons_screen.dart';
 import 'features/teacher/class_quiz_screen.dart';
 import 'features/teacher/class_students_screen.dart';
+import 'features/teacher/class_report_screen.dart';
+import 'features/teacher/student_report_screen.dart';
 import 'features/teacher/users_screen.dart';
 
 // The defaults are the same public values web/.env ships in every build —
@@ -153,7 +155,14 @@ final _router = GoRouter(
         StatefulShellBranch(routes: [
           GoRoute(
               path: '/teacher/students',
-              builder: (_, __) => const ClassStudentsScreen()),
+              builder: (_, __) => const ClassStudentsScreen(),
+              routes: [
+                GoRoute(
+                  path: 'report/:studentId',
+                  builder: (_, s) => StudentReportScreen(
+                      studentId: s.pathParameters['studentId']!),
+                ),
+              ]),
         ]),
         StatefulShellBranch(routes: [
           GoRoute(
@@ -168,7 +177,7 @@ final _router = GoRouter(
     GoRoute(
         path: '/teacher/review', builder: (_, __) => const ComingSoonScreen()),
     GoRoute(
-        path: '/teacher/reports', builder: (_, __) => const ComingSoonScreen()),
+        path: '/teacher/reports', builder: (_, __) => const ClassReportScreen()),
   ],
 );
 

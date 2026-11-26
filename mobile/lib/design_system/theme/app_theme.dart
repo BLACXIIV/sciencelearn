@@ -104,7 +104,8 @@ ThemeData buildDSTheme() {
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: DSColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
       ),
     ),
     snackBarTheme: SnackBarThemeData(

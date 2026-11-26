@@ -146,7 +146,10 @@ class ProgressScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(b.$1, style: DSText.bodySm),
+                            Expanded(
+                                child: Text(b.$1,
+                                    style: DSText.bodySm,
+                                    overflow: TextOverflow.ellipsis)),
                             Text(b.$3, style: DSText.label),
                           ],
                         ),

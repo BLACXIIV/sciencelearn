@@ -22,7 +22,10 @@ class _UsersState extends ConsumerState<UsersScreen> {
   final _search = TextEditingController();
 
   @override
-  void dispose() { _search.dispose(); super.dispose(); }
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickRole(Json u) async {
     final role = await showDSModal<String>(
@@ -42,7 +45,9 @@ class _UsersState extends ConsumerState<UsersScreen> {
       await ref.read(repoProvider).setRole('${u['id']}', role);
       ref.invalidate(profilesProvider);
     } catch (e) {
-      if (mounted) DSToast.show(context, message: '$e', tone: DSToastTone.error);
+      if (mounted) {
+        DSToast.show(context, message: '$e', tone: DSToastTone.error);
+      }
     }
   }
 
@@ -69,8 +74,9 @@ class _UsersState extends ConsumerState<UsersScreen> {
             ),
           ),
         ),
-        Expanded(child: users.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+        Expanded(
+            child: users.when(
+          loading: () => const Center(child: DSLoadingIndicator()),
           error: (e, _) => DSEmptyState(
             icon: DSIconName.offline,
             title: "Couldn't load this right now",
@@ -84,11 +90,14 @@ class _UsersState extends ConsumerState<UsersScreen> {
             ),
           ),
           data: (rows) {
-            final filtered = rows.where((u) =>
-                needle.isEmpty ||
-                '${u['full_name'] ?? ''}'.toLowerCase().contains(needle) ||
-                '${u['id']}'.toLowerCase().startsWith(needle)).toList();
-            return MaxWidth(child: ListView(padding: const EdgeInsets.all(16), children: [
+            final filtered = rows
+                .where((u) =>
+                    needle.isEmpty ||
+                    '${u['full_name'] ?? ''}'.toLowerCase().contains(needle) ||
+                    '${u['id']}'.toLowerCase().startsWith(needle))
+                .toList();
+            return MaxWidth(
+                child: ListView(padding: const EdgeInsets.all(16), children: [
               DSSearchField(
                 label: 'Search',
                 hint: 'Name or ID',
@@ -97,7 +106,8 @@ class _UsersState extends ConsumerState<UsersScreen> {
               ),
               const SizedBox(height: 16),
               if (filtered.isEmpty)
-                DSCard(child: DSEmptyState(
+                DSCard(
+                    child: DSEmptyState(
                   icon: DSIconName.students,
                   title: rows.isEmpty ? 'No users yet' : 'No matches',
                 )),
@@ -106,14 +116,22 @@ class _UsersState extends ConsumerState<UsersScreen> {
                 () {
                   final isSelf = u['id'] == me.valueOrNull?['id'];
                   return DSListItemCard(
-                    leading: DSAvatar(name: '${u['full_name'] ?? ''}'.isEmpty ? '?' : '${u['full_name']}'),
-                    title: Text('${u['full_name'] ?? ''}'.isEmpty ? '(no name)' : '${u['full_name']}'),
+                    leading: DSAvatar(
+                        name: '${u['full_name'] ?? ''}'.isEmpty
+                            ? '?'
+                            : '${u['full_name']}'),
+                    title: Text('${u['full_name'] ?? ''}'.isEmpty
+                        ? '(no name)'
+                        : '${u['full_name']}'),
                     subtitle: Row(children: [
-                      DSBadge(tone: _roleTones['${u['role']}'] ?? DSBadgeTone.blue,
+                      DSBadge(
+                          tone: _roleTones['${u['role']}'] ?? DSBadgeTone.blue,
                           child: Text('${u['role']}')),
                       if (isSelf) ...[
                         const SizedBox(width: 6),
-                        Text('you', style: DSText.caption.copyWith(color: DSColors.muted)),
+                        Text('you',
+                            style:
+                                DSText.caption.copyWith(color: DSColors.muted)),
                       ],
                     ]),
                     trailing: DSIconButton(

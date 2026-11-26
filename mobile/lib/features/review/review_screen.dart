@@ -128,7 +128,7 @@ class _ListPage extends StatelessWidget {
                 );
               }
               if (!snap.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: DSLoadingIndicator());
               }
               final rows = snap.data!;
               if (rows.isEmpty) {

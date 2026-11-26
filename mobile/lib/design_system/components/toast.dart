@@ -71,10 +71,12 @@ class DSToast extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: DSText.bodySm.copyWith(color: DSColors.ink, fontWeight: FontWeight.w500),
+              style: DSText.bodySm
+                  .copyWith(color: DSColors.ink, fontWeight: FontWeight.w500),
             ),
           ),
-          DSIconButton(icon: DSIconName.close, label: 'Dismiss', onPressed: onClose),
+          DSIconButton(
+              icon: DSIconName.close, label: 'Dismiss', onPressed: onClose),
         ],
       ),
     );

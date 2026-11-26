@@ -11,7 +11,10 @@ export interface Profile {
 }
 
 export const SUBJECTS = ["Physics", "Chemistry", "Earth Science"] as const;
-export type Subject = (typeof SUBJECTS)[number];
+// Teachers can add/remove subjects at runtime (lesson picker + filters), so
+// Subject is not a closed union — the `| (string & {})` keeps autocomplete
+// for the built-ins while accepting any custom name.
+export type Subject = (typeof SUBJECTS)[number] | (string & {});
 
 export interface Lesson {
   id: string;

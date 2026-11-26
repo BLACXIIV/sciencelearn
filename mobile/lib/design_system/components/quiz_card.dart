@@ -38,7 +38,10 @@ class DSQuizCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (tag != null)
-            DSChip(variant: DSChipVariant.pastel, pastel: DSChipPastel.mint, child: Text(tag!)),
+            DSChip(
+                variant: DSChipVariant.pastel,
+                pastel: DSChipPastel.mint,
+                child: Text(tag!)),
           if (tag != null) const SizedBox(height: DSSpacing.s4),
           DefaultTextStyle.merge(
             style: DSText.h3.copyWith(color: DSColors.surface),
@@ -52,7 +55,8 @@ class DSQuizCard extends StatelessWidget {
           if (footer != null) ...[
             const SizedBox(height: DSSpacing.s4),
             DefaultTextStyle.merge(
-              style: DSText.caption.copyWith(color: DSColors.pastelBlue, fontWeight: FontWeight.w500),
+              style: DSText.caption.copyWith(
+                  color: DSColors.pastelBlue, fontWeight: FontWeight.w500),
               child: footer!,
             ),
           ],

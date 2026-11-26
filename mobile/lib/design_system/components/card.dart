@@ -6,6 +6,7 @@ import '../tokens/shadows.dart';
 import '../tokens/spacing.dart';
 
 enum DSCardVariant { white, pastel, navy, trivia, flat }
+
 enum DSCardPastel { blue, yellow, purple, mint }
 
 /// Card — the chunky content card. Variants:
@@ -37,15 +38,50 @@ class DSCard extends StatelessWidget {
 
   (Color, List<BoxShadow>, Border?, double) _style() => switch (variant) {
         // (fill, shadow, border, tiltDeg)
-        DSCardVariant.white => (DSColors.surface, dsEdge(DSColors.edgeCard), null, 0.0),
+        DSCardVariant.white => (
+            DSColors.surface,
+            dsEdge(DSColors.edgeCard),
+            null,
+            0.0
+          ),
         DSCardVariant.pastel => switch (pastel) {
-            DSCardPastel.blue => (DSColors.pastelBlue, dsEdge(DSColors.edgeWhite), null, 0.0),
-            DSCardPastel.yellow => (DSColors.pastelYellow, dsEdge(DSColors.edgeCard), null, 0.0),
-            DSCardPastel.purple => (DSColors.pastelPurple, dsEdge(DSColors.edgeCard), null, 0.0),
-            DSCardPastel.mint => (DSColors.pastelMint, dsEdge(DSColors.edgeMint), null, 0.0),
+            DSCardPastel.blue => (
+                DSColors.pastelBlue,
+                dsEdge(DSColors.edgeWhite),
+                null,
+                0.0
+              ),
+            DSCardPastel.yellow => (
+                DSColors.pastelYellow,
+                dsEdge(DSColors.edgeCard),
+                null,
+                0.0
+              ),
+            DSCardPastel.purple => (
+                DSColors.pastelPurple,
+                dsEdge(DSColors.edgeCard),
+                null,
+                0.0
+              ),
+            DSCardPastel.mint => (
+                DSColors.pastelMint,
+                dsEdge(DSColors.edgeMint),
+                null,
+                0.0
+              ),
           },
-        DSCardVariant.navy => (DSColors.navy, dsEdge(DSColors.edgeNavy), null, 0.0),
-        DSCardVariant.trivia => (DSColors.surface, dsEdge(DSColors.edgeCard, h: 5), null, -1.2),
+        DSCardVariant.navy => (
+            DSColors.navy,
+            dsEdge(DSColors.edgeNavy),
+            null,
+            0.0
+          ),
+        DSCardVariant.trivia => (
+            DSColors.surface,
+            dsEdge(DSColors.edgeCard, h: 5),
+            null,
+            -1.2
+          ),
         DSCardVariant.flat => (
             DSColors.surface,
             const <BoxShadow>[],
@@ -57,22 +93,31 @@ class DSCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (fill, shadow, border, restTilt) = _style();
-    final deg = tilt ? 1.2 : tiltLeft ? -1.2 : restTilt;
-    return Transform.rotate(
-      angle: deg * 3.141592653589793 / 180,
-      child: Container(
-        padding: padding ?? const EdgeInsets.all(DSSpacing.s5),
-        decoration: BoxDecoration(
-          color: fill,
-          borderRadius: DSRadii.cardBr,
-          border: border,
-          boxShadow: shadow,
-        ),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: variant == DSCardVariant.navy ? DSColors.surface : DSColors.ink),
-          child: child,
-        ),
+    final deg = tilt
+        ? 1.2
+        : tiltLeft
+            ? -1.2
+            : restTilt;
+    final card = Container(
+      padding: padding ?? const EdgeInsets.all(DSSpacing.s5),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: DSRadii.cardBr,
+        border: border,
+        boxShadow: shadow,
+      ),
+      child: DefaultTextStyle.merge(
+        style: TextStyle(
+            color: variant == DSCardVariant.navy
+                ? DSColors.surface
+                : DSColors.ink),
+        child: child,
       ),
     );
+    // Transform pushes a compositing layer — skip it at 0° so flat cards
+    // don't pay a layer each per scroll frame.
+    return deg == 0
+        ? card
+        : Transform.rotate(angle: deg * 3.141592653589793 / 180, child: card);
   }
 }

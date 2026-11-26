@@ -5,6 +5,9 @@ export interface SwitchProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "type"> {
   /** Optional label next to the toggle. */
   label?: string;
+  /** Checked-track color. `blue` (default) for settings; `teal` for publish
+   *  toggles where "on" means live. */
+  tone?: "blue" | "teal";
   id?: string;
 }
 
@@ -13,13 +16,13 @@ export interface SwitchProps
  * white circle with a card edge. Row tap target ≥44px.
  */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { label, id, className = "", ...rest },
+  { label, tone = "blue", id, className = "", ...rest },
   ref,
 ) {
   const uid = useId();
   const inputId = id ?? uid;
   const input = (
-    <span className="ds-switch">
+    <span className={`ds-switch${tone === "teal" ? " tone-teal" : ""}`}>
       <input id={inputId} type="checkbox" role="switch" ref={ref} {...rest} />
       <span className="ds-switch-track" aria-hidden="true"><span className="ds-switch-knob" /></span>
     </span>

@@ -45,7 +45,7 @@ class TeacherShell extends ConsumerWidget {
     return ListTile(
       leading: DSIcon(icon, size: 22, color: DSColors.navy),
       title: Text(label, style: DSText.title),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(borderRadius: DSRadii.inputBr),
       onTap: () {
         Navigator.of(context).pop();
         onTap();
@@ -56,10 +56,14 @@ class TeacherShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
-    if (me.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final meV = me.valueOrNull;
+    // Gate on a missing VALUE, not isLoading: auth refresh emits AsyncLoading
+    // with the previous value attached, and blanking the whole portal for a
+    // frame on every token refresh is the scroll-time white blip.
+    if (meV == null && me.isLoading) {
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
-    if (me.hasError) {
+    if (meV == null && me.hasError) {
       return Scaffold(
         body: DSEmptyState(
           icon: DSIconName.offline,
@@ -79,7 +83,23 @@ class TeacherShell extends ConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) GoRouter.maybeOf(context)?.go('/');
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
+    }
+
+    // Ownership guard — every /teacher/* screen is scoped to currentClass;
+    // a class the teacher doesn't own gets cleared and the router re-gates
+    // to the picker. Admins pass. RLS blocks writes; this stops the
+    // read-side leak (name, join code, counts).
+    final cls = currentClass.value;
+    if (cls != null &&
+        '${cls['teacher_id']}' != '${meV?['id']}' &&
+        role != 'admin') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        currentClass.value = null;
+        classPicked.value = false;
+        if (context.mounted) context.go('/select-class');
+      });
+      return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
 
     // Four tab branches + a 5th "More" slot that opens the sheet instead.

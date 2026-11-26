@@ -25,8 +25,8 @@ class DSThumbnail extends StatelessWidget {
     Widget ph() => Container(
           width: size,
           height: size,
-          decoration:
-              BoxDecoration(color: DSColors.track, borderRadius: DSRadii.chipBr),
+          decoration: BoxDecoration(
+              color: DSColors.track, borderRadius: DSRadii.chipBr),
           child: DSIcon(icon, size: size * 0.45, color: DSColors.muted),
         );
     if (imageUrl == null || imageUrl!.isEmpty) return ph();

@@ -55,7 +55,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(_app({'role': 'student', 'full_name': 'Rhey Aguilar'}, [
+    await tester.pumpWidget(_app({
+      'role': 'student',
+      'full_name': 'Rhey Aguilar'
+    }, [
       enrolledClassesProvider.overrideWith((ref) => Future.value(_enrolled)),
     ]));
     await tester.pumpAndSettle();
@@ -70,7 +73,8 @@ void main() {
     expect(find.text('Join with a class code'), findsOneWidget);
 
     // Continue is the gate: disabled until a class is selected.
-    var cta = tester.widget<DSButton>(find.widgetWithText(DSButton, 'Continue'));
+    var cta =
+        tester.widget<DSButton>(find.widgetWithText(DSButton, 'Continue'));
     expect(cta.disabled, isTrue);
 
     await tester.tap(find.text('Grade 7 – Diamond'));
@@ -93,7 +97,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(_app({'role': 'teacher', 'full_name': 'Ms. Aquino'}, [
+    await tester.pumpWidget(_app({
+      'role': 'teacher',
+      'full_name': 'Ms. Aquino'
+    }, [
       teacherClassesProvider.overrideWith((ref) => Future.value(_taught)),
     ]));
     await tester.pumpAndSettle();
@@ -114,7 +121,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(_app({'role': 'student', 'full_name': 'Rhey'}, [
+    await tester.pumpWidget(_app({
+      'role': 'student',
+      'full_name': 'Rhey'
+    }, [
       enrolledClassesProvider.overrideWith((ref) => Future.value(_enrolled)),
     ]));
     await tester.pumpAndSettle();

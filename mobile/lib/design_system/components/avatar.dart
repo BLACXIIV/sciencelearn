@@ -30,7 +30,8 @@ class DSAvatar extends StatelessWidget {
       DSAvatarPastel.mint => DSColors.pastelMint,
     };
     final parts = name.trim().split(RegExp(r'\s+'));
-    final initials = parts.take(2).map((w) => w.isEmpty ? '' : w[0]).join().toUpperCase();
+    final initials =
+        parts.take(2).map((w) => w.isEmpty ? '' : w[0]).join().toUpperCase();
 
     return Semantics(
       label: name,

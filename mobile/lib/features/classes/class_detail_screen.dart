@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
@@ -7,13 +7,15 @@ import '../../design_system/design_system.dart';
 import '../lessons/lesson_thumb.dart';
 
 final _classLessonsProvider = FutureProvider.autoDispose
-    .family<List<Json>, String>((ref, id) => ref.read(repoProvider).lessons(classId: id));
+    .family<List<Json>, String>(
+        (ref, id) => ref.read(repoProvider).lessons(classId: id));
 
 /// Student view of one class: the lessons inside it with per-lesson progress.
 class StudentClassScreen extends ConsumerWidget {
   final String classId;
   final String name;
-  const StudentClassScreen({super.key, required this.classId, required this.name});
+  const StudentClassScreen(
+      {super.key, required this.classId, required this.name});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,8 +37,9 @@ class StudentClassScreen extends ConsumerWidget {
             ]),
           ),
         ),
-        Expanded(child: lessons.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+        Expanded(
+            child: lessons.when(
+          loading: () => const Center(child: DSLoadingIndicator()),
           error: (e, _) => DSEmptyState(
             icon: DSIconName.offline,
             title: "Couldn't load this right now",
@@ -50,14 +53,19 @@ class StudentClassScreen extends ConsumerWidget {
             ),
           ),
           data: (rows) => RefreshIndicator(
-            onRefresh: () async => ref.refresh(_classLessonsProvider(classId).future),
+            onRefresh: () async =>
+                ref.refresh(_classLessonsProvider(classId).future),
             child: rows.isEmpty
                 ? ListView(children: const [
                     SizedBox(height: 80),
-                    DSEmptyState(icon: DSIconName.lessons, title: 'No lessons here yet',
-                        body: 'Your teacher has not published lessons for this class.'),
+                    DSEmptyState(
+                        icon: DSIconName.lessons,
+                        title: 'No lessons here yet',
+                        body:
+                            'Your teacher has not published lessons for this class.'),
                   ])
-                : MaxWidth(child: ListView.separated(
+                : MaxWidth(
+                    child: ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: rows.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -67,7 +75,8 @@ class StudentClassScreen extends ConsumerWidget {
                       final pct = lp.isEmpty ? 0 : (lp.first['percent'] as int);
                       return DSListItemCard(
                         onTap: () => context.push('/lesson/${l['id']}'),
-                        leading: LessonThumb(thumbKey: l['thumbnail_key'] as String?),
+                        leading: LessonThumb(
+                            thumbKey: l['thumbnail_key'] as String?),
                         title: Text(l['title']),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +85,8 @@ class StudentClassScreen extends ConsumerWidget {
                                 maxLines: 2, overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 6),
                             Row(children: [
-                              Expanded(child: DSProgressBar(
+                              Expanded(
+                                  child: DSProgressBar(
                                 value: pct / 100,
                                 size: DSProgressBarSize.sm,
                               )),
@@ -85,7 +95,8 @@ class StudentClassScreen extends ConsumerWidget {
                             ]),
                           ],
                         ),
-                        trailing: const DSIcon(DSIconName.chevron, color: DSColors.muted),
+                        trailing: const DSIcon(DSIconName.chevron,
+                            color: DSColors.muted),
                       );
                     },
                   )),

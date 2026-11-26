@@ -26,7 +26,9 @@ class DSPageSection extends StatelessWidget {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 if (title != null)
-                  Expanded(child: Text(title!, style: DSText.h2.copyWith(fontSize: 21))),
+                  Expanded(
+                      child: Text(title!,
+                          style: DSText.h2.copyWith(fontSize: 21))),
                 if (aside != null) aside!,
               ],
             ),

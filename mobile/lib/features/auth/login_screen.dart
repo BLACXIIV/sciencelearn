@@ -7,6 +7,5 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const AuthSheetHost(tab: AuthTab.login);
+  Widget build(BuildContext context) => const AuthSheetHost(tab: AuthTab.login);
 }

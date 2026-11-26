@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 /// "recedes" under the finger). Colors come from DSColors.edge*.
 /// Matches edge(color, height) in web/src/design-system/tokens/shadows.css.
 List<BoxShadow> dsEdge(Color color, {int h = 6}) {
-  assert(h >= 1 && h <= 6, 'edge height must be 1-6 (3-6 surfaces, 1-2 pressed)');
+  assert(
+      h >= 1 && h <= 6, 'edge height must be 1-6 (3-6 surfaces, 1-2 pressed)');
   return [BoxShadow(color: color, offset: Offset(0, h.toDouble()))];
 }
 

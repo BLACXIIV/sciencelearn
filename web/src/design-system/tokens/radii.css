@@ -1,10 +1,16 @@
-/* ScienceLearn Design System — corner radii. Fixed set, six values. */
+/* ScienceLearn Design System — corner radii. Fixed scale; semantic names
+   match mobile DSRadii 1:1. */
 
 :root {
-  --ds-r-button: 16px;
+  --ds-r-sm: 12px;    /* small controls, menu items */
   --ds-r-input: 14px;
-  --ds-r-card: 22px;
-  --ds-r-panel: 32px; /* panels, sheets, hero bottom corners */
-  --ds-r-chip: 14px;
-  --ds-r-pill: 999px;
+  --ds-r-button: 16px;
+  --ds-r-tile: 18px;  /* tiles, empty slots */
+  --ds-r-row: 20px;   /* list rows */
+  --ds-r-card: 24px;
+  --ds-r-strip: 28px; /* navy strips, report headers */
+  --ds-r-sheet: 30px; /* bottom sheets */
+  --ds-r-panel: 32px; /* panels, hero corners */
+  --ds-r-pill: 99px;
+  --ds-r-chip: var(--ds-r-input); /* legacy alias — small chips/icon tiles */
 }

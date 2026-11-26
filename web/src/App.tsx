@@ -15,6 +15,8 @@ import ClassLessons from "./pages/teacher/ClassLessons";
 import ClassQuiz from "./pages/teacher/ClassQuiz";
 import ClassStudents from "./pages/teacher/ClassStudents";
 import ComingSoon from "./pages/teacher/ComingSoon";
+import ClassReport from "./pages/teacher/ClassReport";
+import StudentReport from "./pages/teacher/StudentReport";
 import Users from "./pages/Users";
 import { pickedClassId } from "./services/classes";
 import StudentHome from "./pages/student/Home";
@@ -81,7 +83,8 @@ export default function App() {
             <Route path="quiz" element={<ClassQuiz />} />
             <Route path="students" element={<ClassStudents />} />
             <Route path="review" element={<ComingSoon />} />
-            <Route path="reports" element={<ComingSoon />} />
+            <Route path="reports" element={<ClassReport />} />
+            <Route path="reports/:studentId" element={<StudentReport />} />
           </Route>
         </Route>
       </Route>

@@ -19,6 +19,7 @@
 .ds-progress-fill-mint    { background: var(--ds-mint); }
 .ds-progress-fill-sun     { background: var(--ds-sun); }
 .ds-progress-fill-success { background: var(--ds-success); }
+.ds-progress-fill-teal    { background: var(--ds-teal); }
 
 @media (prefers-reduced-motion: reduce) {
   .ds-progress-fill { transition: none; }

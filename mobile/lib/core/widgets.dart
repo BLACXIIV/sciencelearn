@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repository.dart';
 import '../design_system/design_system.dart';
@@ -7,7 +7,8 @@ import '../design_system/design_system.dart';
 class UserAvatar extends ConsumerWidget {
   final double radius;
   final DSAvatarPastel pastel;
-  const UserAvatar({super.key, this.radius = 28, this.pastel = DSAvatarPastel.blue});
+  const UserAvatar(
+      {super.key, this.radius = 28, this.pastel = DSAvatarPastel.blue});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
