@@ -34,11 +34,13 @@ String cleanChars(String s) {
 
 const _subscripts = '₀₁₂₃₄₅₆₇₈₉';
 
-/// Digits right after a letter or ')' are formula subscripts in this domain:
-/// '2H2 + O2 -> 2H2O' stores as '2H₂ + O₂ → 2H₂O'. 'Activity 2' / 'item 3'
-/// are untouched (a space breaks the match).
+/// Digits right after an element token or ')' are formula subscripts in this
+/// domain: '2H2 + O2 -> 2H2O' stores as '2H₂ + O₂ → 2H₂O'. Element symbols
+/// always start with a capital (H, Fe, Cl, OH groups) so the match requires
+/// '[A-Z][a-z]?' — lowercase words like 'test2' or 'item3' stay untouched,
+/// as do spaced digits ('Activity 2').
 String _chemSub(String s) => s.replaceAllMapped(
-    RegExp(r'([A-Za-z)\]])(\d+)'),
+    RegExp(r'([A-Z][a-z]?|\)|\])(\d+)'),
     (m) =>
         m[1]! + m[2]!.split('').map((c) => _subscripts[int.parse(c)]).join());
 

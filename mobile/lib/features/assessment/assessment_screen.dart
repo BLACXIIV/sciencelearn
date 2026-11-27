@@ -21,7 +21,7 @@ class AssessmentScreen extends ConsumerWidget {
           ),
         ),
         Expanded(
-            child: FutureBuilder<({List<Json> rows, Map<String, num> scores})>(
+            child: KeepDataFutureBuilder<({List<Json> rows, Map<String, num> scores})>(
           future: (() async => (
                 rows: await repo.assessments([
                   'pre_test',

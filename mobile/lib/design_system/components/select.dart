@@ -41,6 +41,7 @@ class DSSelect extends StatelessWidget {
         DropdownButtonFormField<String>(
           initialValue: value,
           onChanged: onChanged,
+          isExpanded: true,
           icon:
               const DSIcon(DSIconName.chevron, size: 18, color: DSColors.muted),
           style:
@@ -51,7 +52,9 @@ class DSSelect extends StatelessWidget {
           ),
           items: [
             for (final o in options)
-              DropdownMenuItem(value: o.value, child: Text(o.label)),
+              DropdownMenuItem(
+                  value: o.value,
+                  child: Text(o.label, overflow: TextOverflow.ellipsis)),
           ],
         ),
       ],

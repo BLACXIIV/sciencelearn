@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'auth_sheet.dart';
 import 'auth_sheet_host.dart';

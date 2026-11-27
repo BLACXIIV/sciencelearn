@@ -2,14 +2,15 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "../../icons/Icon";
 import "./Button.css";
 
-export type ButtonVariant = "primary" | "mint" | "sun" | "white" | "outline" | "danger" | "ghost";
-export type ButtonSize = "md" | "sm";
+export type ButtonVariant = "primary" | "mint" | "sun" | "white" | "outline" | "danger" | "ghost" | "line";
+export type ButtonSize = "md" | "sm" | "xs";
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "disabled"> {
   /** Visual variant. `primary` = blue CTA (default). `ghost` = border-only,
    *  intended for use on navy surfaces. */
   variant?: ButtonVariant;
-  /** `md` = 52px primary-form size (default). `sm` = compact nav size. */
+  /** `md` = 52px primary-form size (default). `sm` = compact nav size.
+   *  `xs` = tight in-card action (activity-card footer). */
   size?: ButtonSize;
   /** Shows a spinner and blocks interaction. */
   loading?: boolean;
@@ -47,7 +48,7 @@ export function Button({
     <button type={type} className={cls} disabled={disabled || loading} {...rest}>
       {loading
         ? <span className="ds-btn-spin" aria-label="Working" />
-        : <>{leadingIcon && <Icon name={leadingIcon} size={size === "sm" ? 16 : 18} />}{children}</>}
+        : <>{leadingIcon && <Icon name={leadingIcon} size={size === "md" ? 18 : 16} />}{children}</>}
     </button>
   );
 }

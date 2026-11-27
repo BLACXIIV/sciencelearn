@@ -188,7 +188,7 @@ class Repo {
   Future<List<Json>> lessonAssessments(String lessonId) async =>
       List<Json>.from(await sb
           .from('assessments')
-          .select('*, assessment_parts(count)')
+          .select('*, assessment_parts(count), questions(count)')
           .eq('lesson_id', lessonId)
           .order('created_at'));
 
@@ -237,6 +237,15 @@ class Repo {
     }
     return m;
   }
+
+  /// Submitted attempts newest-first, with the activity title embedded —
+  /// the progress tracker's "Quiz scores" list.
+  Future<List<Json>> myQuizScores() async => List<Json>.from(await sb
+      .from('attempts')
+      .select('score, submitted_at, assessments(title)')
+      .eq('student_id', uid)
+      .not('submitted_at', 'is', null)
+      .order('submitted_at', ascending: false));
 
   Future<void> deleteAssessment(String id) async =>
       await sb.from('assessments').delete().eq('id', id);
@@ -299,6 +308,66 @@ class Repo {
 
   Future<void> deleteQuestion(String id) async =>
       await sb.from('questions').delete().eq('id', id);
+
+  /// One assessment row — the builder header needs title/description/
+  /// publish/release flags without the lesson-scope list.
+  Future<Json> assessment(String id) async =>
+      await sb.from('assessments').select().eq('id', id).single();
+
+  /// UPDATEs title/description only — everything else on the row is untouched.
+  Future<void> renameAssessment(String id, String title, String? desc) async {
+    final row = <String, dynamic>{'title': cleanText(title)};
+    if (desc != null) row['description'] = cleanText(desc);
+    await sb.from('assessments').update(row).eq('id', id);
+  }
+
+  /// Attempt count (teacher-readable) — drives the delete-guard pre-check.
+  Future<int> assessmentAttemptCount(String id) async =>
+      (await sb.from('attempts').select('id').eq('assessment_id', id)).length;
+
+  /// Reassigns a question to a different part, appended at [position].
+  Future<void> moveQuestionToPart(
+          String questionId, String? partId, int position) async =>
+      await sb
+          .from('questions')
+          .update({'part_id': partId, 'position': position}).eq('id', questionId);
+
+  /// Rewrites part positions to the dense order given (ids in display order).
+  Future<void> reorderPartPositions(List<String> orderedIds) async {
+    for (var i = 0; i < orderedIds.length; i++) {
+      await sb.from('assessment_parts').update({'position': i}).eq('id', orderedIds[i]);
+    }
+  }
+
+  /// Rewrites question positions within one scope to the dense order given.
+  Future<void> reorderQuestionPositions(List<String> orderedIds) async {
+    for (var i = 0; i < orderedIds.length; i++) {
+      await sb.from('questions').update({'position': i}).eq('id', orderedIds[i]);
+    }
+  }
+
+  /// Teacher preview — same student-view payload as questions_public +
+  /// parts_public via the teacher-gated RPC (0032). Returns {parts, questions};
+  /// throws a friendly error when the function is not deployed yet.
+  Future<Json> previewQuestions(String assessmentId) async {
+    try {
+      final data = await sb
+          .rpc('preview_questions', params: {'p_assessment': assessmentId});
+      final payload = Map<String, dynamic>.from(data as Map);
+      if (payload['error'] != null) {
+        throw Exception(payload['error']);
+      }
+      return payload;
+    } catch (e) {
+      final m = '$e';
+      if (m.contains('PGRST202') ||
+          m.contains('could not find') ||
+          m.contains('does not exist')) {
+        throw Exception('Preview is not available yet');
+      }
+      rethrow;
+    }
+  }
 
   // ---------- classes ----------
 

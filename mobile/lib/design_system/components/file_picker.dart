@@ -18,6 +18,7 @@ class DSDashedBox extends StatelessWidget {
   final double strokeWidth;
   final double dash;
   final double gap;
+  final EdgeInsets padding;
 
   const DSDashedBox({
     super.key,
@@ -27,6 +28,7 @@ class DSDashedBox extends StatelessWidget {
     this.strokeWidth = 2,
     this.dash = 6,
     this.gap = 4,
+    this.padding = EdgeInsets.zero,
   });
 
   @override
@@ -39,7 +41,7 @@ class DSDashedBox extends StatelessWidget {
         dash: dash,
         gap: gap,
       ),
-      child: child,
+      child: Padding(padding: padding, child: child),
     );
   }
 }

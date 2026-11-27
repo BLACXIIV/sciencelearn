@@ -23,6 +23,7 @@ export 'components/text_area.dart';
 export 'components/select.dart';
 export 'components/checkbox.dart';
 export 'components/switch.dart';
+export 'components/compact_switch.dart';
 export 'components/radio_card.dart';
 export 'components/radio_group.dart';
 export 'components/segmented_control.dart';

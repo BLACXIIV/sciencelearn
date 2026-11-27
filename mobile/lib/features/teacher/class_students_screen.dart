@@ -102,7 +102,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                members.when(
+                members.when(skipLoadingOnRefresh: true, 
                   loading: () => const Center(child: DSLoadingIndicator()),
                   error: (e, _) => DSEmptyState(
                     icon: DSIconName.offline,
@@ -486,16 +486,6 @@ class _RosterCard extends StatelessWidget {
                       p?['quizzes_pct'] == null ? '—' : '${p!['quizzes_pct']}%',
                   bar: ((p?['quizzes_pct'] as num?)?.toDouble() ?? 0) / 100,
                   tone: DSProgressBarTone.blue,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _MiniStat(
-                  label: 'Pre → Post',
-                  value:
-                      '${p?['pre_score'] ?? '—'} → ${p?['post_score'] ?? '—'}',
-                  bar: ((p?['post_score'] as num?)?.toDouble() ?? 0) / 100,
-                  tone: DSProgressBarTone.teal,
                 ),
               ),
             ]),

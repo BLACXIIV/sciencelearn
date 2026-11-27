@@ -71,6 +71,17 @@ export async function fetchMyAttemptScores(uid: string): Promise<Record<string, 
   return m;
 }
 
+/** Submitted attempts newest-first with the activity title embedded —
+ *  the progress tracker's "Quiz scores" list. */
+export async function fetchMyQuizScores(uid: string): Promise<{ score: number; assessments: { title: string } | null }[]> {
+  const { data, error } = await supabase
+    .from("attempts").select("score, submitted_at, assessments(title)")
+    .eq("student_id", uid).not("submitted_at", "is", null)
+    .order("submitted_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as { score: number; assessments: { title: string } | null }[];
+}
+
 export async function fetchQuestions(assessmentId: string): Promise<QuizQuestion[]> {
   const { data, error } = await supabase
     .from("questions_public").select("*").eq("assessment_id", assessmentId).order("position");

@@ -50,6 +50,32 @@
 }
 .ds-btn-ghost:active:not(:disabled) { transform: translateY(4px); box-shadow: none; }
 
+/* xs — compact in-card actions (activity-card footer): tighter padding,
+   input radius (14), edge drops to 4px. Overrides whichever variant it
+   pairs with — declared after them. */
+.ds-btn-xs {
+  min-height: 0;
+  padding: 10px 14px;
+  border-radius: var(--ds-r-input);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 var(--ds-edge);
+}
+/* line — edgeless pastel outline for secondary in-card actions (Preview).
+   Inter 600 label instead of Lexend. Declared last: it self-carries
+   padding/radius so it wins over size classes. */
+.ds-btn-line {
+  min-height: 0;
+  padding: 9px 14px;
+  border-radius: var(--ds-r-input);
+  background: var(--ds-surface);
+  color: var(--ds-navy);
+  border: 2px solid var(--ds-pastel-blue);
+  font: 600 14px/1 var(--ds-font-body);
+  box-shadow: none;
+}
+.ds-btn-line:active:not(:disabled) { transform: none; box-shadow: none; }
+
 /* busy spinner */
 .ds-btn-spin {
   width: 20px; height: 20px; border-radius: 50%;

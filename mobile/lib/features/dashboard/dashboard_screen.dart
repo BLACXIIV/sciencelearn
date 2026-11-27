@@ -168,7 +168,6 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
   bool _busy = false;
   String? _msg;
   bool _err = false;
-  int _refresh = 0;
 
   Future<void> _join() async {
     setState(() {
@@ -182,7 +181,6 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
           ? 'Request sent to ${r['name']}, waiting for teacher approval'
           : 'Joined ${r['name']}';
       _err = false;
-      _refresh++;
     } catch (e) {
       _msg = '$e'.replaceFirst('Exception: ', '');
       _err = true;
@@ -222,8 +220,7 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
             ),
         ]),
       ),
-      FutureBuilder<List<Json>>(
-        key: ValueKey(_refresh),
+      KeepDataFutureBuilder<List<Json>>(
         future: ref.read(repoProvider).enrolledClasses(),
         builder: (context, snap) {
           if (!snap.hasData) return const SizedBox.shrink();

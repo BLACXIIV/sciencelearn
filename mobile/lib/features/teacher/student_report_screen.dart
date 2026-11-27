@@ -21,9 +21,6 @@ String buildReportCsv({
   required List<Json> lessons,
 }) {
   final p = progress;
-  final pre = p?['pre_score'] as num?;
-  final post = p?['post_score'] as num?;
-  final gain = pre != null && post != null ? post - pre : null;
   final b = StringBuffer()
     ..writeln('Student report')
     ..writeln('Student,${csvCell(studentName)}')
@@ -32,9 +29,6 @@ String buildReportCsv({
         'Lessons,${p == null ? '—' : '${(p['lessons_pct'] as num?)?.round() ?? 0}%'}')
     ..writeln(
         'Quiz average,${p?['quizzes_pct'] == null ? '—' : '${p!['quizzes_pct']}%'}')
-    ..writeln('Pre-test,${pre == null ? '—' : '$pre%'}')
-    ..writeln('Post-test,${post == null ? '—' : '$post%'}')
-    ..writeln('Gain,${gain == null ? '—' : '${gain >= 0 ? '+' : ''}$gain%'}')
     ..writeln()
     ..writeln('Assessment,Score,Visibility');
   for (final a in assessments) {
@@ -78,7 +72,7 @@ Future<void> _exportReport({
   final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
   await SharePlus.instance.share(ShareParams(
     files: [
-      XFile.fromData(utf8.encode('﻿$csv'), // ﻿ = UTF-8 BOM
+      XFile.fromData(utf8.encode('?$csv'), // ? = UTF-8 BOM
           name: 'student-report-$slug.csv', mimeType: 'text/csv'),
     ],
     subject: 'Student report — $name',

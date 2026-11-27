@@ -10,11 +10,12 @@ import type {
   AnswerValue, AssessmentPart, AttemptResult, QuizQuestion, ReviewItem, ReviewResult,
 } from "../../types";
 import { fmtPts } from "../../utils/stats";
+import { isAnswered, sortQuestionsByPart } from "../../utils/quiz";
 import "./student.css";
 
 const LETTERS = "ABCDEFGH";
 
-const TYPE_LABEL: Record<string, string> = {
+export const TYPE_LABEL: Record<string, string> = {
   multiple_choice: "Multiple choice",
   true_false: "True or false",
   fill_blank: "Fill in the blank",
@@ -149,11 +150,11 @@ function ClassificationInput({ q, value, onChange }: {
 }
 
 /** Student-facing prompt: the editor's [blank] marker renders as a line. */
-const showPrompt = (s: string) => s.replace(/\[blank\]/gi, "________");
+export const showPrompt = (s: string) => s.replace(/\[blank\]/gi, "________");
 
 /** Prompt with the [blank] slot live-filled: `fill.text` (the student's pick
  *  or the correct word) renders inline styled; unset keeps the blank line. */
-const promptView = (prompt: string, fill?: { text?: string; ok?: boolean }) => {
+export const promptView = (prompt: string, fill?: { text?: string; ok?: boolean }) => {
   const parts = prompt.split(/\[blank\]/i);
   if (parts.length < 2) return showPrompt(prompt);
   return parts.map((part, i) => (
@@ -173,7 +174,7 @@ const promptView = (prompt: string, fill?: { text?: string; ok?: boolean }) => {
 
 /** Student-facing context card — navy panel; a "X:" line prefix renders in
  *  sun-yellow like the design's equation labels, the rest white. */
-const ctxBlock = (ctx: string) => (
+export const ctxBlock = (ctx: string) => (
   <div className="sd-ctx">
     {ctx.split("\n").map((line, i) => {
       const m = line.match(/^(\S+:)\s*(.*)$/);
@@ -188,8 +189,9 @@ const ctxBlock = (ctx: string) => (
   </div>
 );
 
-/** Per-question input for one qtype. Reports changes as AnswerValue payloads. */
-function AnswerInput({ q, value, onChange }: {
+/** Per-question input for one qtype. Reports changes as AnswerValue payloads.
+ *  Exported for the teacher preview (same inputs, nothing saved). */
+export function AnswerInput({ q, value, onChange }: {
   q: QuizQuestion; value: AnswerValue | undefined; onChange: (v: AnswerValue) => void;
 }) {
   switch (q.qtype) {
@@ -588,6 +590,10 @@ export default function StudentQuiz() {
 
   const reviewData = reviewNow ?? review.data;
 
+  // Part-aware order — positions are per-part, a flat sort interleaves parts.
+  const ps = parts.data ?? [];
+  const qs = sortQuestionsByPart(questions.data ?? [], ps);
+
   if (result && !showReview) {
     return (
       <Card>
@@ -630,30 +636,18 @@ export default function StudentQuiz() {
   if (reviewData?.attempted === true) {
     return (
       <ReviewScreen
-        qs={questions.data ?? []}
-        ps={parts.data ?? []}
+        qs={qs}
+        ps={ps}
         review={reviewData}
         onDone={() => nav("/student/assessments")}
       />
     );
   }
 
-  const qs = questions.data ?? [];
-  const ps = parts.data ?? [];
   /** part_id -> 1-based display index. */
   const partIndex = new Map(ps.map((p, i) => [p.id, i + 1]));
   const partOf = (qq: QuizQuestion | undefined) =>
     qq?.part_id ? ps.find((p) => p.id === qq.part_id) : undefined;
-  const isAnswered = (q: QuizQuestion, v: AnswerValue | undefined) => {
-    if (!v) return false;
-    if ("t" in v) return v.t.trim() !== "";
-    if ("items" in v) return v.items.some((s) => s.trim() !== "");
-    if ("sel" in v) return v.sel.length >= (q.meta?.min ?? 1);
-    if ("z" in v)
-      return v.z.length >= (q.choices ?? []).length && v.z.every((z) => z >= 0);
-    if ("o" in v) return v.o.length >= (q.choices ?? []).length;
-    return true;
-  };
   const answered = qs.filter((q) => isAnswered(q, answers[q.id])).length;
   const q = qs[qi];
   const trySubmit = () => {

@@ -10,7 +10,7 @@ import {
 import reportEmptyArt from "../../assets/illustrations/report-empty.png";
 import { Avatar, Button, Card, Icon, ProgressBar } from "../../design-system";
 import {
-  PrePostChart, ReportRing, ScoreRow, csvCell, pct,
+  ReportRing, ScoreRow, csvCell, pct,
 } from "./reportShared";
 import "../teacher.css";
 
@@ -24,9 +24,6 @@ function buildClassReportCsv(opts: {
   students: number;
   lessonsAvg: number | null;
   quizAvg: number | null;
-  preAvg: number | null;
-  postAvg: number | null;
-  gain: number | null;
   assessments: { title: string; avg: number | null; attempts: number; released: boolean }[];
   lessons: { title: string; avg: number }[];
   roster: ClassStudentProgress[];
@@ -38,9 +35,6 @@ function buildClassReportCsv(opts: {
     `Students,${opts.students}`,
     `Lessons,${pctN(opts.lessonsAvg)}`,
     `Quiz average,${pctN(opts.quizAvg)}`,
-    `Pre-test,${pctN(opts.preAvg)}`,
-    `Post-test,${pctN(opts.postAvg)}`,
-    `Gain,${opts.gain == null ? "—" : `${opts.gain >= 0 ? "+" : ""}${opts.gain}%`}`,
     "",
     "Assessment,Class average,Attempts,Visibility",
     ...opts.assessments.map((a) =>
@@ -54,19 +48,12 @@ function buildClassReportCsv(opts: {
     "Lesson,Class average",
     ...opts.lessons.map((l) => `${csvCell(l.title)},${l.avg}%`),
     "",
-    "Student,Lessons,Quiz average,Pre-test,Post-test,Gain",
-    ...opts.roster.map((r) => {
-      const g = r.pre_score != null && r.post_score != null
-        ? r.post_score - r.pre_score : null;
-      return [
-        csvCell(r.full_name),
-        pct(r.lessons_pct),
-        pct(r.quizzes_pct),
-        pct(r.pre_score),
-        pct(r.post_score),
-        g == null ? "—" : `${g >= 0 ? "+" : ""}${g}%`,
-      ].join(",");
-    }),
+    "Student,Lessons,Quiz average",
+    ...opts.roster.map((r) => [
+      csvCell(r.full_name),
+      pct(r.lessons_pct),
+      pct(r.quizzes_pct),
+    ].join(",")),
   ];
   return lines.join("\n");
 }
@@ -114,11 +101,6 @@ export default function ClassReport() {
     mean(roster.map(pick).filter((v): v is number => v != null));
   const lessonsAvg = avg((r) => r.lessons_pct);
   const quizAvg = avg((r) => r.quizzes_pct);
-  const preAvg = avg((r) => r.pre_score);
-  const postAvg = avg((r) => r.post_score);
-  const gain = mean(roster
-    .filter((r) => r.pre_score != null && r.post_score != null)
-    .map((r) => r.post_score! - r.pre_score!));
   const acts = assessments.data ?? [];
   const anyAttempt = acts.some((a) => a.avg != null);
 
@@ -139,7 +121,7 @@ export default function ClassReport() {
     const csv = buildClassReportCsv({
       className: cls.data.name,
       students: studentCount,
-      lessonsAvg, quizAvg, preAvg, postAvg, gain,
+      lessonsAvg, quizAvg,
       assessments: acts,
       lessons: lessons.data ?? [],
       roster,
@@ -171,10 +153,8 @@ export default function ClassReport() {
             <span className="sr-tile-lab">Quiz average</span>
           </span>
           <span className="sr-tile sr-tile-mint edge-4">
-            <span className="sr-tile-val">
-              {gain != null ? `${gain >= 0 ? "+" : ""}${gain}%` : "—"}
-            </span>
-            <span className="sr-tile-lab">Class gain</span>
+            <span className="sr-tile-val">{pct(lessonsAvg)}</span>
+            <span className="sr-tile-lab">Lessons</span>
           </span>
           <Button variant="white" size="sm" leadingIcon="export" onClick={exportCsv}>
             Export <span className="sr-new">NEW</span>
@@ -184,21 +164,10 @@ export default function ClassReport() {
 
       <div className="bento">
         <Card variant="white">
-          <div className="td-spread">
-            <h3 className="ds-h3" style={{ margin: 0 }}>Class pre-test to post-test</h3>
-            {gain != null && (
-              <span className="sr-gain edge-3">{gain >= 0 ? "+" : ""}{gain}% avg gain</span>
-            )}
-          </div>
-          <PrePostChart pre={preAvg} post={postAvg} />
-        </Card>
-        <Card variant="white">
           <h3 className="ds-h3" style={{ marginTop: 0 }}>Class averages</h3>
           <div className="sr-rings bento-cols">
             <ReportRing label="Lessons" value={lessonsAvg} series={1} />
             <ReportRing label="Quizzes" value={quizAvg} series={2} />
-            <ReportRing label="Pre-test" value={preAvg} series={2} />
-            <ReportRing label="Post-test" value={postAvg} series={4} />
           </div>
         </Card>
         <Card variant="white">
@@ -251,8 +220,6 @@ export default function ClassReport() {
           </div>
           <div className="td-stack" style={{ marginTop: "var(--ds-s4)" }}>
             {roster.map((r) => {
-              const g = r.pre_score != null && r.post_score != null
-                ? r.post_score - r.pre_score : null;
               const go = () => nav(`/teacher/c/${classId}/reports/${r.student_id}`);
               return (
                 <div key={r.student_id} className="ts-row edge-4" role="link" tabIndex={0}
@@ -275,14 +242,6 @@ export default function ClassReport() {
                     <span className="ts-stat-cap">Quiz</span>
                     <span className="ts-stat-val">{pct(r.quizzes_pct)}</span>
                     <ProgressBar size="sm" tone="blue" value={r.quizzes_pct ?? 0} label="Quiz average" />
-                  </div>
-                  <div className="ts-stat">
-                    <span className="ts-stat-cap">Gain</span>
-                    <span className="ts-stat-val">
-                      {g != null ? `${g >= 0 ? "+" : ""}${g}%` : "—"}
-                    </span>
-                    <ProgressBar size="sm" tone="teal"
-                      value={g != null ? Math.min(100, Math.max(0, g)) : 0} label="Gain" />
                   </div>
                   <span className="ts-report">
                     View report <Icon name="chevron" size={16} />

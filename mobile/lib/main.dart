@@ -29,6 +29,8 @@ import 'features/teacher/class_students_screen.dart';
 import 'features/teacher/class_report_screen.dart';
 import 'features/teacher/student_report_screen.dart';
 import 'features/teacher/users_screen.dart';
+import 'features/teacher/lesson_activities_screen.dart';
+import 'features/teacher/activity_builder_screen.dart';
 
 // The defaults are the same public values web/.env ships in every build —
 // protected by RLS, not secrets. Override with --dart-define if needed.
@@ -173,6 +175,22 @@ final _router = GoRouter(
     // Full-screen sub-pages pushed over the shell (class header avatar → account).
     GoRoute(
         path: '/teacher/account', builder: (_, __) => const AccountScreen()),
+    // Quiz flow — picker's activities list, the builder, and the
+    // student-view preview all cover the tab bar.
+    GoRoute(
+        path: '/teacher/quiz/lesson/:lessonId',
+        builder: (_, s) => LessonActivitiesScreen(
+            lessonId: s.pathParameters['lessonId']!)),
+    GoRoute(
+        path: '/teacher/quiz/builder/:assessmentId',
+        builder: (_, s) => ActivityBuilderScreen(
+            assessmentId: s.pathParameters['assessmentId']!)),
+    GoRoute(
+        path: '/teacher/quiz/preview/:id',
+        builder: (_, s) => QuizRunnerScreen(
+            id: s.pathParameters['id']!,
+            title: 'Preview',
+            preview: true)),
     // More-sheet destinations with no screen yet.
     GoRoute(
         path: '/teacher/review', builder: (_, __) => const ComingSoonScreen()),

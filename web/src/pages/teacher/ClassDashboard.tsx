@@ -31,9 +31,8 @@ export default function ClassDashboard() {
 
   // Empty vs true-zero: no scored students → "—" + reason, never "0%"/"+0%".
   const scored = rows.filter((s) => s.quizzes_pct != null);
-  const both = rows.filter((s) => s.pre_score != null && s.post_score != null);
   const stats = computeClassStats(rows, completed.data ?? 0);
-  const [studentsStat, completedStat, avgStat, gainStat] = stats;
+  const [studentsStat, completedStat, avgStat] = stats;
 
   // Lowest scores first — nulls (no attempts) sort below 0 so they surface first.
   const attention = [...rows]
@@ -83,9 +82,6 @@ export default function ClassDashboard() {
         <StatCard filled pastelColor="purple" icon={avgStat.icon!}
           value={scored.length ? String(avgStat.value) : "—"} label="Quiz average"
           note={scored.length ? `${scored.length} attempted` : "No quiz attempts yet"} />
-        <StatCard filled pastelColor="yellow" icon={gainStat.icon!}
-          value={both.length ? String(gainStat.value) : "—"} label="Class gain"
-          note={both.length ? "Pre → post average" : "Needs pre and post-test"} />
         <StatCard alert pastelColor="yellow" icon="pending" value={String(pending)}
           label={pending === 1 ? "Pending request" : "Pending requests"}
           note={pending ? "Waiting for approval" : "No open requests"}

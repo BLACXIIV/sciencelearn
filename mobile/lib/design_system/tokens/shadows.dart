@@ -17,3 +17,13 @@ List<BoxShadow> dsEdgeTop(Color color, {int h = 3}) {
   assert(h >= 3 && h <= 6, 'edge height must be 3, 4, 5 or 6');
   return [BoxShadow(color: color, offset: Offset(0, -h.toDouble()))];
 }
+
+/// Soft upward drop shadow — the sticky bottom bar lifting off the page.
+/// Mirrors web `--ds-shadow-bar`: 0 -4px 16px navy at 12%.
+List<BoxShadow> dsBarLift() => [
+      BoxShadow(
+        color: const Color(0xFF0A1A5C).withValues(alpha: 0.12),
+        offset: const Offset(0, -4),
+        blurRadius: 16,
+      ),
+    ];

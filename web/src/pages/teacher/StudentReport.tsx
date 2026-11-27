@@ -21,13 +21,9 @@ function buildReportCsv(opts: {
   className: string;
   lessons_pct?: number | null;
   quizzes_pct?: number | null;
-  pre_score?: number | null;
-  post_score?: number | null;
   assessments: ReportAssessment[];
   lessons: { title: string; percent: number }[];
 }): string {
-  const { pre_score: pre, post_score: post } = opts;
-  const gain = pre != null && post != null ? post - pre : null;
   const pct = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v)}%`);
   const lines = [
     "Student report",
@@ -35,9 +31,6 @@ function buildReportCsv(opts: {
     `Class,${csvCell(opts.className)}`,
     `Lessons,${pct(opts.lessons_pct)}`,
     `Quiz average,${pct(opts.quizzes_pct)}`,
-    `Pre-test,${pct(pre)}`,
-    `Post-test,${pct(post)}`,
-    `Gain,${gain == null ? "—" : `${gain >= 0 ? "+" : ""}${gain}%`}`,
     "",
     "Assessment,Score,Visibility",
     ...opts.assessments.map((a) =>
@@ -56,7 +49,7 @@ function buildReportCsv(opts: {
   return lines.join("\n");
 }
 
-/** Per-student report: header tiles, pre→post chart, rings, assessment
+/** Per-student report: header tiles, rings, assessment
  *  scores and lesson progress for one active member of this class. */
 export default function StudentReport() {
   const { classId = "", studentId = "" } = useParams();
@@ -148,8 +141,6 @@ export default function StudentReport() {
                 className: cls.data.name,
                 lessons_pct: p?.lessons_pct,
                 quizzes_pct: p?.quizzes_pct,
-                pre_score: p?.pre_score,
-                post_score: p?.post_score,
                 assessments: rows,
                 lessons: lessons.data ?? [],
               });

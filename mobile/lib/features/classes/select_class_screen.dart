@@ -494,7 +494,7 @@ class _StudentPickState extends ConsumerState<_StudentPick> {
       Expanded(
         child: MaxWidth(
           child: ListView(padding: const EdgeInsets.all(16), children: [
-            classes.when(
+            classes.when(skipLoadingOnRefresh: true, 
               loading: () => const Center(child: DSLoadingIndicator()),
               error: (e, _) => DSEmptyState(
                 icon: DSIconName.offline,
@@ -655,7 +655,7 @@ class _TeacherPickState extends ConsumerState<_TeacherPick> {
       Expanded(
         child: MaxWidth(
           child: ListView(padding: const EdgeInsets.all(16), children: [
-            classes.when(
+            classes.when(skipLoadingOnRefresh: true, 
               loading: () => const Center(child: DSLoadingIndicator()),
               error: (e, _) => DSEmptyState(
                 icon: DSIconName.offline,

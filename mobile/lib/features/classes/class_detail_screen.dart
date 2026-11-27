@@ -38,7 +38,7 @@ class StudentClassScreen extends ConsumerWidget {
           ),
         ),
         Expanded(
-            child: lessons.when(
+            child: lessons.when(skipLoadingOnRefresh: true, 
           loading: () => const Center(child: DSLoadingIndicator()),
           error: (e, _) => DSEmptyState(
             icon: DSIconName.offline,

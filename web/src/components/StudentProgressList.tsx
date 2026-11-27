@@ -9,7 +9,7 @@ export default function StudentProgressList({ students }: { students: StudentPro
           key={s.student_id}
           leading={<Avatar name={s.full_name || "?"} />}
           title={s.full_name}
-          subtitle={`Pre ${s.pre_score ?? "–"} → Post ${s.post_score ?? "–"}`}
+          subtitle={`Quiz average ${s.quizzes_pct ?? "–"}%`}
           trailing={
             <span className="td-row" style={{ flexWrap: "nowrap" }}>
               <span style={{ width: 96 }}>

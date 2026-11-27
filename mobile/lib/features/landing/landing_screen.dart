@@ -41,7 +41,7 @@ class LandingScreen extends StatelessWidget {
       DSIconName.progress,
       DSCardPastel.mint,
       'Progress',
-      'See your gain',
+      'Track your scores',
       '/progress'
     ),
   ];
@@ -59,16 +59,20 @@ class LandingScreen extends StatelessWidget {
     ),
     (
       DSColors.pastelMint,
-      'See your gain',
-      'Compare your pre-test and post-test scores.'
+      'Track your scores',
+      'Watch your lessons and quiz scores climb.'
     ),
   ];
 
   static const _types = [
-    'Multiple-choice',
-    'Identification',
+    'Multiple choice',
+    'Multi-select',
     'True or false',
-    'Problem-solving',
+    'Fill in the blank',
+    'Identification',
+    'Enumeration',
+    'Classification',
+    'Ordering',
   ];
 
   static const _options = [
@@ -79,9 +83,9 @@ class LandingScreen extends StatelessWidget {
   ];
 
   static const _teacherTiles = [
-    ('Class management', 'Join codes and approvals', false),
-    ('Assessment builder', 'Five question types', false),
-    ('Class dashboard', 'Average score and gain', true),
+    ('Class management', 'Join codes, approvals, roster', false),
+    ('Activity builder', 'Multi-part — 8 question types', false),
+    ('Class dashboard', 'Average score, CSV reports', true),
   ];
 
   bool get _loggedIn => Supabase.instance.client.auth.currentSession != null;
@@ -115,7 +119,7 @@ class LandingScreen extends StatelessWidget {
                 _stepCards()),
             _section(
                 'Quizzes for every kind of question',
-                'Multiple-choice, identification, true or false, and problem-solving quizzes.',
+                'Eight question types — from multiple choice and fill in the blank to classification and ordering.',
                 _quizColumn()),
             _teacherBand(),
             _footer(),
@@ -215,7 +219,7 @@ class LandingScreen extends StatelessWidget {
                       child: const DSStickerBadge(
                           rotation: 5,
                           pastel: DSCardPastel.mint,
-                          child: Text('Pre → post gain')),
+                          child: Text('Track your scores')),
                     ),
                     Positioned(
                       bottom: d * .03,
@@ -362,23 +366,6 @@ class LandingScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 18),
-        DSCard(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('EXAMPLE · GAIN = POST-TEST − PRE-TEST',
-                style: DSText.caption
-                    .copyWith(color: DSColors.muted, letterSpacing: .4)),
-            const SizedBox(height: 8),
-            _gainRow('Pre-test', '70%'),
-            const SizedBox(height: 6),
-            const DSProgressBar(value: .70),
-            const SizedBox(height: 12),
-            _gainRow('Post-test', '85%'),
-            const SizedBox(height: 6),
-            const DSProgressBar(value: .85, tone: DSProgressBarTone.success),
-          ]),
-        ),
-        const SizedBox(height: 18),
         DSQuizCard(
           tag: 'Sample · Multiple choice',
           title: const Text(
@@ -389,12 +376,6 @@ class LandingScreen extends StatelessWidget {
               DSQuizOption(letter: o.$1, state: o.$3, child: Text(o.$2)),
           ],
         ),
-      ]);
-
-  Widget _gainRow(String label, String pct) => Row(children: [
-        Text(label, style: DSText.label),
-        const Spacer(),
-        Text(pct, style: DSText.label),
       ]);
 
   // ---- 5 · teachers ----
@@ -415,7 +396,7 @@ class LandingScreen extends StatelessWidget {
               style: DSText.h1.copyWith(color: DSColors.surface)),
           const SizedBox(height: 8),
           Text(
-            'Manage. Monitor. Support. Create classes with a join code, publish lessons with files, build assessments and choose when scores are released.',
+            'Manage. Monitor. Support. Create classes with a join code, publish lessons with files, build multi-part activities, preview them before publishing, and choose when scores are released.',
             style: DSText.body
                 .copyWith(color: DSColors.surface.withValues(alpha: .9)),
           ),

@@ -5,7 +5,7 @@
   padding: var(--ds-s5);
 }
 
-.ds-card-white { background: var(--ds-surface); box-shadow: 0 6px 0 var(--ds-edge-card); }
+.ds-card-white { background: var(--ds-surface); box-shadow: 0 6px 0 var(--ds-edge, var(--ds-edge-card)); }
 
 .ds-card-pastel-blue   { background: var(--ds-pastel-blue);   box-shadow: 0 6px 0 var(--ds-edge-white); }
 .ds-card-pastel-yellow { background: var(--ds-pastel-yellow); box-shadow: 0 6px 0 var(--ds-edge-card); }

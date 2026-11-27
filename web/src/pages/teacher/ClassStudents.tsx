@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   approveMember, clearPickedClass, deleteClass, fetchClass, fetchClassMembers,
-  fetchClassStudentProgress, removeMember, type ClassMember,
+  fetchClassStudentProgress, fetchLessonActivityCounts, removeMember,
+  type ClassMember,
 } from "../../services/classes";
 import rosterEmptyArt from "../../assets/illustrations/roster-empty.png";
 import {
@@ -24,6 +25,7 @@ export default function ClassStudents() {
   const cls = useQuery({ queryKey: ["class", classId], queryFn: () => fetchClass(classId) });
   const members = useQuery({ queryKey: ["class-members", classId], queryFn: () => fetchClassMembers(classId) });
   const progress = useQuery({ queryKey: ["class-progress", classId], queryFn: () => fetchClassStudentProgress(classId) });
+  const actCounts = useQuery({ queryKey: ["lesson-activity-counts", classId], queryFn: () => fetchLessonActivityCounts(classId) });
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -69,6 +71,16 @@ export default function ClassStudents() {
     onSuccess: () => { clearPickedClass(); nav("/select-classroom", { replace: true }); },
   });
 
+  // A class that still owns activities can't be deleted — the lessons→
+  // assessments FK is RESTRICT (0015). Disable the button + say why.
+  const hasActivities = Object.values(actCounts.data ?? {}).some((n) => n > 0);
+  const delErrorText = (e: unknown): string => {
+    const msg = e instanceof Error ? e.message
+      : typeof e === "object" && e != null && "message" in e
+        ? String((e as { message: unknown }).message) : String(e);
+    return /foreign key|violates|restrict/i.test(msg)
+      ? "Delete or move its activities first." : msg;
+  };
   const progById = new Map((progress.data ?? []).map((p) => [p.student_id, p]));
   const pending = (members.data ?? []).filter((m) => m.status === "pending");
   const active = (members.data ?? []).filter((m) => m.status === "active");
@@ -196,13 +208,6 @@ export default function ClassStudents() {
                 <span className="ts-stat-val">{p?.quizzes_pct != null ? `${p.quizzes_pct}%` : "—"}</span>
                 <ProgressBar size="sm" tone="blue" value={p?.quizzes_pct ?? 0} label="Quiz average" />
               </div>
-              <div className="ts-stat">
-                <span className="ts-stat-cap">Pre → Post</span>
-                <span className="ts-stat-val">
-                  {p?.pre_score ?? "—"} → {p?.post_score ?? "—"}
-                </span>
-                <ProgressBar size="sm" tone="teal" value={p?.post_score ?? 0} label="Post-test" />
-              </div>
               <span className="ts-report">
                 View report <Icon name="chevron" size={16} />
               </span>
@@ -236,13 +241,24 @@ export default function ClassStudents() {
           <span className="ts-danger">
             <span className="ts-danger-t">Danger zone</span>
             <span className="ts-danger-s">
-              Deleting removes the class, its lessons and activities for everyone.
+              Deleting removes the class and its lessons. A class that still has
+              activities cannot be deleted yet.
             </span>
           </span>
-          <Button variant="danger" size="sm" onClick={() => setConfirmDel(true)}>
-            Delete class
-          </Button>
+          <span title={hasActivities
+            ? "Delete or move this class's activities first."
+            : undefined}>
+            <Button variant="danger" size="sm" disabled={hasActivities}
+              onClick={() => setConfirmDel(true)}>
+              Delete class
+            </Button>
+          </span>
         </div>
+        {hasActivities && (
+          <p className="ts-danger-s" style={{ marginTop: 8 }}>
+            Delete or move this class's activities first.
+          </p>
+        )}
       </Card>
 
       <Modal open={confirmDel} onClose={() => setConfirmDel(false)} title="Delete this class?"
@@ -258,7 +274,7 @@ export default function ClassStudents() {
         <p className="ds-body">
           This removes “{cls.data?.name}” and its lessons. Students lose access.
         </p>
-        {del.error != null && <p className="td-err">{String(del.error)}</p>}
+        {del.error != null && <p className="td-err">{delErrorText(del.error)}</p>}
       </Modal>
 
       <Modal open={removeTarget != null} onClose={() => setRemoveTarget(null)}

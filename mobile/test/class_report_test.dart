@@ -101,11 +101,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Class report'), findsWidgets);
-    expect(find.text('Class pre-test to post-test'), findsOneWidget);
     expect(find.text('Class averages'), findsOneWidget);
-    // Aggregates: 1 active student at quiz 80, gain +15.
+    // Aggregate: 1 active student at quiz 80.
     expect(find.text('80%'), findsWidgets);
-    expect(find.text('+15%'), findsWidgets);
     // Scroll for the below-fold sections — ListView builds lazily.
     await tester.scrollUntilVisible(find.text('Assessment averages'), 150,
         scrollable: find.byType(Scrollable).last);
@@ -119,6 +117,12 @@ void main() {
 
   testWidgets('Tapping a student row opens that student\'s report',
       (tester) async {
+    // Bundled Inter/Lexend have taller line metrics than the old test
+    // fallback — the roster row lands below the 600pt fold. Give this
+    // navigation test a taller surface so the row is tappable.
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final router = _router()..go('/teacher/reports');
     await tester.pumpWidget(_app(router));
     await tester.pumpAndSettle();
@@ -149,9 +153,6 @@ void main() {
       students: 1,
       lessonsAvg: 100,
       quizAvg: 80,
-      preAvg: 70,
-      postAvg: 85,
-      gain: 15,
       assessments: const [
         {'title': 'Pre-test', 'avg': 70, 'attempts': 1, 'released': true},
         {
@@ -169,18 +170,16 @@ void main() {
           'full_name': 'student',
           'lessons_pct': 100,
           'quizzes_pct': 80,
-          'pre_score': 70,
-          'post_score': 85,
         },
       ],
     );
 
     expect(csv, contains('Class,"test, classroom"'));
     expect(csv, contains('Students,1'));
-    expect(csv, contains('Gain,+15%'));
+    expect(csv, contains('Quiz average,80%'));
     expect(csv, contains('Pre-test,70%,1,'));
     expect(csv, contains('Final challenge,No attempts,0,'));
     expect(csv, contains('Projectile Motion,50%'));
-    expect(csv, contains('student,100%,80%,70%,85%,+15%'));
+    expect(csv, contains('student,100%,80%'));
   });
 }

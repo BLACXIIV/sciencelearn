@@ -26,7 +26,7 @@ class ClassDashboardScreen extends ConsumerWidget {
       body: Column(children: [
         ClassHeroHeader(cls: cls),
         Expanded(
-          child: students.when(
+          child: students.when(skipLoadingOnRefresh: true, 
             loading: () => const Center(child: DSLoadingIndicator()),
             error: (e, _) => DSEmptyState(
               icon: DSIconName.offline,
@@ -52,20 +52,6 @@ class ClassDashboardScreen extends ConsumerWidget {
                               0, (a, s) => a + (s['quizzes_pct'] as num)) /
                           scored.length)
                       .round();
-              final both = rows
-                  .where(
-                      (s) => s['pre_score'] != null && s['post_score'] != null)
-                  .toList();
-              final gain = both.isEmpty
-                  ? null
-                  : (both.fold<num>(
-                              0,
-                              (a, s) =>
-                                  a +
-                                  ((s['post_score'] as num) -
-                                      (s['pre_score'] as num))) /
-                          both.length)
-                      .round();
               final memberList = members.valueOrNull ?? [];
               final active =
                   memberList.where((m) => m['status'] == 'active').length;
@@ -79,12 +65,10 @@ class ClassDashboardScreen extends ConsumerWidget {
                     : have.fold<num>(0, (a, b) => a + b) / have.length;
               }
 
-              // Mockup: Lessons ring is sun (series 1), the others blue (series 2).
+              // Mockup: Lessons ring is sun (series 1), Quizzes blue (series 2).
               final classRings = <(String, num?, int)>[
                 ('Lessons', avgOf('lessons_pct'), 1),
                 ('Quizzes', avgOf('quizzes_pct'), 2),
-                ('Pre-test', avgOf('pre_score'), 2),
-                ('Post-test', avgOf('post_score'), 2),
               ];
 
               // Lowest scores first; nulls (no attempts) sort below 0.
@@ -135,14 +119,10 @@ class ClassDashboardScreen extends ConsumerWidget {
                         DSStatCard(
                           filled: true,
                           pastel: DSStatPastel.yellow,
-                          icon: DSIconName.gain,
-                          value: gain == null
-                              ? '—'
-                              : '${gain >= 0 ? '+' : ''}$gain%',
-                          label: 'Class gain',
-                          note: both.isEmpty
-                              ? 'Needs pre and post'
-                              : 'Pre → post',
+                          icon: DSIconName.students,
+                          value: '$pending',
+                          label: 'Pending',
+                          note: 'Awaiting approval',
                         ),
                       ],
                     ),

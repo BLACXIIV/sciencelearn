@@ -2,6 +2,7 @@ import { supabase } from "../lib/supabase";
 import { cleanDeep, cleanText } from "../utils/text";
 import type {
   ActivityMode, Assessment, AssessmentKind, AssessmentPart, Question, QuestionType,
+  QuizQuestion,
 } from "../types";
 
 // Teacher activity builder — reads questions with answer keys (teacher RLS)
@@ -9,13 +10,26 @@ import type {
 
 export async function fetchLessonAssessments(lessonId: string): Promise<Assessment[]> {
   const { data, error } = await supabase
-    .from("assessments").select("*, assessment_parts(count)")
+    .from("assessments").select("*, assessment_parts(count), questions(count)")
     .eq("lesson_id", lessonId).order("created_at");
   if (error) throw error;
-  type Row = Assessment & { assessment_parts?: { count: number }[] };
-  return ((data ?? []) as Row[]).map(({ assessment_parts, ...a }) => ({
-    ...a, part_count: assessment_parts?.[0]?.count ?? 0,
+  type Row = Assessment & {
+    assessment_parts?: { count: number }[];
+    questions?: { count: number }[];
+  };
+  return ((data ?? []) as Row[]).map(({ assessment_parts, questions, ...a }) => ({
+    ...a,
+    part_count: assessment_parts?.[0]?.count ?? 0,
+    question_count: questions?.[0]?.count ?? 0,
   }));
+}
+
+/** One assessment row — the builder header reads title/release/publish. */
+export async function fetchAssessment(id: string): Promise<Assessment> {
+  const { data, error } = await supabase
+    .from("assessments").select("*").eq("id", id).single();
+  if (error) throw error;
+  return data as Assessment;
 }
 
 export async function createAssessment(input: {
@@ -75,7 +89,8 @@ export interface PartInput {
   position: number;
 }
 
-export async function upsertPart(p: PartInput): Promise<void> {
+/** Insert/update a part — resolves to the part's id (for selecting a new one). */
+export async function upsertPart(p: PartInput): Promise<string> {
   const row = {
     assessment_id: p.assessment_id,
     title: cleanText(p.title),
@@ -85,10 +100,12 @@ export async function upsertPart(p: PartInput): Promise<void> {
     points: p.points,
     position: p.position,
   };
-  const { error } = p.id
+  const { data, error } = p.id
     ? await supabase.from("assessment_parts").update(row).eq("id", p.id)
-    : await supabase.from("assessment_parts").insert(row);
+        .select("id").single()
+    : await supabase.from("assessment_parts").insert(row).select("id").single();
   if (error) throw error;
+  return (data as { id: string }).id;
 }
 
 /** Deletes the part AND its questions (FK cascade). */
@@ -136,4 +153,83 @@ export async function upsertQuestion(q: QuestionInput): Promise<void> {
 export async function deleteQuestion(id: string): Promise<void> {
   const { error } = await supabase.from("questions").delete().eq("id", id);
   if (error) throw error;
+}
+
+// ---------- builder helpers (0032) ----------
+
+/** UPDATEs title/description only — everything else on the row is untouched. */
+export async function renameAssessment(
+  id: string, fields: { title: string; description?: string },
+): Promise<void> {
+  const row: { title: string; description?: string } = {
+    title: cleanText(fields.title),
+  };
+  if (fields.description !== undefined)
+    row.description = cleanText(fields.description);
+  const { error } = await supabase.from("assessments").update(row).eq("id", id);
+  if (error) throw error;
+}
+
+/** Teacher-readable count of attempts (drives the delete guard pre-check). */
+export async function assessmentAttemptCount(id: string): Promise<number> {
+  const { count, error } = await supabase.from("attempts")
+    .select("id", { count: "exact", head: true }).eq("assessment_id", id);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+/** Reassigns a question to a different part, appended at `position`. */
+export async function moveQuestionToPart(
+  questionId: string, partId: string | null, position: number,
+): Promise<void> {
+  const { error } = await supabase.from("questions")
+    .update({ part_id: partId, position }).eq("id", questionId);
+  if (error) throw error;
+}
+
+/** Rewrites part positions to the dense order given (ids in display order). */
+export async function reorderPartPositions(orderedIds: string[]): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    const { error } = await supabase.from("assessment_parts")
+      .update({ position: i }).eq("id", orderedIds[i]);
+    if (error) throw error;
+  }
+}
+
+/** Rewrites question positions within one scope to the dense order given. */
+export async function reorderQuestionPositions(orderedIds: string[]): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    const { error } = await supabase.from("questions")
+      .update({ position: i }).eq("id", orderedIds[i]);
+    if (error) throw error;
+  }
+}
+
+export interface PreviewPayload {
+  parts: AssessmentPart[];
+  questions: QuizQuestion[];
+}
+
+/**
+ * Teacher preview — same student-view payload as questions_public +
+ * parts_public, via the teacher-gated RPC (0032). Fails gracefully until
+ * the migration lands.
+ */
+export async function fetchPreview(assessmentId: string): Promise<PreviewPayload> {
+  const { data, error } = await supabase
+    .rpc("preview_questions", { p_assessment: assessmentId });
+  if (error) {
+    if (error.code === "PGRST202"
+        || /could not find|does not exist/i.test(error.message))
+      throw new Error("Preview is not available yet");
+    throw error;
+  }
+  const payload = data as {
+    error?: string; parts?: AssessmentPart[]; questions?: QuizQuestion[];
+  } | null;
+  if (payload?.error) throw new Error(payload.error);
+  return {
+    parts: payload?.parts ?? [],
+    questions: payload?.questions ?? [],
+  };
 }

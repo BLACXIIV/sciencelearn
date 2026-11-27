@@ -29,9 +29,11 @@ const SUBSCRIPTS = "\u2080\u2081\u2082\u2083\u2084\u2085\u2086\u2087\u2088\u2089
 
 /** Digits right after a letter or ')' are formula subscripts in this domain:
  *  '2H2 + O2 -> 2H2O' stores as '2H\u2082 + O\u2082 \u2192 2H\u2082O'.
- *  'Activity 2' / 'item 3' are untouched (a space breaks the match). */
+ *  'Activity 2' / 'item 3' are untouched (a space breaks the match). Element
+ *  symbols always start with a capital (H, Fe, Cl, OH groups) so the match
+ *  requires '[A-Z][a-z]?' — lowercase words like 'test2' stay untouched. */
 function chemSub(s: string): string {
-  return s.replace(/([A-Za-z)\]])(\d+)/g,
+  return s.replace(/([A-Z][a-z]?|\)|\])(\d+)/g,
     (_m, pre: string, d: string) =>
       pre + [...d].map((c) => SUBSCRIPTS[+c]).join(""));
 }

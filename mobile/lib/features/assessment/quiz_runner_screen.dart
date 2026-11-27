@@ -8,7 +8,12 @@ import '../../design_system/design_system.dart';
 
 class QuizRunnerScreen extends ConsumerStatefulWidget {
   final String id, title;
-  const QuizRunnerScreen({super.key, required this.id, required this.title});
+
+  /// Teacher preview — same payload shape via preview_questions (0032),
+  /// renders the student view read-only with a banner and no submit.
+  final bool preview;
+  const QuizRunnerScreen(
+      {super.key, required this.id, required this.title, this.preview = false});
   @override
   ConsumerState<QuizRunnerScreen> createState() => _QuizRunnerState();
 }
@@ -57,7 +62,7 @@ Widget _ctxCard(String ctx) {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     decoration: BoxDecoration(
       color: DSColors.navy,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: DSRadii.inputBr,
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,6 +124,10 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
     super.dispose();
   }
 
+  /// meta numbers may arrive as strings or junk from older payloads —
+  /// parse tolerantly instead of casting (mirrors web numOr).
+  static int? _intOr(Object? v) => v is num ? v.toInt() : int.tryParse('$v');
+
   bool _answered(Json q) {
     final a = _answers[q['id']];
     if (a == null) return false;
@@ -127,7 +136,8 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
       return (a['items'] as List).any((s) => (s as String).trim().isNotEmpty);
     }
     if (a.containsKey('sel')) {
-      final min = (q['meta'] as Map?)?['min'] as int? ?? 1;
+      // meta.min may arrive as a double, string, or null — tolerant parse.
+      final min = _intOr((q['meta'] as Map?)?['min']) ?? 1;
       return (a['sel'] as List).length >= min;
     }
     if (a.containsKey('z')) {
@@ -214,12 +224,12 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
         final sel = List<int>.from(_answers[id]?['sel'] as List? ?? const []);
         final choices = (q['choices'] as List? ?? []);
         final meta = q['meta'] as Map? ?? const {};
-        final max = (meta['max'] as int?) ?? choices.length;
+        final max = _intOr(meta['max']) ?? choices.length;
         return [
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'Select ${(meta['min'] as int?) ?? 0}–$max answers.',
+              'Select ${_intOr(meta['min']) ?? 0}–$max answers.',
               style: DSText.caption.copyWith(color: DSColors.muted),
             ),
           ),
@@ -231,7 +241,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                 height: 26,
                 decoration: BoxDecoration(
                   color: sel.contains(c) ? DSColors.blue : DSColors.track,
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: DSRadii.br(7),
                   border: Border.all(
                     color: sel.contains(c) ? DSColors.blue : DSColors.line,
                     width: 2,
@@ -297,7 +307,7 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
           ),
         ];
       case 'enumeration':
-        final n = (q['meta'] as Map?)?['n'] as int? ?? 3;
+        final n = _intOr((q['meta'] as Map?)?['n']) ?? 3;
         final ctrls = _enumCtrl.putIfAbsent(
           id,
           () => List.generate(n, (_) => TextEditingController()),
@@ -830,20 +840,79 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
     );
   }
 
+  /// Preview payload missing/RPC absent — a friendly panel, not a crash.
+  Widget _previewUnavailable(Object? err) {
+    final msg = err == null ? '' : '$err';
+    return MaxWidth(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DSCard(
+          child: DSEmptyState(
+            icon: DSIconName.assessment,
+            title: 'Preview is not available yet',
+            body: msg.isNotEmpty &&
+                    !msg.contains('Could not find') &&
+                    !msg.contains('does not exist')
+                ? msg
+                : 'The preview service hasn\'t been enabled for this class yet.',
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildQuiz(Repo repo) {
-    return FutureBuilder<List<Object>>(
-      future: Future.wait([
-        repo.questions(widget.id),
-        repo.partsPublic(widget.id),
-        repo.reviewAttempt(widget.id),
-      ]),
+    // Preview: the teacher-gated RPC returns {parts, questions} — same shape
+    // as parts_public + questions_public, no attempt review.
+    final future = widget.preview
+        ? repo.previewQuestions(widget.id).then((p) => <Object>[
+              sortQuestionsByPart(
+                List<Json>.from(p['questions'] as List? ?? const []),
+                List<Json>.from(p['parts'] as List? ?? const []),
+              ),
+              List<Json>.from(p['parts'] as List? ?? const []),
+              // RPC-side gate failures land here ('Not allowed') — surfaced
+              // by the error-key check below.
+              <String, dynamic>{'attempted': false, 'error': p['error']},
+            ])
+        : Future.wait([
+            repo.questions(widget.id),
+            repo.partsPublic(widget.id),
+            repo.reviewAttempt(widget.id),
+          ]).then((d) => <Object>[
+              // Positions are per-part — a flat sort interleaves parts.
+              sortQuestionsByPart(d[0] as List<Json>, d[1] as List<Json>),
+              d[1],
+              d[2],
+            ]);
+    return KeepDataFutureBuilder<List<Object>>(
+      future: future,
       builder: (context, snap) {
+        if (snap.hasError) {
+          return widget.preview ? _previewUnavailable(snap.error)
+              : MaxWidth(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: DSCard(
+                      child: DSEmptyState(
+                        icon: DSIconName.offline,
+                        title: "Couldn't load this quiz",
+                        body: '${snap.error}',
+                      ),
+                    ),
+                  ),
+                );
+        }
         if (!snap.hasData) {
           return const Center(child: DSLoadingIndicator());
         }
         final qs = snap.data![0] as List<Json>;
         final parts = snap.data![1] as List<Json>;
         final review = snap.data![2] as Json;
+        // RPC-side gate failure ("Not allowed") surfaces as an error key.
+        if (widget.preview && review['error'] != null) {
+          return _previewUnavailable(review['error']);
+        }
         // One-shot: a submitted attempt turns the runner into review mode.
         if (review['attempted'] == true) {
           return _buildReview(qs, parts, review);
@@ -917,6 +986,29 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (widget.preview)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: DSColors.pastelYellow,
+                    borderRadius: DSRadii.buttonBr,
+                  ),
+                  child: const Row(children: [
+                    DSIcon(DSIconName.show, size: 18,
+                        color: DSColors.navy),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text.rich(TextSpan(children: [
+                        TextSpan(
+                            text: 'Preview',
+                            style: TextStyle(fontWeight: FontWeight.w700)),
+                        TextSpan(text: ' — view only, answers are not saved.'),
+                      ])),
+                    ),
+                  ]),
+                ),
               Text(
                 '$tag · Question ${_qi + 1} of ${qs.length}',
                 style: DSText.label.copyWith(color: DSColors.muted),
@@ -928,11 +1020,14 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                 tone: DSProgressBarTone.mint,
               ),
               const SizedBox(height: 12),
-              DSQuizNav(
-                count: qs.length,
-                current: _qi,
-                answered: [for (final qq in qs) _answered(qq)],
-                onSelect: (i) => setState(() => _qi = i),
+              IgnorePointer(
+                ignoring: widget.preview,
+                child: DSQuizNav(
+                  count: qs.length,
+                  current: _qi,
+                  answered: [for (final qq in qs) _answered(qq)],
+                  onSelect: (i) => setState(() => _qi = i),
+                ),
               ),
               if (part != null)
                 Padding(
@@ -985,17 +1080,25 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                     )
                   : Text(_showPrompt('${q['prompt']}'), style: DSText.h2),
               const SizedBox(height: 16),
-              for (var i = 0; i < opts.length; i++) ...[
-                if (i > 0) const SizedBox(height: DSSpacing.s3),
-                opts[i],
-              ],
+              IgnorePointer(
+                ignoring: widget.preview,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < opts.length; i++) ...[
+                      if (i > 0) const SizedBox(height: DSSpacing.s3),
+                      opts[i],
+                    ],
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 children: [
                   DSButton(
                     variant: DSButtonVariant.outline,
-                    disabled: _qi == 0,
+                    disabled: _qi == 0 || widget.preview,
                     onPressed: () => setState(() => _qi -= 1),
                     child: const Text('Back'),
                   ),
@@ -1003,6 +1106,13 @@ class _QuizRunnerState extends ConsumerState<QuizRunnerScreen> {
                     DSButton(
                       onPressed: () => setState(() => _qi += 1),
                       child: const Text('Next'),
+                    )
+                  // deliberately no submit in preview — answers aren't saved
+                  else if (widget.preview)
+                    DSButton(
+                      variant: DSButtonVariant.outline,
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Exit preview'),
                     )
                   else
                     DSButton(
@@ -1075,7 +1185,7 @@ class _ClsInputState extends State<_ClsInput> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: sel ? DSColors.blue : DSColors.pastelBlue,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: DSRadii.smBr,
           ),
           child: Text(
             '${items[i]}',
@@ -1102,7 +1212,10 @@ class _ClsInputState extends State<_ClsInput> {
             padding: const EdgeInsets.only(bottom: 12),
             child: _ctxCard(ctx),
           ),
-        _DashedBox(
+        DSDashedBox(
+            color: DSColors.edgeSoft,
+            strokeWidth: 1.5,
+            padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1127,7 +1240,10 @@ class _ClsInputState extends State<_ClsInput> {
             padding: const EdgeInsets.only(top: 12),
             child: GestureDetector(
               onTap: () => place(bi),
-              child: _DashedBox(
+              child: DSDashedBox(
+                  color: DSColors.edgeSoft,
+                  strokeWidth: 1.5,
+                  padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1147,49 +1263,6 @@ class _ClsInputState extends State<_ClsInput> {
       ],
     );
   }
-}
-
-/// Rounded-rect dashed outline matching the web `.sd-cls-*` zone cards.
-class _DashedBox extends StatelessWidget {
-  final Widget child;
-  const _DashedBox({required this.child});
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: const _DashedRectPainter(color: DSColors.edgeSoft),
-      child: Padding(padding: const EdgeInsets.all(14), child: child),
-    );
-  }
-}
-
-class _DashedRectPainter extends CustomPainter {
-  final Color color;
-  const _DashedRectPainter({required this.color});
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(14)),
-      );
-    const dash = 6.0, gap = 4.0;
-    for (final metric in path.computeMetrics()) {
-      var d = 0.0;
-      while (d < metric.length) {
-        canvas.drawPath(
-          metric.extractPath(d, (d + dash).clamp(0.0, metric.length)),
-          paint,
-        );
-        d += dash + gap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedRectPainter old) => old.color != color;
 }
 
 /// Ordering slot→pool input: dashed "Step" slots on top, a "Tap in order"
@@ -1230,7 +1303,7 @@ class _OrdInputState extends State<_OrdInput> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: DSColors.pastelBlue,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: DSRadii.smBr,
             ),
             child: Text(
               '${items[c]}',
@@ -1248,7 +1321,10 @@ class _OrdInputState extends State<_OrdInput> {
         for (var p = 0; p < items.length; p++)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: _DashedBox(
+            child: DSDashedBox(
+                color: DSColors.edgeSoft,
+                strokeWidth: 1.5,
+                padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1274,7 +1350,10 @@ class _OrdInputState extends State<_OrdInput> {
               ),
             ),
           ),
-        _DashedBox(
+        DSDashedBox(
+            color: DSColors.edgeSoft,
+            strokeWidth: 1.5,
+            padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

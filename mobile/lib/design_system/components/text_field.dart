@@ -21,7 +21,9 @@ class DSTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? leading;
   final Widget? trailing;
-  final int maxLines;
+  /// `minLines: 1, maxLines: null` makes the field grow to fit its text.
+  final int? maxLines;
+  final int? minLines;
   final bool enabled;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
@@ -44,6 +46,7 @@ class DSTextField extends StatelessWidget {
     this.leading,
     this.trailing,
     this.maxLines = 1,
+    this.minLines,
     this.enabled = true,
     this.focusNode,
     this.textInputAction,
@@ -66,6 +69,7 @@ class DSTextField extends StatelessWidget {
           onChanged: onChanged,
           keyboardType: keyboardType,
           obscureText: obscureText,
+          minLines: minLines,
           maxLines: maxLines,
           enabled: enabled,
           focusNode: focusNode,

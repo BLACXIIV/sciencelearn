@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
@@ -48,105 +46,6 @@ class ReportHeadTile extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Two-column pre/post chart — custom painter per spec (columns, baseline,
-/// labels). Null values render a dashed empty column with "—".
-class PrePostChart extends StatelessWidget {
-  final num? pre;
-  final num? post;
-  const PrePostChart({super.key, required this.pre, required this.post});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Pre-test ${pre ?? '—'}%, post-test ${post ?? '—'}%',
-      child: SizedBox(
-        height: 190,
-        width: double.infinity,
-        child: CustomPaint(painter: _PrePostPainter(pre, post)),
-      ),
-    );
-  }
-}
-
-class _PrePostPainter extends CustomPainter {
-  final num? pre;
-  final num? post;
-  _PrePostPainter(this.pre, this.post);
-
-  void _dashRRect(Canvas canvas, RRect rr, Paint paint) {
-    final path = Path()..addRRect(rr);
-    for (final m in path.computeMetrics()) {
-      var d = 0.0;
-      while (d < m.length) {
-        final end = math.min(d + 6, m.length);
-        canvas.drawPath(m.extractPath(d, end), paint);
-        d = end + 6;
-      }
-    }
-  }
-
-  void _label(Canvas canvas, String text, TextStyle style, Offset c) {
-    final tp = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(canvas, c - Offset(tp.width / 2, tp.height / 2));
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const bw = 56.0, gap = 48.0, maxH = 118.0;
-    final base = size.height - 26.0;
-    final cols = [
-      ('Pre-test', pre, DSColors.blue, size.width / 2 - gap / 2 - bw),
-      ('Post-test', post, DSColors.teal, size.width / 2 + gap / 2),
-    ];
-    canvas.drawLine(
-      Offset(cols[0].$4 - 24, base + 0.5),
-      Offset(cols[1].$4 + bw + 24, base + 0.5),
-      Paint()
-        ..color = DSColors.track
-        ..strokeWidth = 2
-        ..strokeCap = StrokeCap.round,
-    );
-    for (final (lab, v, color, x) in cols) {
-      final h = v == null ? 0.0 : math.max(8.0, v / 100 * maxH);
-      if (v == null) {
-        _dashRRect(
-          canvas,
-          RRect.fromRectAndRadius(Rect.fromLTWH(x, base - maxH, bw, maxH),
-              const Radius.circular(14)),
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2
-            ..color = DSColors.track,
-        );
-      } else {
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-              Rect.fromLTWH(x, base - h, bw, h), const Radius.circular(14)),
-          Paint()..color = color,
-        );
-      }
-      _label(
-        canvas,
-        v == null ? '—' : '${v.round()}%',
-        DSText.label.copyWith(fontSize: 15, color: DSColors.navy),
-        Offset(x + bw / 2, base - h - 14),
-      );
-      _label(
-        canvas,
-        lab,
-        DSText.caption.copyWith(color: DSColors.muted),
-        Offset(x + bw / 2, base + 14),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_PrePostPainter old) => old.pre != pre || old.post != post;
 }
 
 /// Labeled ring in the "Overall progress" / "Class averages" card.
@@ -251,18 +150,27 @@ class ReportScoreRow extends StatelessWidget {
               : DSText.label.copyWith(color: DSColors.navy),
         ),
       ),
-      if (score != null && !released) ...[
-        const SizedBox(width: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: DSColors.sun,
-            borderRadius: DSRadii.pillBr,
+      if (score != null && !released)
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: DSColors.sun,
+                  borderRadius: DSRadii.pillBr,
+                ),
+                child: Text('Not released',
+                    style: DSText.label
+                        .copyWith(fontSize: 11, color: DSColors.navy)),
+              ),
+            ),
           ),
-          child: Text('Not released',
-              style: DSText.label.copyWith(fontSize: 11, color: DSColors.navy)),
         ),
-      ],
     ]);
   }
 }

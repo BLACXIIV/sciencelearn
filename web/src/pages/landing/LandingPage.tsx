@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import learningCuate from "../../assets/illustrations/learning-cuate.svg";
 import {
-  Button, Card, Chip, Icon, ProgressBar, QuizCard, QuizOption,
+  Button, Card, Chip, Icon, QuizCard, QuizOption,
   StickerBadge, type CardPastel, type IconName,
 } from "../../design-system";
 import "./landing.css";
@@ -42,7 +42,7 @@ const MISSIONS: Mission[] = [
     pastel: "yellow",
     title: "Assessment Center",
     mTitle: "Assessment",
-    desc: "Pre-test, topic quizzes, problem solving, practice and the final challenge.",
+    desc: "Pre-test, topic quizzes, exercises, practice and the final challenge.",
     mDesc: "Pre and post-test",
     to: "/student/assessments",
   },
@@ -60,8 +60,8 @@ const MISSIONS: Mission[] = [
     pastel: "mint",
     title: "Progress Tracker",
     mTitle: "Progress",
-    desc: "See your scores and your pre-test to post-test gain.",
-    mDesc: "See your gain",
+    desc: "Track lessons done, quiz scores and your recent activity.",
+    mDesc: "Track your progress",
     to: "/student/progress",
   },
 ];
@@ -69,10 +69,13 @@ const MISSIONS: Mission[] = [
 const STEPS: { pastel: CardPastel; title: string; text: string }[] = [
   { pastel: "blue", title: "Join your class", text: "Enter the 6-character code from your teacher." },
   { pastel: "yellow", title: "Learn and practice", text: "Read lessons, review key terms and take quizzes." },
-  { pastel: "mint", title: "See your gain", text: "Compare your pre-test and post-test scores." },
+  { pastel: "mint", title: "Track your progress", text: "See your quiz scores and completed lessons grow." },
 ];
 
-const QUIZ_TYPES = ["Multiple-choice", "Identification", "True or false", "Problem-solving"];
+const QUIZ_TYPES = [
+  "Multiple choice", "Multi-select", "True or false", "Fill in the blank",
+  "Identification", "Enumeration", "Classification", "Ordering",
+];
 
 const OPTIONS = [
   { letter: "A", text: "Momentum", selected: true },
@@ -82,9 +85,9 @@ const OPTIONS = [
 ];
 
 const TEACHER_TILES = [
-  { title: "Class management", caption: "Join codes and approvals", mint: false },
-  { title: "Assessment builder", caption: "Five question types", mint: false },
-  { title: "Class dashboard", caption: "Average score and gain", mint: true },
+  { title: "Class management", caption: "Join codes, approvals, roster", mint: false },
+  { title: "Activity builder", caption: "Multi-part · 8 question types", mint: false },
+  { title: "Class dashboard", caption: "Average score, lessons, CSV reports", mint: true },
 ];
 
 export default function LandingPage() {
@@ -124,7 +127,7 @@ export default function LandingPage() {
               <span className="ld-spark s1" aria-hidden="true" />
               <span className="ld-spark s2" aria-hidden="true" />
               <span className="ld-chip c1"><StickerBadge rotation={-5} pastel="blue">Join with a class code</StickerBadge></span>
-              <span className="ld-chip c2"><StickerBadge rotation={5} pastel="mint">Pre → post gain</StickerBadge></span>
+              <span className="ld-chip c2"><StickerBadge rotation={5} pastel="mint">Track your scores</StickerBadge></span>
               <span className="ld-chip c3 d"><StickerBadge rotation={-3} pastel="yellow">Physics · Chemistry · Earth Science</StickerBadge></span>
               <span className="ld-chip c3 m"><StickerBadge rotation={-3} pastel="yellow">Physics · Chem · Earth</StickerBadge></span>
             </div>
@@ -171,17 +174,10 @@ export default function LandingPage() {
           <div className="ld-qg">
             <div>
               <h2 className="ds-h1 ld-h2">Quizzes for every kind of question</h2>
-              <p className="ds-body ld-secsub">Multiple-choice, identification, true or false, and problem-solving quizzes.</p>
+              <p className="ds-body ld-secsub">Eight question types — from multiple choice and fill in the blank to classification and ordering.</p>
               <div className="ld-ty">
                 {QUIZ_TYPES.map((t) => <Chip key={t}>{t}</Chip>)}
               </div>
-              <Card className="ld-gb">
-                <p className="ds-caption ld-gb-cap">Example · Gain = post-test − pre-test</p>
-                <div className="ld-gbrow ds-label"><span>Pre-test</span><span>70%</span></div>
-                <ProgressBar value={70} />
-                <div className="ld-gbrow ds-label"><span>Post-test</span><span>85%</span></div>
-                <ProgressBar value={85} tone="success" />
-              </Card>
             </div>
 
             <QuizCard
@@ -203,7 +199,7 @@ export default function LandingPage() {
           <div className="ld-band-in">
             <div>
               <h2 className="ds-h1 ld-band-h">Teachers, you&rsquo;re covered</h2>
-              <p className="ds-body ld-band-p">Manage. Monitor. Support. Create classes with a join code, publish lessons with files, build assessments and choose when scores are released.</p>
+              <p className="ds-body ld-band-p">Manage. Monitor. Support. Create classes with a join code, publish lessons with files, build multi-part activities, preview them before publishing, and choose when scores are released.</p>
             </div>
             <div className="ld-st">
               {TEACHER_TILES.map((t) => (

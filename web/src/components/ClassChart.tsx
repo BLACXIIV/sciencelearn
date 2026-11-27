@@ -12,8 +12,6 @@ export default function ClassChart({ students }: { students: StudentProgress[] }
   const rings: { label: string; pct: number | null; series: 1 | 2 }[] = [
     { label: "Lessons", pct: avg(students.map((s) => s.lessons_pct)), series: 1 },
     { label: "Quizzes", pct: avg(students.map((s) => s.quizzes_pct)), series: 2 },
-    { label: "Pre-test", pct: avg(students.map((s) => s.pre_score)), series: 2 },
-    { label: "Post-test", pct: avg(students.map((s) => s.post_score)), series: 2 },
   ];
   return (
     <Card variant="white">

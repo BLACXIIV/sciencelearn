@@ -19,6 +19,11 @@ abstract final class DSColors {
   // neutrals
   static const ink = navy, inkSoft = Color(0xFF2B3466);
   static const muted = Color(0xFF5A6480), line = Color(0xFFDDE4F5);
+  static const note = Color(0xFF3B4A8F); // text-soft — secondary ink on cards
+  static const onNavy = Color(0xFFDCE4FF); // soft text sitting on navy
+  static const navDim = Color(0xFF8FA3F0); // dim ink on navy — grip icons
+  static const divider = Color(0xFFEEF2FF); // lightest in-card divider
+  static const hint = Color(0xFF6B7BB8); // input placeholder text
   static const surface = Color(0xFFFFFFFF);
 
   // solid bottom-edge ("edge") colors — a darker shade of the fill above
@@ -43,8 +48,9 @@ abstract final class DSColors {
   static const warningInk = Color(0xFF9A6200);
   static const neutralInk = muted;
 
-  // progress track
-  static const track = Color(0xFFE4E9FB);
+  // progress track + off-state pill toggles
+  static const track = Color(0xFFE4EAFF);
+  static const switchOff = Color(0xFFC9D3F5);
 
   // chart series (canonical order: lessons, quizzes, pre-test, post-test) —
   // identical to --ds-chart-1..4 so web and mobile rings match.

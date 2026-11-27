@@ -257,7 +257,6 @@ void main() {
 
     expect(csv, contains('Student,"student, jr"'));
     expect(csv, contains('Quiz average,80%'));
-    expect(csv, contains('Gain,+15%'));
     expect(csv, contains('Pre-test,70%,'));
     expect(csv, contains('Final challenge,60%,Not released'));
     expect(csv, contains('Exit quiz,Not taken,'));

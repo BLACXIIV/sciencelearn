@@ -89,7 +89,7 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
                   ),
               ])),
           const SizedBox(height: 16),
-          classes.when(
+          classes.when(skipLoadingOnRefresh: true, 
             loading: () => const Center(child: DSLoadingIndicator()),
             error: (e, _) => DSEmptyState(
               icon: DSIconName.offline,

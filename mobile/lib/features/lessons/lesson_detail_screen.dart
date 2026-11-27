@@ -13,7 +13,7 @@ class LessonDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(repoProvider);
-    return FutureBuilder<Json>(
+    return KeepDataFutureBuilder<Json>(
       future: repo.lesson(id),
       builder: (context, snap) {
         final l = snap.data;
@@ -111,7 +111,7 @@ class _Activities extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<({List<Json> rows, Map<String, num> scores})>(
+    return KeepDataFutureBuilder<({List<Json> rows, Map<String, num> scores})>(
       future: (() async => (
             rows: await repo.lessonActivities(lessonId),
             scores: await repo.myAttemptScores(),

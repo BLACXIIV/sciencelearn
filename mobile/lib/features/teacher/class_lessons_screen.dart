@@ -1,11 +1,11 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
 import 'class_portal_header.dart';
-import 'lesson_activities_screen.dart';
 
 /// Subjects come from [subjectsN] (repository.dart) — built-ins plus
 /// teacher-added customs, synced via profiles.settings.subjects.
@@ -40,8 +40,7 @@ class _LessonsState extends ConsumerState<ClassLessonsScreen> {
   /// Activities live on a pushed route — refresh counts when we pop back
   /// so "N activities" reflects anything built in the builder.
   Future<void> _openActivities(Json lesson) async {
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => LessonActivitiesScreen(lesson: lesson)));
+    await context.push('/teacher/quiz/lesson/${lesson['id']}');
     if (mounted) _invalidate();
   }
 
@@ -245,7 +244,7 @@ class _LessonsState extends ConsumerState<ClassLessonsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          lessons.when(
+          lessons.when(skipLoadingOnRefresh: true, 
             loading: () => const Padding(
                 padding: EdgeInsets.all(16),
                 child: Center(child: DSLoadingIndicator())),
@@ -421,7 +420,7 @@ class _LessonThumb extends ConsumerWidget {
               : Center(child: DSIcon(icon, size: 26, color: DSColors.ink)),
         );
     if (key == null || key.isEmpty) return tile(null);
-    return FutureBuilder<String?>(
+    return KeepDataFutureBuilder<String?>(
       future: ref.read(repoProvider).signedUrl(key),
       builder: (_, s) => tile(s.data),
     );

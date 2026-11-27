@@ -2,7 +2,7 @@ import {
   ArrowDown, ArrowLeft, ArrowUp, Atom, Award, BarChart3, BookOpen, Camera, Check, CheckCircle2,
   ChevronRight, CircleAlert, ClipboardCheck, ClipboardList, Clock, CloudOff,
   Copy, Download, Ellipsis, ExternalLink, Eye, EyeOff, FlaskConical, Globe, GraduationCap,
-  Home, Inbox,
+  GripVertical, Home, Inbox,
   Info, KeyRound, Layers, LayoutDashboard, Lightbulb, ListChecks, Lock,
   LogIn, LogOut, Mail, MailCheck, Pencil, Play, Plus, Presentation, Puzzle,
   RefreshCw, School, Search, Settings, Shield, Sigma, Timer, Trash2,
@@ -26,6 +26,7 @@ const registry = {
   copy: Copy, play: Play, add: Plus, tip: Lightbulb, pending: Timer,
   award: Award, delete: Trash2, search: Search, close: X, check: Check,
   more: Ellipsis, export: Download, up: ArrowUp, down: ArrowDown,
+  grip: GripVertical,
 } as const;
 
 export type IconName = keyof typeof registry;

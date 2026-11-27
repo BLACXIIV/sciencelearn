@@ -46,8 +46,6 @@ export interface StudentProgress {
   full_name: string;
   lessons_pct: number;
   quizzes_pct: number | null;
-  pre_score: number | null;
-  post_score: number | null;
 }
 
 export interface ClassDashboard {
@@ -85,6 +83,8 @@ export interface Assessment {
   created_at: string;
   /** Teacher list embed — number of parts inside the activity. */
   part_count?: number;
+  /** Teacher list embed — number of questions inside the activity. */
+  question_count?: number;
 }
 
 /** A part inside an activity (its own directions + quiz mode + items).

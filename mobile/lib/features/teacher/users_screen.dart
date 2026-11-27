@@ -75,7 +75,7 @@ class _UsersState extends ConsumerState<UsersScreen> {
           ),
         ),
         Expanded(
-            child: users.when(
+            child: users.when(skipLoadingOnRefresh: true, 
           loading: () => const Center(child: DSLoadingIndicator()),
           error: (e, _) => DSEmptyState(
             icon: DSIconName.offline,

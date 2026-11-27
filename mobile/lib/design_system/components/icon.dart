@@ -27,6 +27,8 @@ enum DSIconName {
   presentation(LucideIcons.presentation),
   shield(LucideIcons.shield),
   back(LucideIcons.arrowLeft),
+  chevronBack(LucideIcons.chevronLeft),
+  chevronDown(LucideIcons.chevronDown),
   login(LucideIcons.logIn),
   signOut(LucideIcons.logOut),
   camera(LucideIcons.camera),
@@ -60,7 +62,8 @@ enum DSIconName {
   more(LucideIcons.ellipsis),
   export(LucideIcons.download),
   up(LucideIcons.arrowUp),
-  down(LucideIcons.arrowDown);
+  down(LucideIcons.arrowDown),
+  grip(LucideIcons.gripVertical);
 
   const DSIconName(this.data);
   final IconData data;

@@ -59,7 +59,7 @@ Widget _ctxCard(String ctx) {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     decoration: BoxDecoration(
       color: DSColors.navy,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: DSRadii.inputBr,
     ),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       for (var i = 0; i < lines.length; i++) ...[
@@ -105,7 +105,7 @@ class AttemptPaperSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.8,
-      child: FutureBuilder<List<Object>>(
+      child: KeepDataFutureBuilder<List<Object>>(
         future: Future.wait([
           repo.attemptPaper(assessmentId, studentId),
           repo.profileName(teacherId),

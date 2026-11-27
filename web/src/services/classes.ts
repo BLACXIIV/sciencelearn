@@ -165,7 +165,7 @@ export const clearPickedClass = () => {
 
 // ---------- class-scoped dashboard ----------
 
-/** One row per active member: lessons/quiz/pre-post metrics filtered to
+/** One row per active member: lessons/quiz metrics filtered to
  *  this class's own lessons (v_class_student_progress, migration 0011). */
 export interface ClassStudentProgress {
   class_id: string;
@@ -175,8 +175,6 @@ export interface ClassStudentProgress {
   lessons_pct: number;
   /** Average submitted score — "Quiz average", not completion. */
   quizzes_pct: number | null;
-  pre_score: number | null;
-  post_score: number | null;
   /** % of the class's published assessments submitted. */
   quizzes_done_pct: number;
 }

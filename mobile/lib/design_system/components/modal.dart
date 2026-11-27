@@ -69,14 +69,21 @@ class DSModal extends StatelessWidget {
             ],
             if (actions != null && actions!.isNotEmpty) ...[
               const SizedBox(height: DSSpacing.s5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  for (var i = 0; i < actions!.length; i++) ...[
-                    if (i > 0) const SizedBox(width: DSSpacing.s3),
-                    actions![i],
-                  ],
-                ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      for (var i = 0; i < actions!.length; i++) ...[
+                        if (i > 0) const SizedBox(width: DSSpacing.s3),
+                        actions![i],
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ],
           ],

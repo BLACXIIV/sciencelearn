@@ -122,7 +122,7 @@ class _ListPage extends StatelessWidget {
             ),
           ),
           Expanded(
-              child: FutureBuilder<List<Json>>(
+              child: KeepDataFutureBuilder<List<Json>>(
             future: future,
             builder: (_, snap) {
               if (snap.hasError) {

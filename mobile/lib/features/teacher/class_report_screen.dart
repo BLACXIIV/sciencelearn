@@ -23,9 +23,6 @@ String buildClassReportCsv({
   required int students,
   required num? lessonsAvg,
   required num? quizAvg,
-  required num? preAvg,
-  required num? postAvg,
-  required num? gain,
   required List<Json> assessments,
   required List<Json> lessons,
   required List<Json> roster,
@@ -37,9 +34,6 @@ String buildClassReportCsv({
     ..writeln('Students,$students')
     ..writeln('Lessons,${p(lessonsAvg)}')
     ..writeln('Quiz average,${p(quizAvg)}')
-    ..writeln('Pre-test,${p(preAvg)}')
-    ..writeln('Post-test,${p(postAvg)}')
-    ..writeln('Gain,${gain == null ? '—' : '${gain >= 0 ? '+' : ''}$gain%'}')
     ..writeln()
     ..writeln('Assessment,Class average,Attempts,Visibility');
   for (final a in assessments) {
@@ -59,18 +53,12 @@ String buildClassReportCsv({
   }
   b
     ..writeln()
-    ..writeln('Student,Lessons,Quiz average,Pre-test,Post-test,Gain');
+    ..writeln('Student,Lessons,Quiz average');
   for (final r in roster) {
-    final pre = r['pre_score'] as num?;
-    final post = r['post_score'] as num?;
-    final g = pre != null && post != null ? post - pre : null;
     b.writeln([
       csvCell(r['full_name']),
       p(r['lessons_pct'] as num?),
       p(r['quizzes_pct'] as num?),
-      p(pre),
-      p(post),
-      g == null ? '—' : '${g >= 0 ? '+' : ''}$g%',
     ].join(','));
   }
   return b.toString();
@@ -138,11 +126,6 @@ class ClassReportScreen extends ConsumerWidget {
         .length;
     final lessonsAvg = _mean(roster.map((r) => r['lessons_pct'] as num?));
     final quizAvg = _mean(roster.map((r) => r['quizzes_pct'] as num?));
-    final preAvg = _mean(roster.map((r) => r['pre_score'] as num?));
-    final postAvg = _mean(roster.map((r) => r['post_score'] as num?));
-    final gain = _mean(roster
-        .where((r) => r['pre_score'] != null && r['post_score'] != null)
-        .map((r) => (r['post_score'] as num) - (r['pre_score'] as num)));
     final acts = assessments.valueOrNull ?? const <Json>[];
     final anyAttempt = acts.any((a) => a['avg'] != null);
     final lessonRows = lessons.valueOrNull ?? const <Json>[];
@@ -179,41 +162,11 @@ class ClassReportScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 10),
                   ReportHeadTile(
-                    value: gain == null ? '—' : '${gain >= 0 ? '+' : ''}$gain%',
-                    label: 'Gain',
+                    value: lessonsAvg == null ? '—' : '$lessonsAvg%',
+                    label: 'Lessons avg',
                     bg: DSColors.pastelMint,
                   ),
                 ]),
-                const SizedBox(height: 16),
-                DSCard(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Expanded(
-                        child: Text('Class pre-test to post-test',
-                            style: DSText.title),
-                      ),
-                      if (gain != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: DSColors.mint,
-                            borderRadius: DSRadii.pillBr,
-                            boxShadow: dsEdge(DSColors.edgeMint, h: 3),
-                          ),
-                          child: Text(
-                            '${gain >= 0 ? '+' : ''}$gain% avg gain',
-                            style: DSText.label
-                                .copyWith(fontSize: 12, color: DSColors.navy),
-                          ),
-                        ),
-                    ]),
-                    const SizedBox(height: 12),
-                    PrePostChart(pre: preAvg, post: postAvg),
-                  ],
-                )),
                 const SizedBox(height: 16),
                 DSCard(
                     child: Column(
@@ -234,20 +187,6 @@ class ClassReportScreen extends ConsumerWidget {
                           label: 'Quizzes',
                           value: quizAvg?.toDouble(),
                           series: 2,
-                        ),
-                      ),
-                      Expanded(
-                        child: ReportRing(
-                          label: 'Pre-test',
-                          value: preAvg?.toDouble(),
-                          series: 2,
-                        ),
-                      ),
-                      Expanded(
-                        child: ReportRing(
-                          label: 'Post-test',
-                          value: postAvg?.toDouble(),
-                          series: 4,
                         ),
                       ),
                     ]),
@@ -337,9 +276,6 @@ class ClassReportScreen extends ConsumerWidget {
                       students: studentCount,
                       lessonsAvg: lessonsAvg,
                       quizAvg: quizAvg,
-                      preAvg: preAvg,
-                      postAvg: postAvg,
-                      gain: gain,
                       assessments: acts,
                       lessons: lessonRows,
                       roster: roster,
@@ -349,7 +285,7 @@ class ClassReportScreen extends ConsumerWidget {
                         .replaceAll(RegExp(r'[^a-z0-9]+'), '-');
                     await SharePlus.instance.share(ShareParams(
                       files: [
-                        XFile.fromData(utf8.encode('﻿$csv'), // ﻿ = UTF-8 BOM
+                        XFile.fromData(utf8.encode('?$csv'), // ? = UTF-8 BOM
                             name: 'class-report-$slug.csv',
                             mimeType: 'text/csv'),
                       ],
@@ -377,9 +313,6 @@ class _StudentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = '${row['full_name'] ?? 'Student'}';
-    final pre = row['pre_score'] as num?;
-    final post = row['post_score'] as num?;
-    final gain = pre != null && post != null ? post - pre : null;
     return Semantics(
       button: true,
       label: 'Open report for $name',
@@ -417,11 +350,6 @@ class _StudentTile extends StatelessWidget {
                   value: row['quizzes_pct'] == null
                       ? '—'
                       : '${row['quizzes_pct']}%'),
-            ),
-            Expanded(
-              child: _Mini(
-                  label: 'Gain',
-                  value: gain == null ? '—' : '${gain >= 0 ? '+' : ''}$gain%'),
             ),
           ]),
         ]),

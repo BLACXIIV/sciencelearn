@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
 
@@ -13,7 +14,7 @@ class LessonThumb extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(repoProvider);
     if (thumbKey == null || thumbKey!.isEmpty) return const DSThumbnail();
-    return FutureBuilder<String?>(
+    return KeepDataFutureBuilder<String?>(
       future: repo.signedUrl(thumbKey),
       builder: (_, snap) => DSThumbnail(imageUrl: snap.data),
     );

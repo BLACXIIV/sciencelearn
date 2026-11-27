@@ -5,10 +5,9 @@ import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
 import 'class_portal_header.dart';
-import 'lesson_activities_screen.dart';
 
 /// Create Quiz: quizzes attach to lessons, so this tab is the lesson picker —
-/// tapping a lesson opens its full activity/question builder.
+/// tapping a lesson opens its activities (compact cards -> builder).
 class ClassQuizScreen extends ConsumerWidget {
   const ClassQuizScreen({super.key});
 
@@ -18,6 +17,7 @@ class ClassQuizScreen extends ConsumerWidget {
     if (cls == null) return const Scaffold(body: SizedBox.shrink());
     final classId = '${cls['id']}';
     final lessons = ref.watch(classLessonsProvider(classId));
+    final counts = ref.watch(lessonActivityCountsProvider(classId));
 
     return Scaffold(
       body: Column(children: [
@@ -36,7 +36,7 @@ class ClassQuizScreen extends ConsumerWidget {
             )),
           ])),
           const SizedBox(height: 16),
-          lessons.when(
+          lessons.when(skipLoadingOnRefresh: true, 
             loading: () => const Padding(
                 padding: EdgeInsets.all(16),
                 child: Center(child: DSLoadingIndicator())),
@@ -65,13 +65,14 @@ class ClassQuizScreen extends ConsumerWidget {
                   ),
                 ));
               }
+              final countMap = counts.valueOrNull ?? const <String, int>{};
               return Column(children: [
                 for (final l in rows)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: DSListItemCard(
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => LessonActivitiesScreen(lesson: l))),
+                      onTap: () =>
+                          context.push('/teacher/quiz/lesson/${l['id']}'),
                       leading: const DSIcon(DSIconName.assessment, size: 22),
                       title: Text('${l['title']}'),
                       subtitle: Row(children: [
@@ -79,6 +80,12 @@ class ClassQuizScreen extends ConsumerWidget {
                             child: Text('${l['subject']}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis)),
+                        const SizedBox(width: 6),
+                        Text(
+                            '${countMap['${l['id']}'] ?? 0} '
+                            '${(countMap['${l['id']}'] ?? 0) == 1 ? 'activity' : 'activities'}',
+                            style: DSText.caption
+                                .copyWith(color: DSColors.muted)),
                         const SizedBox(width: 6),
                         DSStatusBadge(
                             status: l['is_published'] == true

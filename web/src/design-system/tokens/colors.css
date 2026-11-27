@@ -23,9 +23,11 @@
   --ds-ink: var(--ds-navy);
   --ds-ink-soft: #2B3466;
   --ds-muted: #5A6480;
-  --ds-note: #3B4A8F;   /* stat-card reason line */
+  --ds-note: #3B4A8F;   /* text-soft — secondary ink on cards */
   --ds-nav-dim: #8FA3F0; /* muted text on the navy rail */
+  --ds-on-navy: #DCE4FF; /* soft text sitting on navy */
   --ds-line: #DDE4F5;
+  --ds-divider: #EEF2FF; /* lightest in-card divider */
 
   /* solid bottom-edge ("edge") colors — a darker shade of the fill above */
   --ds-edge-card: #C9CFEA;
@@ -49,8 +51,9 @@
   --ds-warning-ink: #9A6200;
   --ds-neutral-ink: #5A6480;
 
-  /* progress track */
-  --ds-track: #E4E9FB;
+  /* progress track + off-state pill toggles */
+  --ds-track: #E4EAFF;
+  --ds-switch-off: #C9D3F5;
 
   /* chart series (canonical order: lessons, quizzes, pre-test, post-test).
      The mobile palette values win over the legacy web hardcodes so both

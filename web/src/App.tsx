@@ -13,6 +13,8 @@ import LessonActivities from "./pages/LessonActivities";
 import ClassDashboard from "./pages/teacher/ClassDashboard";
 import ClassLessons from "./pages/teacher/ClassLessons";
 import ClassQuiz from "./pages/teacher/ClassQuiz";
+import ActivityBuilder from "./pages/teacher/ActivityBuilder";
+import QuizPreview from "./pages/teacher/QuizPreview";
 import ClassStudents from "./pages/teacher/ClassStudents";
 import ComingSoon from "./pages/teacher/ComingSoon";
 import ClassReport from "./pages/teacher/ClassReport";
@@ -81,6 +83,8 @@ export default function App() {
             <Route path="lessons" element={<ClassLessons />} />
             <Route path="lessons/:lessonId/activities" element={<LessonActivities />} />
             <Route path="quiz" element={<ClassQuiz />} />
+            <Route path="quiz/a/:assessmentId" element={<ActivityBuilder />} />
+            <Route path="quiz/a/:assessmentId/preview" element={<QuizPreview />} />
             <Route path="students" element={<ClassStudents />} />
             <Route path="review" element={<ComingSoon />} />
             <Route path="reports" element={<ClassReport />} />

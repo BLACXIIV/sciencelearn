@@ -45,7 +45,7 @@
 .sd-ord { display: flex; flex-direction: column; gap: var(--ds-s3); }
 .sd-ord-slot {
   border: 1.5px dashed var(--ds-edge-soft);
-  border-radius: 14px;
+  border-radius: var(--ds-r-input);
   padding: 12px 14px;
 }
 .sd-ord-slot-label {
@@ -64,7 +64,7 @@
 .sd-cls { display: flex; flex-direction: column; gap: 12px; }
 .sd-cls-pool, .sd-cls-zone {
   border: 1.5px dashed var(--ds-edge-soft);
-  border-radius: 14px;
+  border-radius: var(--ds-r-input);
   padding: 14px;
 }
 .sd-cls-zone {
@@ -73,9 +73,8 @@
 }
 .sd-cls-zone:hover { border-color: var(--ds-blue); }
 .sd-cls-zone:focus-visible {
-  outline: none;
   border-color: var(--ds-blue);
-  box-shadow: 0 0 0 3px var(--ds-track);
+  outline: 3px solid var(--ds-track);
 }
 .sd-cls-hint, .sd-cls-zone-label {
   margin: 0 0 10px;
@@ -86,33 +85,32 @@
 .sd-cls-items { display: flex; flex-wrap: wrap; gap: 10px; min-height: 20px; }
 .sd-cls-chip {
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--ds-r-sm);
   padding: 10px 14px;
   background: var(--ds-pastel-blue);
   color: var(--ds-navy);
-  font: inherit;
+  font-family: var(--ds-font-body);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s, color .15s, box-shadow .15s;
 }
-.sd-cls-chip-sel { background: var(--ds-blue); color: #fff; }
+.sd-cls-chip-sel { background: var(--ds-blue); color: var(--ds-surface); }
 .sd-cls-chip:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--ds-track);
+  outline: 3px solid var(--ds-track);
 }
 .sd-cls-done { font-size: 14px; color: var(--ds-muted); }
 
 /* classification context — navy reference card (labeled equations etc.) */
 .sd-ctx {
   background: var(--ds-navy);
-  border-radius: 14px;
+  border-radius: var(--ds-r-input);
   padding: 14px 16px;
   margin: 0 0 12px;
 }
 .sd-ctx-line {
   margin: 0;
-  color: #fff;
+  color: var(--ds-surface);
   font-size: 15px;
   font-weight: 500;
   line-height: 1.5;
