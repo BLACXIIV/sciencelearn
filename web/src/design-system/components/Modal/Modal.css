@@ -20,6 +20,16 @@
   animation: ds-sheet-up 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
+/* Wide modal — document-style content (e.g. a graded test paper). Body
+   scrolls; the head and actions stay pinned. */
+.ds-modal-wide {
+  width: min(760px, 100%);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.ds-modal-wide .ds-modal-body { overflow-y: auto; min-height: 0; }
+
 .ds-modal-head {
   display: flex;
   align-items: center;

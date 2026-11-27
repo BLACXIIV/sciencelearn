@@ -73,7 +73,7 @@ export default function ClassDashboard() {
         </section>
       )}
 
-      <div className="td-stats">
+      <div className="td-stats bento bento-sm">
         <StatCard filled pastelColor="blue" icon={studentsStat.icon!}
           value={String(studentsStat.value)} label="Total students"
           note={`${active} active`} />
@@ -96,7 +96,7 @@ export default function ClassDashboard() {
           } />
       </div>
 
-      <div className="td-grid2">
+      <div className="bento">
         <ClassChart students={rows} />
 
         <Card variant="white" className="td-attn">

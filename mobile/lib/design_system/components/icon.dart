@@ -58,7 +58,9 @@ enum DSIconName {
   close(LucideIcons.x),
   check(LucideIcons.check),
   more(LucideIcons.ellipsis),
-  export(LucideIcons.download);
+  export(LucideIcons.download),
+  up(LucideIcons.arrowUp),
+  down(LucideIcons.arrowDown);
 
   const DSIconName(this.data);
   final IconData data;

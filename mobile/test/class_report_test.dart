@@ -128,8 +128,8 @@ void main() {
     await tester.tap(find.text('student'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pre-test to post-test'), findsOneWidget);
     expect(find.text('Overall progress'), findsOneWidget);
+    expect(find.text('Activities', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('A non-owner is bounced off the class report', (tester) async {

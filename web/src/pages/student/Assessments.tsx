@@ -63,7 +63,7 @@ export default function StudentAssessments() {
   return (
     <div className="sd-stack">
       {tests.length > 0 && (
-        <div className="sd-tiles">
+        <div className="bento bento-fit bento-xs bento-gap-xs">
           {tests.map((a) => {
             const isPre = a.kind === "pre_test";
             return (

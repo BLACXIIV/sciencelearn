@@ -48,94 +48,100 @@ class _AuthSheetState extends State<_AuthSheet> {
     return GestureDetector(
       // Tapping outside a field dismisses the keyboard.
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: DSColors.surface,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
-          ),
-          // The blurred Storyset art is the sheet's background, bleeding
-          // off the top-right corner behind the form.
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(DSRadii.panel)),
-            child: Stack(children: [
-              Positioned(
-                top: -24,
-                right: -24,
-                child: IgnorePointer(
-                  child: AnimatedSwitcher(
-                    duration: dur,
-                    child: ShaderMask(
-                      // Crisp at the corner, fully faded where the title is.
-                      blendMode: BlendMode.dstIn,
-                      shaderCallback: (r) => const LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.white,
-                          Colors.white,
-                          Colors.transparent
-                        ],
-                        stops: [0.0, 0.42, 0.85],
-                      ).createShader(r),
-                      child: ImageFiltered(
-                        key: ValueKey(_art),
-                        imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                        child: SvgPicture.asset(_art, width: 200),
+      child: ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.8),
+        child: Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: DSColors.surface,
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(DSRadii.panel)),
+            ),
+            // The blurred Storyset art is the sheet's background, bleeding
+            // off the top-right corner behind the form.
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(DSRadii.panel)),
+              child: Stack(children: [
+                Positioned(
+                  top: -24,
+                  right: -24,
+                  child: IgnorePointer(
+                    child: AnimatedSwitcher(
+                      duration: dur,
+                      child: ShaderMask(
+                        // Crisp at the corner, fully faded where the title is.
+                        blendMode: BlendMode.dstIn,
+                        shaderCallback: (r) => const LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [
+                            Colors.white,
+                            Colors.white,
+                            Colors.transparent
+                          ],
+                          stops: [0.0, 0.42, 0.85],
+                        ).createShader(r),
+                        child: ImageFiltered(
+                          key: ValueKey(_art),
+                          imageFilter:
+                              ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                          child: SvgPicture.asset(_art, width: 200),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 5,
-                      decoration: BoxDecoration(
-                          color: DSColors.track, borderRadius: DSRadii.pillBr),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        decoration: BoxDecoration(
+                            color: DSColors.track,
+                            borderRadius: DSRadii.pillBr),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  DSSegmentedControl(
-                    options: const [
-                      DSSegment('login', 'Log in'),
-                      DSSegment('signup', 'Sign up'),
-                    ],
-                    value: _tab == AuthTab.login ? 'login' : 'signup',
-                    onChanged: (v) => setState(() =>
-                        _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
-                  ),
-                  const SizedBox(height: 16),
-                  AnimatedSize(
-                    duration: dur,
-                    curve: Curves.easeInOut,
-                    child: AnimatedSwitcher(
+                    const SizedBox(height: 16),
+                    DSSegmentedControl(
+                      options: const [
+                        DSSegment('login', 'Log in'),
+                        DSSegment('signup', 'Sign up'),
+                      ],
+                      value: _tab == AuthTab.login ? 'login' : 'signup',
+                      onChanged: (v) => setState(() =>
+                          _tab = v == 'login' ? AuthTab.login : AuthTab.signup),
+                    ),
+                    const SizedBox(height: 16),
+                    AnimatedSize(
                       duration: dur,
-                      child: _tab == AuthTab.login
-                          ? _LoginForm(
-                              key: const ValueKey('login'),
-                              onGoSignup: () =>
-                                  setState(() => _tab = AuthTab.signup),
-                            )
-                          : _SignupForm(
-                              key: const ValueKey('signup'),
-                              onGoLogin: () =>
-                                  setState(() => _tab = AuthTab.login),
-                              onRoleArt: (role) => setState(() => _signupArt =
-                                  'assets/illustrations/$role.svg'),
-                            ),
+                      curve: Curves.easeInOut,
+                      child: AnimatedSwitcher(
+                        duration: dur,
+                        child: _tab == AuthTab.login
+                            ? _LoginForm(
+                                key: const ValueKey('login'),
+                                onGoSignup: () =>
+                                    setState(() => _tab = AuthTab.signup),
+                              )
+                            : _SignupForm(
+                                key: const ValueKey('signup'),
+                                onGoLogin: () =>
+                                    setState(() => _tab = AuthTab.login),
+                                onRoleArt: (role) => setState(() => _signupArt =
+                                    'assets/illustrations/$role.svg'),
+                              ),
+                      ),
                     ),
-                  ),
-                ]),
-              ),
-            ]),
+                  ]),
+                ),
+              ]),
+            ),
           ),
         ),
       ),

@@ -9,6 +9,7 @@ import "./tokens/typography.css";
 import "./tokens/radii.css";
 import "./tokens/spacing.css";
 import "./tokens/shadows.css";
+import "./layout/bento.css";
 
 /* tokens */
 export { breakpoints } from "./tokens/breakpoints";
@@ -68,6 +69,8 @@ export { StickerBadge } from "./components/StickerBadge/StickerBadge";
 export type { StickerBadgeProps } from "./components/StickerBadge/StickerBadge";
 export { Badge } from "./components/Badge/Badge";
 export type { BadgeProps, BadgeTone } from "./components/Badge/Badge";
+export { StatusBadge } from "./components/StatusBadge/StatusBadge";
+export type { StatusBadgeProps, StatusKind, StatusTone } from "./components/StatusBadge/StatusBadge";
 export { ProgressBar } from "./components/ProgressBar/ProgressBar";
 export type { ProgressBarProps, ProgressBarSize, ProgressBarTone } from "./components/ProgressBar/ProgressBar";
 export { RingChart } from "./components/RingChart/RingChart";

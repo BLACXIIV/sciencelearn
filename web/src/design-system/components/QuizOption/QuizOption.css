@@ -42,6 +42,34 @@
 .ds-quiz-text { flex: 1; min-width: 0; }
 .ds-quiz-mark { flex: none; }
 
+/* multi-select tick badge — square box that fills when picked */
+.ds-ms-box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 2px solid var(--ds-line);
+  background: var(--ds-track);
+  color: var(--ds-surface);
+}
+.ds-ms-box.on { border-color: var(--ds-blue); background: var(--ds-blue); }
+
+/* true/false badge — check/cross icon, letter-badge shape */
+.ds-tf-badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ds-r-chip);
+  background: var(--ds-navy);
+  color: var(--ds-surface);
+}
+.ds-quiz-opt-correct .ds-tf-badge { background: var(--ds-success); }
+.ds-quiz-opt-wrong .ds-tf-badge { background: var(--ds-error); }
+
 .ds-quiz-opt-selected {
   --ds-edge: var(--ds-edge-blue);
   border-color: var(--ds-blue);

@@ -1,6 +1,12 @@
 import type { IconName } from "../design-system";
 import type { StudentProgress } from "../types";
 
+/** Formats a point value without trailing zeros: 7 → "7", 2.5 → "2.5". */
+export function fmtPts(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return Number.isInteger(v) ? String(v) : (+v.toFixed(2)).toString();
+}
+
 export interface StatItem {
   label: string;
   value: string | number;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/bento.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
@@ -101,19 +102,9 @@ class ClassDashboardScreen extends ConsumerWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    GridView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      // Fixed row height — an aspect-ratio cell overflows on
-                      // narrow screens (content is ~160px tall regardless of
-                      // cell width).
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: 172,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                      ),
+                    BentoGrid(
+                      minWidth: 160,
+                      gap: 10,
                       children: [
                         DSStatCard(
                           filled: true,

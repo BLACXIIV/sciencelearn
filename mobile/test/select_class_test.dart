@@ -69,7 +69,7 @@ void main() {
     expect(find.text('Grade 7 – Diamond'), findsOneWidget);
     expect(find.text('Ms. Aquino'), findsOneWidget);
     expect(find.text('Grade 8 – Ruby'), findsOneWidget);
-    expect(find.text('PENDING'), findsOneWidget);
+    expect(find.text('Pending'), findsOneWidget);
     expect(find.text('Join with a class code'), findsOneWidget);
 
     // Continue is the gate: disabled until a class is selected.

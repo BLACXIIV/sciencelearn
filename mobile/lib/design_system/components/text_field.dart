@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/text_clean.dart';
 import '../tokens/colors.dart';
 import '../tokens/radii.dart';
 import '../tokens/typography.dart';
@@ -27,6 +28,8 @@ class DSTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final Iterable<String>? autofillHints;
   final TextCapitalization textCapitalization;
+  /// Normalize pasted/typed text live (docx symbol glyphs, arrows, subscripts).
+  final bool clean;
 
   const DSTextField({
     super.key,
@@ -47,6 +50,7 @@ class DSTextField extends StatelessWidget {
     this.onSubmitted,
     this.autofillHints,
     this.textCapitalization = TextCapitalization.none,
+    this.clean = false,
   });
 
   @override
@@ -69,6 +73,7 @@ class DSTextField extends StatelessWidget {
           onSubmitted: onSubmitted,
           autofillHints: autofillHints,
           textCapitalization: textCapitalization,
+          inputFormatters: clean ? const [CleanTextFormatter()] : null,
           style:
               DSText.bodySm.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(

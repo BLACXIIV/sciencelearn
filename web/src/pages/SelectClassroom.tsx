@@ -1,16 +1,16 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar, Badge, Button, Card, CodeInput, EmptyState, Icon, ListItemCard, Modal, PageHeader,
-  SegmentedControl, TextField, type IconName,
+  SegmentedControl, StatusBadge, TextField, type IconName,
 } from "../design-system";
 import { useAuth } from "../hooks/useAuth";
 import { signOut } from "../services/auth";
 import { createClass, fetchAwaitingByClass, fetchEnrolledClasses, fetchMyClasses, joinClass, markClassPicked } from "../services/classes";
 import "./select-classroom.css";
 
-/** Pastel subject tiles — color cycles by list position, like the mockup. */
+/** Pastel subject tiles â€” color cycles by list position, like the mockup. */
 const TILES: { pastel: "b" | "m" | "y" | "p"; icon: IconName }[] = [
   { pastel: "b", icon: "science" },
   { pastel: "m", icon: "atom" },
@@ -20,11 +20,11 @@ const TILES: { pastel: "b" | "m" | "y" | "p"; icon: IconName }[] = [
 const tile = (i: number) => TILES[i % TILES.length];
 
 /** Post-login gate: signed-in users land here and pick a classroom to open.
- *  It's a session landing step — portal tabs stay cross-class. */
+ *  It's a session landing step â€” portal tabs stay cross-class. */
 export default function SelectClassroom() {
   const { session, profile, loading } = useAuth();
 
-  if (loading) return <p className="ds-body sc-load">Loading…</p>;
+  if (loading) return <p className="ds-body sc-load">Loadingâ€¦</p>;
   if (!session) return <Navigate to="/login" replace />;
   if (!profile)
     return <p className="ds-body sc-load">Couldn't load your profile. Check your connection and refresh.</p>;
@@ -99,7 +99,7 @@ function StudentPick() {
   return (
     <>
       <div className="sc-stack">
-        {classes.isLoading && <Card><p className="sc-dim">Loading classes…</p></Card>}
+        {classes.isLoading && <Card><p className="sc-dim">Loading classesâ€¦</p></Card>}
         {classes.error != null && <Card><p className="sc-err">{String(classes.error)}</p></Card>}
         {classes.data?.length === 0 && (
           <Card>
@@ -154,7 +154,7 @@ function StudentPick() {
               }
               title={e.classes?.name ?? "Class"}
               subtitle="Waiting for teacher approval"
-              trailing={<Badge tone="sun">Pending</Badge>}
+              trailing={<StatusBadge status="pending" />}
             />
           ),
         )}
@@ -211,7 +211,7 @@ function TeacherPick() {
   return (
     <>
       <div className="sc-stack">
-        {classes.isLoading && <Card><p className="sc-dim">Loading classes…</p></Card>}
+        {classes.isLoading && <Card><p className="sc-dim">Loading classesâ€¦</p></Card>}
         {classes.error != null && <Card><p className="sc-err">{String(classes.error)}</p></Card>}
         {classes.data?.length === 0 && (
           <Card>

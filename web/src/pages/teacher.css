@@ -1,6 +1,6 @@
-/* Teacher screens — layout only; every visual value is a design-system token. */
+﻿/* Teacher screens â€” layout only; every visual value is a design-system token. */
 
-/* class hero — navy panel, 32px radius, deep edge (mockup dashboard banner) */
+/* class hero â€” navy panel, 32px radius, deep edge (mockup dashboard banner) */
 .td-hero {
   display: flex;
   align-items: center;
@@ -41,22 +41,9 @@
 .td-hero-art { width: 260px; height: 150px; margin-left: auto; flex: none; }
 .td-hero-art img { width: 100%; height: 100%; object-fit: contain; }
 
-/* stat tiles — 5 up at desktop; the pending tile drops to a full-width
-   alert row once the grid can't hold all five. */
-.td-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--ds-s5);
-  margin-bottom: var(--ds-s6);
-}
-
-/* dashboard second row: averages + needs-attention side by side */
-.td-grid2 {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: var(--ds-s5);
-  align-items: stretch;
-}
+/* stat tiles + dashboard second row — bento elastic grids (see
+   design-system/layout/bento.css). */
+.td-stats { margin-bottom: var(--ds-s6); }
 .td-attn-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ds-s3); margin-bottom: var(--ds-s2); }
 .td-attn-head .ds-h3 { margin: 0; }
 .td-attn-art { display: flex; justify-content: center; padding-top: var(--ds-s3); }
@@ -73,8 +60,6 @@
 .td-quick { display: flex; gap: var(--ds-s4); flex-wrap: wrap; margin-top: var(--ds-s6); }
 
 .td-rings {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   justify-items: center;
   gap: var(--ds-s5) var(--ds-s3);
   padding: var(--ds-s4) var(--ds-s2) 0;
@@ -84,8 +69,9 @@
 .td-stack > * + * { margin-top: var(--ds-s3); }
 .td-row { display: flex; align-items: center; gap: var(--ds-s3); flex-wrap: wrap; }
 .td-spread { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s3); flex-wrap: wrap; }
-.td-row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--ds-s4); margin: var(--ds-s3) 0 var(--ds-s4); }
+.td-row3 { margin: var(--ds-s3) 0 var(--ds-s4); }
 .td-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--ds-s2); flex-wrap: wrap; }
+.td-name { display: flex; align-items: center; gap: var(--ds-s2); flex-wrap: wrap; }
 .td-code { letter-spacing: 0.12em; }
 .td-heading { margin: var(--ds-s6) 0 var(--ds-s3); }
 .td-link { display: inline-flex; align-items: center; gap: var(--ds-s1); color: var(--ds-blue); font: 700 var(--ds-fs-button)/1 var(--ds-font-display); text-decoration: none; }
@@ -99,11 +85,8 @@
 .td-quest .ds-caption { min-width: 90px; }
 
 @media (max-width: 1240px) {
-  .td-stats { grid-template-columns: repeat(4, 1fr); }
-  .td-stats .ds-stat-alert { grid-column: 1 / -1; }
-}
-@media (max-width: 1200px) {
-  .td-grid2 { grid-template-columns: 1fr; }
+  /* The pending-request tile drops to a full-width alert row. */
+  .td-stats .ds-stat-alert { flex: 1 1 100%; }
 }
 @media (max-width: 900px) {
   .td-hero { padding: var(--ds-s5); }
@@ -111,15 +94,13 @@
   .td-hero-art { display: none; }
 }
 @media (max-width: 700px) {
-  .td-stats { grid-template-columns: repeat(2, 1fr); }
-  .td-rings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .td-quick { flex-direction: column; }
   .td-quick .ds-btn { width: 100%; }
 }
 
 /* ---------- Students screen ---------- */
 
-/* join-code strip — navy panel like the dashboard hero, slimmer */
+/* join-code strip â€” navy panel like the dashboard hero, slimmer */
 .ts-strip {
   display: flex;
   align-items: center;
@@ -211,7 +192,7 @@
   color: var(--ds-surface);
 }
 
-/* roster row — one tappable card per student */
+/* roster row â€” one tappable card per student */
 .ts-row {
   display: flex;
   align-items: center;
@@ -272,7 +253,7 @@
 }
 .ts-menu-item:hover { background: var(--ds-error-surface); }
 
-/* roster empty slot — dashed frame until SVG C arrives */
+/* roster empty slot â€” dashed frame until SVG C arrives */
 .ts-empty {
   display: flex;
   align-items: center;
@@ -345,13 +326,7 @@
   letter-spacing: 0.6px;
 }
 
-.sr-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--ds-s5);
-  align-items: stretch;
-}
-.sr-grid > * { min-width: 0; }
+/* Report card grid — bento elastic (see design-system/layout/bento.css). */
 
 /* pre?post two-column chart */
 .sr-ppchart { display: block; width: 100%; max-width: 340px; margin: var(--ds-s4) auto 0; }
@@ -366,13 +341,116 @@
   font: 800 12px/1 var(--ds-font-display);
 }
 
-/* rings */
-.sr-rings {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--ds-s3);
-  margin-top: var(--ds-s4);
+/* Activities grouped by lesson — clickable rows open the test paper. */
+.sr-act-group + .sr-act-group { margin-top: var(--ds-s4); }
+.sr-act-lesson {
+  margin: 0 0 4px;
+  font: 700 13px/1.3 var(--ds-font-display);
+  color: var(--ds-muted);
 }
+.sr-act-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  padding: 8px 10px;
+  margin: 0 -10px;
+  width: calc(100% + 20px);
+  border: 0;
+  border-radius: var(--ds-r-button);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sr-act-row:hover { background: var(--ds-paper); }
+.sr-act-name { flex: 1; min-width: 0; font: 600 14px/1.35 var(--ds-font-body); color: var(--ds-ink); }
+.sr-act-meta { display: flex; align-items: center; gap: var(--ds-s2); flex: none; }
+
+/* ---------- Attempt "test paper" (modal) ---------- */
+.sr-paper-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-s4) var(--ds-s3);
+  padding: var(--ds-s4);
+  margin-bottom: var(--ds-s4);
+  border: 2px dashed var(--ds-line);
+  border-radius: var(--ds-r-button);
+}
+@media (max-width: 560px) {
+  .sr-paper-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.sr-paper-meta > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 600 14px/1.4 var(--ds-font-body);
+  color: var(--ds-ink);
+  min-width: 0;
+}
+.sr-paper-meta b {
+  font: 700 11px/1 var(--ds-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ds-muted);
+}
+.sr-paper-note { font-style: normal; font-weight: 400; font-size: 12px; color: var(--ds-muted); }
+
+.sr-paper-part { margin-bottom: var(--ds-s5); }
+.sr-paper-part-title {
+  margin: 0 0 2px;
+  font: 800 16px/1.3 var(--ds-font-display);
+  color: var(--ds-navy);
+}
+.sr-paper-part-dir { margin: 0 0 var(--ds-s3); font: 400 13px/1.5 var(--ds-font-body); color: var(--ds-muted); }
+
+.sr-q { margin-top: var(--ds-s4); }
+.sr-q-prompt { margin: 0 0 var(--ds-s2); font: 600 14px/1.5 var(--ds-font-body); color: var(--ds-ink); }
+.sr-q-num { color: var(--ds-muted); }
+.sr-q-opts { display: flex; flex-direction: column; gap: var(--ds-s2); }
+
+.sr-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  padding: 9px 12px;
+  border: 2px solid transparent;
+  border-radius: var(--ds-r-button);
+  background: var(--ds-paper);
+  font: 500 14px/1.4 var(--ds-font-body);
+  color: var(--ds-ink);
+}
+.sr-opt-letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--ds-r-chip);
+  background: var(--ds-track);
+  color: var(--ds-navy);
+  font: 700 13px/1 var(--ds-font-display);
+}
+.sr-opt-text { flex: 1; min-width: 0; }
+.sr-opt-ok { background: var(--ds-pastel-mint); border-color: var(--ds-success); }
+.sr-opt-bad { background: var(--ds-error-surface); border-color: var(--ds-error); }
+.sr-opt-mark-ok { color: var(--ds-success); flex: none; }
+.sr-opt-mark-bad { color: var(--ds-error); flex: none; }
+
+.sr-ans {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s2);
+  padding: 9px 12px;
+  border-radius: var(--ds-r-button);
+  background: var(--ds-paper);
+  font: 500 14px/1.4 var(--ds-font-body);
+  color: var(--ds-ink);
+}
+.sr-ans-ok { background: var(--ds-pastel-mint); }
+.sr-ans-bad { background: var(--ds-error-surface); }
+
+/* rings — laid out by .bento-cols so N rings fill the card width */
+.sr-rings { margin-top: var(--ds-s4); }
 .sr-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .sr-ring-val { font: 800 16px/1 var(--ds-font-display); color: var(--ds-navy); }
 .sr-ring-lab { font: 600 12px/1 var(--ds-font-body); color: var(--ds-muted); }
@@ -407,10 +485,9 @@
   color: var(--ds-muted);
 }
 
-/* class report — the roster card spans the full grid */
-.cr-roster { grid-column: 1 / -1; }
+/* class report — roster card takes a full bento row (.bento-wide) */
 
-/* report empty slot — dashed frame until SVG D arrives */
+/* report empty slot â€” dashed frame until SVG D arrives */
 .sr-empty {
   display: flex;
   align-items: center;
@@ -423,22 +500,17 @@
   text-align: center;
 }
 
-@media (max-width: 1100px) {
-  .sr-grid { grid-template-columns: 1fr; }
-  .sr-rings { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
 @media (max-width: 700px) {
   .ts-row { flex-wrap: wrap; }
   .ts-stat { min-width: calc(50% - var(--ds-s4)); }
   .ts-report { display: none; }
   .sr-head-stats { margin-left: 0; }
-  .sr-rings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sr-score-name { width: 110px; }
   .ts-code { font-size: 20px; letter-spacing: 3px; }
   .ts-filters .ds-field { width: 100%; }
 }
 
-/* search label is visual noise next to the chips — keep it for a11y only */
+/* search label is visual noise next to the chips â€” keep it for a11y only */
 .ts-filters .ds-label {
   position: absolute;
   width: 1px; height: 1px;
@@ -527,12 +599,7 @@
 .ts-menu-item[aria-disabled="true"] { opacity: 0.45; cursor: default; }
 .ts-menu-item[aria-disabled="true"]:hover { background: none; }
 
-/* 2-column card grid */
-.tl-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--ds-s4);
-}
+/* Lesson card grid — bento elastic (see design-system/layout/bento.css). */
 .tl-card {
   padding: var(--ds-s3);
   border: 1px solid var(--ds-line);
@@ -565,17 +632,7 @@
   background: var(--ds-surface);
   color: var(--ds-navy);
 }
-.tl-chip {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 5px 10px;
-  border-radius: var(--ds-r-pill);
-  font: 800 11px/1 var(--ds-font-display);
-  color: var(--ds-navy);
-}
-.tl-chip-pub { background: var(--ds-mint); }
-.tl-chip-draft { background: var(--ds-pastel-yellow); }
+.tl-chip { position: absolute; top: 10px; left: 10px; }
 .tl-pdf {
   position: absolute;
   top: 10px;
@@ -622,7 +679,7 @@
   margin-bottom: 2px;
 }
 .tl-form-sub { margin: 0 0 var(--ds-s3); font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
-/* fieldset defaults to min-inline-size: min-content — without this the
+/* fieldset defaults to min-inline-size: min-content â€” without this the
    scrollable card row pushes the whole panel wider instead of scrolling */
 .tl-subjects { border: 0; padding: 0; margin: 0; min-width: 0; }
 .tl-subjects-leg {
@@ -656,7 +713,7 @@
 .tl-subject.on .tl-subject-ic { background: var(--ds-surface); }
 .tl-subject-name { font: 600 13px/1.2 var(--ds-font-display); color: var(--ds-navy); }
 
-/* dashed "+ Subject" card — same grid slot, broken border like FileDropZone */
+/* dashed "+ Subject" card â€” same grid slot, broken border like FileDropZone */
 .tl-subject-add { border: 2px dashed var(--ds-edge-white); color: var(--ds-blue); }
 .tl-subject-add:hover { border-color: var(--ds-blue); }
 .tl-subject-add .tl-subject-ic { background: var(--ds-paper); color: var(--ds-blue); }
@@ -677,7 +734,7 @@
   justify-content: center;
 }
 
-/* manage-subjects modal: fixed-height deletable cards with a centered × */
+/* manage-subjects modal: fixed-height deletable cards with a centered Ã— */
 .tl-add-subj { display: grid; gap: var(--ds-s4); }
 .tl-subject-del {
   position: relative;
@@ -697,7 +754,7 @@
   color: var(--ds-error);
 }
 
-/* drop zones — the dashed tile is the DS FileDropZone component; this is
+/* drop zones â€” the dashed tile is the DS FileDropZone component; this is
    just the stacked layout in the form */
 .tl-drops { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ds-s3); margin: var(--ds-s3) 0 var(--ds-s4); }
 .tl-form-btns { display: flex; gap: var(--ds-s3); }
@@ -706,7 +763,7 @@
 /* muted loading line */
 .tl-dim { margin: var(--ds-s2) 0 0; font: 400 13px/1.4 var(--ds-font-body); color: var(--ds-muted); }
 
-/* empty state — the art slot is intentionally blank until the SVG lands */
+/* empty state â€” the art slot is intentionally blank until the SVG lands */
 .tl-empty-art {
   width: 220px; height: 160px;
   display: flex; align-items: center; justify-content: center;
@@ -718,5 +775,48 @@
 @media (max-width: 1100px) {
   .tl-page { flex-direction: column; }
   .tl-panel { width: 100%; position: static; }
-  .tl-grid { grid-template-columns: 1fr; }
 }
+
+/* True/False answer-key pills (question editor). */
+.td-tfrow { display: flex; gap: 10px; }
+.td-tf {
+  padding: 10px 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ds-track);
+  color: var(--ds-navy);
+  font: 600 var(--ds-fs-body-sm) var(--ds-font-display);
+  cursor: pointer;
+  box-shadow: none;
+}
+.td-tf.on { background: var(--ds-navy); color: #fff; }
+.td-tf:focus-visible { outline: 3px solid var(--ds-pastel-blue); outline-offset: 2px; }
+
+/* ordering item position badge — centered on the input box */
+.td-num {
+  margin-bottom: 14px;
+  min-width: 14px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--ds-muted);
+}
+
+/* filled blank on the graded paper — correct word inline, green */
+.sr-blank { color: var(--ds-success); text-decoration: underline; text-underline-offset: 3px; }
+
+/* classification context — navy reference card (labeled equations etc.) */
+.sr-ctx {
+  background: var(--ds-navy);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+}
+.sr-ctx-line {
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.sr-ctx-line + .sr-ctx-line { margin-top: 4px; }
+.sr-ctx-key { color: var(--ds-sun); font-weight: 700; }

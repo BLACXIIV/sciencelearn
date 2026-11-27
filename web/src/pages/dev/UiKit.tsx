@@ -1,15 +1,15 @@
-import { ReactNode, useState } from "react";
+﻿import { ReactNode, useState } from "react";
 import {
   Avatar, Badge, BottomSheet, Button, Card, Checkbox, Chip, CodeInput,
   Divider, EmptyState, Flashcard, Icon, IconButton, ListItemCard, Modal,
   OptionTile, PageHeader, Panel, PasswordField, ProgressBar, QuizCard,
   QuizNav, QuizOption, RadioCard, RadioGroup, RingChart, SearchField,
-  SegmentedControl, Select, Skeleton, StatCard, StickerBadge, Switch,
+  SegmentedControl, Select, Skeleton, StatCard, StatusBadge, StickerBadge, Switch,
   TextArea, TextField, Thumbnail, Toast, type IconName,
 } from "../../design-system";
 import "./UiKit.css";
 
-/* ————— helpers ————— */
+/* â€”â€”â€”â€”â€” helpers â€”â€”â€”â€”â€” */
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -47,7 +47,7 @@ function EdgeBox({ height, edge }: { height: 3 | 4 | 5 | 6; edge: string }) {
   );
 }
 
-/* ————— page ————— */
+/* â€”â€”â€”â€”â€” page â€”â€”â€”â€”â€” */
 
 export default function UiKit() {
   const [pw, setPw] = useState("hunter2");
@@ -66,11 +66,11 @@ export default function UiKit() {
     <div className="uik">
       <PageHeader compact>
         <h1 className="uik-title">ScienceLearn UI Kit</h1>
-        <p className="uik-sub">Design-system gallery — every token and component. Dev builds only.</p>
+        <p className="uik-sub">Design-system gallery â€” every token and component. Dev builds only.</p>
       </PageHeader>
 
-      {/* ——— Tokens ——— */}
-      <Section title="Tokens — colors">
+      {/* â€”â€”â€” Tokens â€”â€”â€” */}
+      <Section title="Tokens â€” colors">
         <Row label="Brand">
           {["navy", "navy-deep", "blue", "blue-dark", "mint", "sun", "paper"].map((n) => <Swatch key={n} name={n} />)}
         </Row>
@@ -88,20 +88,20 @@ export default function UiKit() {
         </Row>
       </Section>
 
-      <Section title="Tokens — type scale">
+      <Section title="Tokens â€” type scale">
         <p className="ds-display uik-type">Display 76</p>
-        <p className="ds-h1 uik-type">Heading 1 — 38</p>
-        <p className="ds-h2 uik-type">Heading 2 — 27</p>
-        <p className="ds-h3 uik-type">Heading 3 — 21</p>
-        <p className="ds-title uik-type">Title — Lexend 600 / 16</p>
-        <p className="ds-body uik-type">Body — Inter 16: the quick brown fox jumps over the lazy dog.</p>
-        <p className="ds-body-sm uik-type">Body small — Inter 14</p>
-        <p className="ds-label uik-type">Label — Lexend 600 / 13</p>
-        <p className="ds-button uik-type">Button — Lexend 700 / 15</p>
-        <p className="ds-caption uik-type">Caption — Inter 12</p>
+        <p className="ds-h1 uik-type">Heading 1 â€” 38</p>
+        <p className="ds-h2 uik-type">Heading 2 â€” 27</p>
+        <p className="ds-h3 uik-type">Heading 3 â€” 21</p>
+        <p className="ds-title uik-type">Title â€” Lexend 600 / 16</p>
+        <p className="ds-body uik-type">Body â€” Inter 16: the quick brown fox jumps over the lazy dog.</p>
+        <p className="ds-body-sm uik-type">Body small â€” Inter 14</p>
+        <p className="ds-label uik-type">Label â€” Lexend 600 / 13</p>
+        <p className="ds-button uik-type">Button â€” Lexend 700 / 15</p>
+        <p className="ds-caption uik-type">Caption â€” Inter 12</p>
       </Section>
 
-      <Section title="Tokens — radii, spacing, edges">
+      <Section title="Tokens â€” radii, spacing, edges">
         <Row label="Radii">
           {[["button", 16], ["input", 14], ["card", 22], ["panel", 32], ["chip", 14], ["pill", 999]].map(([n]) => (
             <div key={n} className="uik-radius">
@@ -118,7 +118,7 @@ export default function UiKit() {
             </div>
           ))}
         </Row>
-        <Row label="Edge heights (3–6 only)">
+        <Row label="Edge heights (3â€“6 only)">
           <EdgeBox height={3} edge="edge-card" />
           <EdgeBox height={4} edge="edge-card" />
           <EdgeBox height={5} edge="edge-blue" />
@@ -126,7 +126,7 @@ export default function UiKit() {
         </Row>
       </Section>
 
-      {/* ——— Actions ——— */}
+      {/* â€”â€”â€” Actions â€”â€”â€” */}
       <Section title="Button">
         <Row label="Variants (md)">
           <Button>Primary</Button>
@@ -164,7 +164,7 @@ export default function UiKit() {
         </div>
       </Section>
 
-      {/* ——— Forms ——— */}
+      {/* â€”â€”â€” Forms â€”â€”â€” */}
       <Section title="Text fields">
         <div className="uik-form">
           <TextField label="Display name" placeholder="Ada Lovelace" />
@@ -172,9 +172,9 @@ export default function UiKit() {
           <TextField label="With helper" placeholder="you@school.edu" helper="We never share your email." />
           <TextField label="Disabled" placeholder="Locked" disabled />
           <PasswordField label="Password" value={pw} onChange={(e) => setPw(e.target.value)} />
-          <TextArea label="About" placeholder="Tell the class…" />
+          <TextArea label="About" placeholder="Tell the classâ€¦" />
           <Select label="Grade" options={[{ value: "7", label: "Grade 7" }, { value: "8", label: "Grade 8" }, { value: "9", label: "Grade 9" }]} />
-          <SearchField label="Search" placeholder="Students, classes…" />
+          <SearchField label="Search" placeholder="Students, classesâ€¦" />
           <CodeInput label="Class code" value={code} onChange={setCode} error={code.length > 0 && code.length < 6 ? "Enter all 6 characters." : undefined} />
         </div>
       </Section>
@@ -193,7 +193,7 @@ export default function UiKit() {
         <Row label="RadioGroup">
           <div className="uik-col uik-w-360">
             <RadioGroup
-              label="I am a…"
+              label="I am aâ€¦"
               value={role}
               onChange={setRole}
               options={[
@@ -210,7 +210,7 @@ export default function UiKit() {
         </Row>
       </Section>
 
-      {/* ——— Surfaces ——— */}
+      {/* â€”â€”â€” Surfaces â€”â€”â€” */}
       <Section title="Card">
         <Row label="Variants">
           <Card className="uik-card-demo"><strong>White</strong></Card>
@@ -223,7 +223,7 @@ export default function UiKit() {
         </Row>
         <Row label="Navy + Panel">
           <Card variant="navy" className="uik-card-demo"><strong>Navy card</strong></Card>
-          <Panel className="uik-card-demo"><strong>Panel — navy, radius 32</strong></Panel>
+          <Panel className="uik-card-demo"><strong>Panel â€” navy, radius 32</strong></Panel>
         </Row>
       </Section>
 
@@ -249,7 +249,7 @@ export default function UiKit() {
       </Modal>
       <Toast open={toast} message="Class code copied." tone="success" onClose={() => setToast(false)} />
 
-      {/* ——— Display ——— */}
+      {/* â€”â€”â€” Display â€”â€”â€” */}
       <Section title="Chip / StickerBadge / Badge">
         <Row label="Chips">
           <Chip>White</Chip>
@@ -257,7 +257,7 @@ export default function UiKit() {
           <Chip variant="navy">Navy</Chip>
           <Chip variant="mint">Mint</Chip>
         </Row>
-        <Row label="StickerBadge (rotations −5 / +5)">
+        <Row label="StickerBadge (rotations âˆ’5 / +5)">
           <StickerBadge rotation={-5}>New unit</StickerBadge>
           <StickerBadge rotation={5}>Top score</StickerBadge>
           <StickerBadge rotation={-5} pastel="blue">Join</StickerBadge>
@@ -317,9 +317,9 @@ export default function UiKit() {
             <ListItemCard
               pending
               leading={<Icon name="school" size={22} />}
-              title="Physics — Grade 10"
+              title="Physics â€” Grade 10"
               subtitle="Waiting for teacher approval"
-              trailing={<Badge tone="sun">Pending</Badge>}
+              trailing={<StatusBadge status="pending" />}
             />
           </div>
         </Row>
@@ -338,7 +338,7 @@ export default function UiKit() {
         <Divider label="or" />
       </Section>
 
-      {/* ——— Quiz ——— */}
+      {/* â€”â€”â€” Quiz â€”â€”â€” */}
       <Section title="Quiz">
         <QuizCard
           tag="Pre-test"
@@ -347,7 +347,7 @@ export default function UiKit() {
         >
           <QuizOption letter="A" state="default">Earth</QuizOption>
           <QuizOption letter="B" state="selected">Saturn</QuizOption>
-          <QuizOption letter="C" state="correct">Saturn — correct!</QuizOption>
+          <QuizOption letter="C" state="correct">Saturn â€” correct!</QuizOption>
           <QuizOption letter="D" state="wrong">Jupiter</QuizOption>
           <QuizOption letter="E" state="disabled">Mars</QuizOption>
         </QuizCard>
@@ -361,17 +361,17 @@ export default function UiKit() {
         </Row>
       </Section>
 
-      {/* ——— Flashcard ——— */}
+      {/* â€”â€”â€” Flashcard â€”â€”â€” */}
       <Section title="Flashcard">
         <div className="uik-col uik-w-360">
           <Flashcard
             front={<span className="ds-title">What is the chemical symbol for water?</span>}
-            back={<span className="ds-title">H₂O</span>}
+            back={<span className="ds-title">Hâ‚‚O</span>}
           />
         </div>
       </Section>
 
-      {/* ——— Layout ——— */}
+      {/* â€”â€”â€” Layout â€”â€”â€” */}
       <Section title="NavBar / IslandNavBar">
         <Row label="NavBar (sidebar)">
           <div className="uik-nav-demo">
@@ -389,7 +389,7 @@ export default function UiKit() {
             </nav>
           </div>
         </Row>
-        <Row label="IslandNavBar (fixed bottom — preview inline)">
+        <Row label="IslandNavBar (fixed bottom â€” preview inline)">
           <div className="ds-island uik-island-demo">
             {[{ key: "home", label: "Home", icon: "home" as IconName }, { key: "classes", label: "Classes", icon: "lessons" as IconName }, { key: "progress", label: "Progress", icon: "progress" as IconName }, { key: "account", label: "Account", icon: "account" as IconName }].map((it) => (
               <button key={it.key} type="button" className={`ds-island-item${island === it.key ? " on" : ""}`} onClick={() => setIsland(it.key)}>

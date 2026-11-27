@@ -575,9 +575,8 @@ class _StudentPickState extends ConsumerState<_StudentPick> {
                               subtitle:
                                   const Text('Waiting for teacher approval'),
                               pending: true,
-                              trailing: const DSBadge(
-                                  tone: DSBadgeTone.sun,
-                                  child: Text('PENDING')),
+                              trailing: const DSStatusBadge(
+                                  status: DSStatus.pending),
                             ),
                     ),
                 ]);

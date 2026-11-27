@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
+import 'attempt_paper_sheet.dart';
 import 'class_portal_header.dart';
 import 'report_parts.dart';
 
@@ -40,7 +41,12 @@ String buildReportCsv({
     final score = a['score'];
     b.writeln([
       csvCell(a['title']),
-      score == null ? 'Not taken' : '$score%',
+      score == null
+          ? 'Not taken'
+          : a['points_total'] != null
+              ? '${fmtPts(a['points_earned'] as num?)}/'
+                '${fmtPts(a['points_total'] as num?)} pts'
+              : '$score%',
       score != null && a['released'] != true ? 'Not released' : '',
     ].join(','));
   }
@@ -138,18 +144,21 @@ class StudentReportScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: DSLoadingIndicator()));
     }
 
+    final repo = ref.read(repoProvider);
     final rows = progress.valueOrNull ?? const <Json>[];
     Json? p;
     for (final r in rows) {
       if ('${r['student_id']}' == studentId) p = r;
     }
-    final pre = p?['pre_score'] as num?;
-    final post = p?['post_score'] as num?;
-    final gain = pre != null && post != null ? post - pre : null;
     final name =
         '${member.value?['profiles']?['full_name'] ?? p?['full_name'] ?? 'Student'}';
     final acts = assessments.valueOrNull ?? const <Json>[];
     final anyAttempt = acts.any((a) => a['score'] != null);
+    /// lesson_title -> its activities, in assessment order.
+    final groups = <String, List<Json>>{};
+    for (final a in acts) {
+      groups.putIfAbsent('${a['lesson_title']}', () => []).add(a);
+    }
 
     return Scaffold(
       body: Column(children: [
@@ -188,43 +197,7 @@ class StudentReportScreen extends ConsumerWidget {
                     label: 'Quiz avg',
                     bg: DSColors.pastelPurple,
                   ),
-                  const SizedBox(width: 10),
-                  ReportHeadTile(
-                    value: gain == null ? '—' : '${gain >= 0 ? '+' : ''}$gain%',
-                    label: 'Gain',
-                    bg: DSColors.pastelMint,
-                  ),
                 ]),
-                const SizedBox(height: 16),
-                DSCard(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Expanded(
-                        child:
-                            Text('Pre-test to post-test', style: DSText.title),
-                      ),
-                      if (gain != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: DSColors.mint,
-                            borderRadius: DSRadii.pillBr,
-                            boxShadow: dsEdge(DSColors.edgeMint, h: 3),
-                          ),
-                          child: Text(
-                            '${gain >= 0 ? '+' : ''}$gain% gain',
-                            style: DSText.label
-                                .copyWith(fontSize: 12, color: DSColors.navy),
-                          ),
-                        ),
-                    ]),
-                    const SizedBox(height: 12),
-                    PrePostChart(pre: pre, post: post),
-                  ],
-                )),
                 const SizedBox(height: 16),
                 DSCard(
                     child: Column(
@@ -243,22 +216,8 @@ class StudentReportScreen extends ConsumerWidget {
                       Expanded(
                         child: ReportRing(
                           label: 'Quizzes',
-                          value: (p?['quizzes_pct'] as num?)?.toDouble(),
+                          value: (p?['quizzes_done_pct'] as num?)?.toDouble(),
                           series: 2,
-                        ),
-                      ),
-                      Expanded(
-                        child: ReportRing(
-                          label: 'Pre-test',
-                          value: pre?.toDouble(),
-                          series: 2,
-                        ),
-                      ),
-                      Expanded(
-                        child: ReportRing(
-                          label: 'Post-test',
-                          value: post?.toDouble(),
-                          series: 4,
                         ),
                       ),
                     ]),
@@ -269,11 +228,71 @@ class StudentReportScreen extends ConsumerWidget {
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Scores by assessment', style: DSText.title),
-                    if (acts.isNotEmpty && !anyAttempt) const ReportEmpty(),
-                    for (final a in acts) ...[
-                      const SizedBox(height: 12),
-                      ReportScoreRow(assessment: a),
+                    Text('Activities', style: DSText.title),
+                    if (acts.isNotEmpty && !anyAttempt)
+                      const ReportEmpty(
+                        message:
+                            'No attempts yet — tap an activity to preview its test paper.',
+                      ),
+                    for (final e in groups.entries) ...[
+                      const SizedBox(height: 14),
+                      Text(e.key,
+                          style: DSText.label
+                              .copyWith(color: DSColors.muted)),
+                      for (final a in e.value) ...[
+                        const SizedBox(height: 8),
+                        DSListItemCard(
+                          onTap: () => showDSBottomSheet<void>(
+                            context,
+                            child: AttemptPaperSheet(
+                              repo: repo,
+                              assessmentId: '${a['id']}',
+                              studentId: studentId,
+                              studentName: name,
+                              teacherId: '${cls['teacher_id']}',
+                              released: a['released'] == true,
+                            ),
+                          ),
+                          leading: const DSIcon(DSIconName.quiz,
+                              size: 20, color: DSColors.blue),
+                          title: Text('${a['title']}'),
+                          trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (a['score'] != null)
+                                  Text(
+                                      a['points_total'] != null
+                                          ? '${fmtPts(a['points_earned'] as num?)}/'
+                                            '${fmtPts(a['points_total'] as num?)} pts'
+                                          : '${(a['score'] as num).round()}%',
+                                      style: DSText.label
+                                          .copyWith(color: DSColors.navy))
+                                else
+                                  Text('Not taken',
+                                      style: DSText.caption
+                                          .copyWith(color: DSColors.muted)),
+                                if (a['score'] != null &&
+                                    a['released'] != true) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: DSColors.sun,
+                                      borderRadius: DSRadii.pillBr,
+                                    ),
+                                    child: Text('Not released',
+                                        style: DSText.label.copyWith(
+                                            fontSize: 11,
+                                            color: DSColors.navy)),
+                                  ),
+                                ],
+                                const SizedBox(width: 6),
+                                const DSIcon(DSIconName.chevron,
+                                    size: 16, color: DSColors.muted),
+                              ]),
+                        ),
+                      ],
                     ],
                     if (acts.isEmpty && assessments.hasValue)
                       const ReportEmpty(),

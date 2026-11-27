@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/bento.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
@@ -81,13 +82,10 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text('Quick Access', style: DSText.h3),
             const SizedBox(height: 10),
-            GridView.extent(
-              maxCrossAxisExtent: 170,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1,
+            BentoGrid(
+              minWidth: 170,
+              gap: 10,
+              fit: true,
               children: [
                 for (final it in items)
                   GestureDetector(
@@ -250,8 +248,7 @@ class _MyClassesState extends ConsumerState<_MyClassesCard> {
                           : DSColors.muted),
                   title: Text('${e['classes']?['name'] ?? 'Class'}'),
                   trailing: e['status'] == 'pending'
-                      ? const DSBadge(
-                          tone: DSBadgeTone.sun, child: Text('Pending'))
+                      ? const DSStatusBadge(status: DSStatus.pending)
                       : null,
                 ),
               ),

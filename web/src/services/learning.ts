@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 import type {
-  AnswerValue, Assessment, AttemptResult, Flashcard, Formula, KeyTerm, QuizQuestion,
-  Lesson, LessonWithProgress, RecentActivity, StudentProgress, Subject,
+  AnswerValue, Assessment, AssessmentPart, AttemptResult, Flashcard, Formula, KeyTerm,
+  QuizQuestion, Lesson, LessonWithProgress, RecentActivity, ReviewResult, StudentProgress, Subject,
 } from "../types";
 
 // Student-facing data — mirrors the mobile app's Repo (same tables, same RLS).
@@ -78,6 +78,14 @@ export async function fetchQuestions(assessmentId: string): Promise<QuizQuestion
   return (data ?? []) as QuizQuestion[];
 }
 
+/** Parts of a published assessment (student view — directions + mode, no keys). */
+export async function fetchPartsPublic(assessmentId: string): Promise<AssessmentPart[]> {
+  const { data, error } = await supabase
+    .from("parts_public").select("*").eq("assessment_id", assessmentId).order("position");
+  if (error) throw error;
+  return (data ?? []) as AssessmentPart[];
+}
+
 export async function submitAttempt(assessmentId: string, answers: Record<string, AnswerValue>): Promise<AttemptResult> {
   const { data, error } = await supabase
     .rpc("submit_attempt", { p_assessment: assessmentId, p_answers: answers });
@@ -85,6 +93,15 @@ export async function submitAttempt(assessmentId: string, answers: Record<string
   const r = data as AttemptResult & { error?: string };
   if (r?.error) throw new Error(r.error);
   return r;
+}
+
+/** Post-submit review: attempted/released/score + per-question picks & keys
+ *  (keys only once scores are released — see migration 0020). */
+export async function reviewAttempt(assessmentId: string): Promise<ReviewResult> {
+  const { data, error } = await supabase
+    .rpc("review_attempt", { p_assessment: assessmentId });
+  if (error) throw error;
+  return data as ReviewResult;
 }
 
 /** Published activities inside one lesson (student view, RLS hides drafts). */

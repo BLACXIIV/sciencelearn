@@ -74,8 +74,17 @@ class ClassQuizScreen extends ConsumerWidget {
                           builder: (_) => LessonActivitiesScreen(lesson: l))),
                       leading: const DSIcon(DSIconName.assessment, size: 22),
                       title: Text('${l['title']}'),
-                      subtitle: Text(
-                          '${l['subject']}${l['is_published'] == true ? ' · published' : ' · draft'}'),
+                      subtitle: Row(children: [
+                        Flexible(
+                            child: Text('${l['subject']}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis)),
+                        const SizedBox(width: 6),
+                        DSStatusBadge(
+                            status: l['is_published'] == true
+                                ? DSStatus.published
+                                : DSStatus.draft),
+                      ]),
                       trailing: const DSIcon(DSIconName.chevron,
                           size: 20, color: DSColors.muted),
                     ),

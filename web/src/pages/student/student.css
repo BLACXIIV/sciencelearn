@@ -1,7 +1,6 @@
 /* Student portal screens — layout + token classes only (.sd-*). */
 
-/* Nav-tile grid (Quick Access). */
-.sd-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--ds-s3); }
+/* Nav-tile grid (Quick Access) — bento elastic (see design-system/layout/bento.css). */
 
 /* Centered content inside a nav tile card. */
 .sd-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-s3); min-height: 120px; text-align: center; }
@@ -38,6 +37,91 @@
 .sd-quizhead .ds-progress { flex: 1; }
 .sd-quizhead .ds-label { white-space: nowrap; }
 
+/* Quiz review: per-question header mark + option list. */
+.sd-rev-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 0 2px; }
+.sd-rev-rows { display: flex; flex-direction: column; gap: var(--ds-s2); margin-top: var(--ds-s2); }
+
+/* ordering runner — dashed "Step" slots on top, chip pool below */
+.sd-ord { display: flex; flex-direction: column; gap: var(--ds-s3); }
+.sd-ord-slot {
+  border: 1.5px dashed var(--ds-edge-soft);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.sd-ord-slot-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ds-muted);
+}
+.sd-ord-slot-body { margin-top: 8px; }
+
+/* live-filled blank — student's pick renders inline in the prompt */
+.sd-blank { color: var(--ds-blue); text-decoration: underline; text-underline-offset: 3px; }
+.sd-blank-ok { color: var(--ds-success); }
+
+/* classification — item pool on top, dashed zone cards below */
+.sd-cls { display: flex; flex-direction: column; gap: 12px; }
+.sd-cls-pool, .sd-cls-zone {
+  border: 1.5px dashed var(--ds-edge-soft);
+  border-radius: 14px;
+  padding: 14px;
+}
+.sd-cls-zone {
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.sd-cls-zone:hover { border-color: var(--ds-blue); }
+.sd-cls-zone:focus-visible {
+  outline: none;
+  border-color: var(--ds-blue);
+  box-shadow: 0 0 0 3px var(--ds-track);
+}
+.sd-cls-hint, .sd-cls-zone-label {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ds-muted);
+}
+.sd-cls-items { display: flex; flex-wrap: wrap; gap: 10px; min-height: 20px; }
+.sd-cls-chip {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--ds-pastel-blue);
+  color: var(--ds-navy);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.sd-cls-chip-sel { background: var(--ds-blue); color: #fff; }
+.sd-cls-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ds-track);
+}
+.sd-cls-done { font-size: 14px; color: var(--ds-muted); }
+
+/* classification context — navy reference card (labeled equations etc.) */
+.sd-ctx {
+  background: var(--ds-navy);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+}
+.sd-ctx-line {
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.sd-ctx-line + .sd-ctx-line { margin-top: 4px; }
+.sd-ctx-key { color: var(--ds-sun); font-weight: 700; }
+.sd-rev-ok { color: var(--ds-success); }
+.sd-rev-bad { color: var(--ds-error); }
+
 /* Progress rings row. */
 .sd-rings { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--ds-s3); padding: var(--ds-s2) 0; }
 .sd-ring-item { display: flex; flex-direction: column; align-items: center; gap: var(--ds-s2); }
@@ -54,5 +138,5 @@
 .sd-center-text { text-align: center; }
 
 @media (max-width: 760px) {
-  .sd-tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  .bento-xs > * { min-width: min(110px, 100%); }
 }

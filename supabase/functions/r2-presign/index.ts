@@ -32,6 +32,14 @@ Deno.serve(async (req) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return json({ error: "unauthorized" }, 401);
 
+  // Without the R2 secrets every getSignedUrl throws — surface that as a
+  // readable error instead of an opaque 500 crash.
+  const missing = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"]
+    .filter((n) => !Deno.env.get(n));
+  if (missing.length) {
+    return json({ error: `R2 storage not configured (${missing.join(", ")})` }, 500);
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -59,8 +67,12 @@ Deno.serve(async (req) => {
       allowed = (lesson?.length ?? 0) > 0;
     }
     if (!allowed) return json({ error: "forbidden" }, 403);
-    const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: k }), { expiresIn: 3600 });
-    return json({ url });
+    try {
+      const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket, Key: k }), { expiresIn: 3600 });
+      return json({ url });
+    } catch {
+      return json({ error: "presign failed" }, 502);
+    }
   }
 
   if (action === "put") {
@@ -77,12 +89,16 @@ Deno.serve(async (req) => {
     const newKey = safeFolder === "avatars"
       ? `avatars/${user.id}/${crypto.randomUUID()}-${safe}`
       : `${safeFolder}/${crypto.randomUUID()}-${safe}`;
-    const url = await getSignedUrl(
-      s3,
-      new PutObjectCommand({ Bucket, Key: newKey, ContentType: contentType }),
-      { expiresIn: 600 },
-    );
-    return json({ url, key: newKey });
+    try {
+      const url = await getSignedUrl(
+        s3,
+        new PutObjectCommand({ Bucket, Key: newKey, ContentType: contentType }),
+        { expiresIn: 600 },
+      );
+      return json({ url, key: newKey });
+    } catch {
+      return json({ error: "presign failed" }, 502);
+    }
   }
   return json({ error: "bad action" }, 400);
 });

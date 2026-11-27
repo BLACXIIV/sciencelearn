@@ -30,6 +30,12 @@ class UserAvatar extends ConsumerWidget {
   }
 }
 
+/// Formats a point value without trailing zeros: 7 → "7", 2.5 → "2.5".
+String fmtPts(num? v) {
+  if (v == null) return '—';
+  return v == v.roundToDouble() ? '${v.round()}' : '$v';
+}
+
 /// Caps content width and centers it when the window is wider than a phone
 /// (tablet, desktop window). Transparent pass-through on narrow screens.
 class MaxWidth extends StatelessWidget {

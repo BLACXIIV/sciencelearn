@@ -18,12 +18,16 @@ class DSQuizOption extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget child;
 
+  /// Custom badge — replaces the letter box (e.g. multi-select tick).
+  final Widget? leading;
+
   const DSQuizOption({
     super.key,
     required this.letter,
     this.state = DSQuizOptionState.normal,
     this.onTap,
     required this.child,
+    this.leading,
   });
 
   @override
@@ -38,33 +42,37 @@ class _DSQuizOptionState extends State<DSQuizOption> {
   @override
   Widget build(BuildContext context) {
     final s = widget.state;
-    final (fill, border, borderW, edge, badge) = switch (s) {
+    final (fill, border, borderW, edge, badge, badgeInk) = switch (s) {
       DSQuizOptionState.selected => (
           DSColors.pastelBlue,
           DSColors.blue,
           2.0,
           DSColors.edgeBlue,
-          DSColors.navy
+          DSColors.blue,
+          DSColors.surface
         ),
       DSQuizOptionState.correct => (
           DSColors.pastelMint,
           DSColors.success,
           2.0,
           DSColors.edgeMint,
-          DSColors.success
+          DSColors.success,
+          DSColors.surface
         ),
       DSQuizOptionState.wrong => (
           DSColors.errorSurface,
           DSColors.error,
           2.0,
           DSColors.error,
-          DSColors.error
+          DSColors.error,
+          DSColors.surface
         ),
       _ => (
           DSColors.surface,
           Colors.transparent,
           2.0,
           DSColors.edgeWhite,
+          DSColors.track,
           DSColors.navy
         ),
     };
@@ -102,18 +110,19 @@ class _DSQuizOptionState extends State<DSQuizOption> {
           opacity: s == DSQuizOptionState.disabled ? 0.5 : 1,
           child: Row(
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration:
-                    BoxDecoration(color: badge, borderRadius: DSRadii.chipBr),
-                child: Center(
-                  child: Text(
-                    widget.letter,
-                    style: DSText.button.copyWith(color: DSColors.surface),
+              widget.leading ??
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                        color: badge, borderRadius: DSRadii.chipBr),
+                    child: Center(
+                      child: Text(
+                        widget.letter,
+                        style: DSText.button.copyWith(color: badgeInk),
+                      ),
+                    ),
                   ),
-                ),
-              ),
               const SizedBox(width: 12),
               Expanded(
                 child: DefaultTextStyle.merge(

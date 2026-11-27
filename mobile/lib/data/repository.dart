@@ -1,7 +1,9 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../core/text_clean.dart';
 
 typedef Json = Map<String, dynamic>;
 final sb = Supabase.instance.client;
@@ -80,6 +82,13 @@ class Repo {
     if (r['error'] != null) throw Exception(r['error']);
     return r;
   }
+
+  /// Post-submit review: {attempted:false} | {attempted:true, released:false}
+  /// | {attempted:true, released:true, score, total, items:[{question_id,
+  /// key, correct_index, student, is_correct, earned}]} (migration 0020).
+  Future<Json> reviewAttempt(String assessmentId) async =>
+      Map<String, dynamic>.from(await sb.rpc('review_attempt',
+          params: {'p_assessment': assessmentId}));
 
   Future<List<Json>> flashcards() async =>
       List<Json>.from(await sb.from('flashcards').select());
@@ -179,19 +188,21 @@ class Repo {
   Future<List<Json>> lessonAssessments(String lessonId) async =>
       List<Json>.from(await sb
           .from('assessments')
-          .select()
+          .select('*, assessment_parts(count)')
           .eq('lesson_id', lessonId)
           .order('created_at'));
 
   Future<Json> createAssessment(
-          String lessonId, String kind, String title, String desc) async =>
+          String lessonId, String kind, String title, String desc,
+          {String mode = 'multiple_choice'}) async =>
       Map<String, dynamic>.from(await sb
           .from('assessments')
           .insert({
             'lesson_id': lessonId,
             'kind': kind,
-            'title': title,
-            'description': desc,
+            'mode': mode,
+            'title': cleanText(title),
+            'description': cleanText(desc),
           })
           .select()
           .single());
@@ -230,6 +241,40 @@ class Repo {
   Future<void> deleteAssessment(String id) async =>
       await sb.from('assessments').delete().eq('id', id);
 
+  /// Parts inside an activity ("Activity 1 / Activity 2" sections, each with
+  /// its own mode + scored flag). Teacher read/write via RLS.
+  Future<List<Json>> parts(String assessmentId) async =>
+      List<Json>.from(await sb
+          .from('assessment_parts')
+          .select()
+          .eq('assessment_id', assessmentId)
+          .order('position'));
+
+  /// Parts of a published assessment — student view (no answer keys).
+  Future<List<Json>> partsPublic(String assessmentId) async =>
+      List<Json>.from(await sb
+          .from('parts_public')
+          .select()
+          .eq('assessment_id', assessmentId)
+          .order('position'));
+
+  Future<void> upsertPart(Json p) async {
+    final id = p.remove('id');
+    if (p['title'] is String) p['title'] = cleanText(p['title'] as String);
+    if (p['directions'] is String) {
+      p['directions'] = cleanText(p['directions'] as String);
+    }
+    if (id != null) {
+      await sb.from('assessment_parts').update(p).eq('id', id);
+    } else {
+      await sb.from('assessment_parts').insert(p);
+    }
+  }
+
+  /// Deletes the part AND its questions (FK cascade).
+  Future<void> deletePart(String id) async =>
+      await sb.from('assessment_parts').delete().eq('id', id);
+
   /// Full questions incl. answer keys — teacher policy only, never student-visible.
   Future<List<Json>> questionsFull(String assessmentId) async =>
       List<Json>.from(await sb
@@ -240,6 +285,11 @@ class Repo {
 
   Future<void> upsertQuestion(Json q) async {
     final id = q.remove('id');
+    if (q['prompt'] is String) q['prompt'] = cleanText(q['prompt'] as String);
+    if (q['choices'] is List) {
+      q['choices'] = cleanDeep(q['choices']);
+    }
+    if (q['answer'] is Map) q['answer'] = cleanDeep(q['answer']);
     if (id != null) {
       await sb.from('questions').update(q).eq('id', id);
     } else {
@@ -333,21 +383,21 @@ class Repo {
     final acts = List<Json>.from(await sb
         .from('assessments')
         .select(
-            'id, title, kind, release_scores, scores_released, lessons!inner(class_id)')
+            'id, title, kind, release_scores, scores_released, lessons!inner(class_id, title)')
         .eq('lessons.class_id', classId)
         .eq('is_published', true)
         .order('created_at'));
     final atts = List<Json>.from(await sb
         .from('attempts')
-        .select('assessment_id, score, submitted_at')
+        .select('assessment_id, score, points_earned, points_total, submitted_at')
         .eq('student_id', studentId)
         .not('submitted_at', 'is', null)
         .order('submitted_at', ascending: false));
-    final latest = <String, num>{};
+    final latest = <String, Json>{};
     for (final a in atts) {
       final id = '${a['assessment_id']}';
       if (a['score'] != null && !latest.containsKey(id)) {
-        latest[id] = a['score'] as num;
+        latest[id] = a;
       }
     }
     return [
@@ -356,11 +406,71 @@ class Repo {
           'id': a['id'],
           'title': a['title'],
           'kind': a['kind'],
-          'score': latest['${a['id']}'],
+          'lesson_title': '${a['lessons']?['title'] ?? 'No lesson'}',
+          'score': latest['${a['id']}']?['score'],
+          'points_earned': latest['${a['id']}']?['points_earned'],
+          'points_total': latest['${a['id']}']?['points_total'],
           'released':
               a['release_scores'] != 'manual' || a['scores_released'] == true,
         }
     ];
+  }
+
+  /// Display name for any profile (teacher picks it for the paper header).
+  Future<String> profileName(String uid) async =>
+      '${(await sb.from('profiles').select('full_name').eq('id', uid).maybeSingle())?['full_name'] ?? 'Teacher'}';
+
+  /// The student's paper for one assessment — teacher sees everything:
+  /// full questions + keys, and the latest submitted attempt's answers.
+  /// Returns {assessmentTitle, lessonTitle, publishedAt, parts, questions,
+  /// attempt: {score, submitted_at}|null, answers: {question_id: row}}.
+  Future<Json> attemptPaper(String assessmentId, String studentId) async {
+    final a = Map<String, dynamic>.from(await sb
+        .from('assessments')
+        .select('title, created_at, lessons(title)')
+        .eq('id', assessmentId)
+        .single());
+    final parts = List<Json>.from(await sb
+        .from('assessment_parts')
+        .select('id, title, directions, scored, points')
+        .eq('assessment_id', assessmentId)
+        .order('position'));
+    final qs = List<Json>.from(await sb
+        .from('questions')
+        .select('id, part_id, qtype, prompt, choices, correct_index, answer')
+        .eq('assessment_id', assessmentId)
+        .order('position'));
+    final att = await sb
+        .from('attempts')
+        .select(
+            'score, points_earned, points_total, submitted_at, attempt_answers(question_id, answer, is_correct, earned)')
+        .eq('assessment_id', assessmentId)
+        .eq('student_id', studentId)
+        .not('submitted_at', 'is', null)
+        .order('submitted_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    final answers = <String, Json>{};
+    for (final r
+        in List<Json>.from(att?['attempt_answers'] as List? ?? const [])) {
+      answers['${r['question_id']}'] = r;
+    }
+    return {
+      'assessmentTitle': a['title'],
+      'lessonTitle': a['lessons']?['title'] ?? 'No lesson',
+      'publishedAt': a['created_at'],
+      'parts': parts,
+      'questions': qs,
+      'attempt': att == null
+          ? null
+          : {
+              'score': att['score'],
+              'points_earned': att['points_earned'],
+              'points_total': att['points_total'],
+              'submitted_at': att['submitted_at'],
+            },
+      'answers': answers,
+    };
   }
 
   /// Per-lesson activity (assessment) counts for the curriculum cards
@@ -506,9 +616,13 @@ class Repo {
   /// (FK hint required — classes↔profiles also joins via enrollments;
   /// migration 0009's read policy lets students see it). The nested
   /// enrollments(status) gives each class's roster (migration 0010).
-  Future<List<Json>> enrolledClasses() async =>
-      List<Json>.from(await sb.from('enrollments').select(
-          'class_id, status, classes(name, code, profiles!classes_teacher_id_fkey(full_name), enrollments(status))'));
+  /// Filtered to OWN rows: 0010's member-read policy returns the whole
+  /// roster, so without the eq the picker duplicates a card per classmate.
+  Future<List<Json>> enrolledClasses() async => List<Json>.from(await sb
+      .from('enrollments')
+      .select(
+          'class_id, status, classes(name, code, profiles!classes_teacher_id_fkey(full_name), enrollments(status))')
+      .eq('student_id', uid));
 
   /// class_id -> count of published assessments the student hasn't
   /// attempted yet ("N to do" on the picker's class cards).

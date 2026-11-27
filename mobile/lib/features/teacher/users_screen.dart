@@ -34,7 +34,7 @@ class _UsersState extends ConsumerState<UsersScreen> {
       body: _RolePicker(current: '${u['role']}'),
       actions: [
         DSButton(
-          variant: DSButtonVariant.ghost,
+          variant: DSButtonVariant.outline,
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),

@@ -5,8 +5,8 @@ import '../tokens/radii.dart';
 import '../tokens/spacing.dart';
 
 /// Shows the DS bottom sheet: white, top corners rounded 32px, decorative
-/// drag handle, dim barrier, content-driven height that grows with the
-/// keyboard. Returns the sheet's result.
+/// drag handle, dim barrier, content-driven height capped at 80% of the
+/// screen. Returns the sheet's result.
 Future<T?> showDSBottomSheet<T>(
   BuildContext context, {
   required Widget child,
@@ -27,47 +27,54 @@ Future<T?> showDSBottomSheet<T>(
 
 /// The sheet chrome itself — embeds inside showModalBottomSheet builders.
 /// Top radius 32, decorative 40×5 handle, viewInsets-aware body padding.
+/// Total height (sheet + keyboard gap) is capped at 80% of the screen;
+/// taller content scrolls inside.
 class DSBottomSheet extends StatelessWidget {
   final Widget child;
   const DSBottomSheet({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: DSColors.surface,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(DSRadii.sheet)),
-        ),
-        child: SafeArea(
-          top: false,
-          // ListTile/InkWell need a Material ancestor below this Container's
-          // painted background — without it they can't ink and (in debug)
-          // ListTile throws, which would break every menu inside a sheet.
-          child: Material(
-            color: Colors.transparent,
+    return ConstrainedBox(
+      constraints:
+          BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.8),
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: DSColors.surface,
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(DSRadii.sheet)),
-            clipBehavior: Clip.antiAlias,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                  DSSpacing.s5, 12, DSSpacing.s5, DSSpacing.s5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 5,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: DSColors.track,
-                      borderRadius: DSRadii.pillBr,
+                BorderRadius.vertical(top: Radius.circular(DSRadii.sheet)),
+          ),
+          child: SafeArea(
+            top: false,
+            // ListTile/InkWell need a Material ancestor below this Container's
+            // painted background — without it they can't ink and (in debug)
+            // ListTile throws, which would break every menu inside a sheet.
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(DSRadii.sheet)),
+              clipBehavior: Clip.antiAlias,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                    DSSpacing.s5, 12, DSSpacing.s5, DSSpacing.s5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: DSColors.track,
+                        borderRadius: DSRadii.pillBr,
+                      ),
                     ),
-                  ),
-                  child,
-                ],
+                    child,
+                  ],
+                ),
               ),
             ),
           ),

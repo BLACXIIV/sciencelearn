@@ -1,0 +1,50 @@
+/* ==========================================================================
+   Bento grid — elastic card layouts.
+
+   .bento        Flex-wrap row: children grow from their content width to
+                 consume free space, wrap below --bento-min, and a lone child
+                 on a row stretches full width — no dead space.
+   .bento-even   Fixed-basis variant: children split rows evenly.
+   .bento-fit    Tile-gallery variant (grid auto-fill): same wrap + sizing,
+                 but a partial last row keeps column width — a lone card
+                 stays tile-sized instead of stretching edge to edge.
+   .bento-sm     Child floor 160px (stat tiles, compact cards).
+   .bento-xs     Child floor 140px (nav tiles).
+   .bento-hug    Child modifier: never grows, hugs its content.
+   .bento-cols   Inner auto-fit grid for card CONTENT (rings, tiles) —
+                 empty tracks collapse, so N items fill the card width.
+   ========================================================================== */
+
+.bento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bento-gap, var(--ds-s5));
+  align-items: stretch;
+}
+.bento > * {
+  /* Content-weighted elastic: grow into free space, shrink toward content,
+     wrap once under the floor. */
+  flex: 1 1 auto;
+  min-width: min(var(--bento-min, 300px), 100%);
+}
+.bento-even > * { flex-basis: var(--bento-min, 300px); }
+.bento-sm { --bento-min: 160px; }
+.bento-xs { --bento-min: 140px; }
+.bento-gap-sm { --bento-gap: var(--ds-s4); }
+.bento-gap-xs { --bento-gap: var(--ds-s3); }
+.bento-hug { flex: 0 1 auto !important; }
+.bento-wide { flex: 1 1 100% !important; } /* force a full-width row */
+
+/* auto-fill leaves empty tracks, so a partial row keeps column width.
+   Child `flex` props are inert under grid — no override needed. */
+.bento-fit {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill, minmax(min(var(--bento-min, 300px), 100%), 1fr));
+}
+
+.bento-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--bento-col-min, 110px), 1fr));
+  gap: var(--bento-gap, var(--ds-s3));
+}

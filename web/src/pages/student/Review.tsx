@@ -30,7 +30,7 @@ export default function StudentReview() {
 
   return (
     <div className="sd-stack">
-      <div className="sd-tiles">
+      <div className="bento bento-fit bento-xs bento-gap-xs">
         {SECTIONS.map((s) => (
           <OptionTile
             key={s.kind}

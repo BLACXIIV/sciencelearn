@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/bento.dart';
 import '../../core/widgets.dart';
 import '../../data/repository.dart';
 import '../../design_system/design_system.dart';
@@ -58,28 +59,32 @@ class ReviewScreen extends ConsumerWidget {
         ),
         Expanded(
             child: MaxWidth(
-                child: GridView.extent(
+                child: ListView(
           padding: const EdgeInsets.all(16),
-          maxCrossAxisExtent: 220,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
           children: [
-            for (final t in tiles)
-              GestureDetector(
-                onTap: t.$4,
-                child: DSCard(
-                  variant: DSCardVariant.pastel,
-                  pastel: t.$3,
-                  tilt: true,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        DSIcon(t.$2, size: 36, color: DSColors.navy),
-                        const SizedBox(height: 8),
-                        Text(t.$1, style: DSText.title),
-                      ]),
-                ),
-              ),
+            BentoGrid(
+              minWidth: 220,
+              gap: 12,
+              fit: true,
+              children: [
+                for (final t in tiles)
+                  GestureDetector(
+                    onTap: t.$4,
+                    child: DSCard(
+                      variant: DSCardVariant.pastel,
+                      pastel: t.$3,
+                      tilt: true,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            DSIcon(t.$2, size: 36, color: DSColors.navy),
+                            const SizedBox(height: 8),
+                            Text(t.$1, style: DSText.title),
+                          ]),
+                    ),
+                  ),
+              ],
+            ),
           ],
         ))),
       ]),

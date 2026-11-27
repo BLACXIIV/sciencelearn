@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Button, Icon, IconButton, Switch, type IconName,
+  Button, Icon, IconButton, StatusBadge, Switch, type IconName,
 } from "../design-system";
 import { getR2Url } from "../services/storage";
 import type { Lesson, Subject } from "../types";
@@ -82,8 +82,8 @@ function LessonCard({
     <article className="tl-card edge-4">
       <div className={`tl-thumb ${tile.cls}`}>
         <Thumb lesson={lesson} />
-        <span className={`tl-chip${pub ? " tl-chip-pub" : " tl-chip-draft"}`}>
-          {pub ? "Published" : "Draft"}
+        <span className="tl-chip">
+          <StatusBadge status={pub ? "published" : "draft"} />
         </span>
         {lesson.content_key && <span className="tl-pdf">PDF</span>}
       </div>
@@ -138,7 +138,7 @@ export default function LessonList({
   lessons, counts, onTogglePublish, onEdit, onDelete, onBlockedDelete,
 }: Props) {
   return (
-    <div className="tl-grid">
+    <div className="bento bento-fit bento-gap-sm">
       {lessons.map((l) => (
         <LessonCard key={l.id} lesson={l} activities={counts[l.id] ?? 0}
           onTogglePublish={onTogglePublish} onEdit={onEdit}

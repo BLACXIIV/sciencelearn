@@ -137,10 +137,8 @@ void main() {
     await tester.tap(find.text('student'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pre-test to post-test'), findsOneWidget);
     expect(find.text('Overall progress'), findsOneWidget);
-    expect(
-        find.text('Scores by assessment', skipOffstage: false), findsOneWidget);
+    expect(find.text('Activities', skipOffstage: false), findsOneWidget);
     expect(find.text('Lessons', skipOffstage: false), findsWidgets);
     expect(find.text('Not taken', skipOffstage: false), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Projectile Motion'), 150,
@@ -162,7 +160,7 @@ void main() {
     await tester.tap(find.text('Remove from class'));
     await tester.pumpAndSettle();
     expect(find.text('Remove from class?'), findsOneWidget);
-    expect(find.text('Pre-test to post-test'), findsNothing);
+    expect(find.text('Overall progress'), findsNothing);
   });
 
   testWidgets('Back from the report keeps the Students search state',
@@ -178,12 +176,12 @@ void main() {
 
     await tester.tap(find.text('student'));
     await tester.pumpAndSettle();
-    expect(find.text('Pre-test to post-test'), findsOneWidget);
+    expect(find.text('Overall progress'), findsOneWidget);
 
     await tester.tap(find.byIcon(LucideIcons.arrowLeft));
     await tester.pumpAndSettle();
     // Back on Students, search text preserved.
-    expect(find.text('Pre-test to post-test'), findsNothing);
+    expect(find.text('Overall progress'), findsNothing);
     expect(
         tester.widget<EditableText>(find.byType(EditableText)).controller.text,
         'stu');
@@ -218,7 +216,7 @@ void main() {
 
     // Guard redirects — Students screen is back on top.
     expect(find.text('Requests'), findsOneWidget);
-    expect(find.text('Pre-test to post-test'), findsNothing);
+    expect(find.text('Overall progress'), findsNothing);
   });
 
   test('buildReportCsv emits metrics, scores and lessons', () {

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,11 +8,11 @@ import {
 } from "../../services/classes";
 import reportEmptyArt from "../../assets/illustrations/report-empty.png";
 import {
-  Avatar, Button, Card, IconButton, ProgressBar,
+  Avatar, Button, Card, Icon, IconButton, ProgressBar,
 } from "../../design-system";
-import {
-  PrePostChart, ReportRing, ScoreRow, csvCell,
-} from "./reportShared";
+import { ReportRing, csvCell } from "./reportShared";
+import { AttemptPaperModal } from "./AttemptPaperModal";
+import { fmtPts } from "../../utils/stats";
 import "../teacher.css";
 
 /** The student's report as CSV — same shape as the mobile export. */
@@ -43,7 +43,10 @@ function buildReportCsv(opts: {
     ...opts.assessments.map((a) =>
       [
         csvCell(a.title),
-        a.score == null ? "Not taken" : `${a.score}%`,
+        a.score == null ? "Not taken"
+          : a.points_total != null
+            ? `${fmtPts(a.points_earned)}/${fmtPts(a.points_total)} pts`
+            : `${a.score}%`,
         a.score != null && !a.released ? "Not released" : "",
       ].join(",")),
     "",
@@ -90,12 +93,19 @@ export default function StudentReport() {
     }
   }, [cls.data, member.data, profile, classId, nav]);
 
+  const [paper, setPaper] = useState<ReportAssessment | null>(null);
   const p = progress.data?.find((r) => r.student_id === studentId);
-  const gain = p?.pre_score != null && p?.post_score != null
-    ? p.post_score - p.pre_score : null;
   const name = member.data?.profiles?.full_name || p?.full_name || "Student";
+  const teacherName = cls.data?.profiles?.full_name ?? "Teacher";
   const rows: ReportAssessment[] = assessments.data ?? [];
   const anyAttempt = rows.some((r) => r.score != null);
+  /** lessonTitle -> its activities, in assessment order. */
+  const groups = [
+    ...rows.reduce((m, r) => {
+      m.set(r.lessonTitle, [...(m.get(r.lessonTitle) ?? []), r]);
+      return m;
+    }, new Map<string, ReportAssessment[]>()),
+  ];
 
   if (cls.error || member.error) {
     return (
@@ -131,10 +141,6 @@ export default function StudentReport() {
             <span className="sr-tile-val">{p?.quizzes_pct != null ? `${p.quizzes_pct}%` : "—"}</span>
             <span className="sr-tile-lab">Quiz average</span>
           </span>
-          <span className="sr-tile sr-tile-mint edge-4">
-            <span className="sr-tile-val">{gain != null ? `${gain >= 0 ? "+" : ""}${gain}%` : "—"}</span>
-            <span className="sr-tile-lab">Class gain</span>
-          </span>
           <Button variant="white" size="sm" leadingIcon="export"
             onClick={() => {
               const csv = buildReportCsv({
@@ -160,38 +166,47 @@ export default function StudentReport() {
         </div>
       </div>
 
-      <div className="sr-grid">
-        <Card variant="white">
-          <div className="td-spread">
-            <h3 className="ds-h3" style={{ margin: 0 }}>Pre-test to post-test</h3>
-            {gain != null && (
-              <span className="sr-gain edge-3">{gain >= 0 ? "+" : ""}{gain}% gain</span>
-            )}
-          </div>
-          <PrePostChart pre={p?.pre_score ?? null} post={p?.post_score ?? null} />
-        </Card>
+      <div className="bento">
         <Card variant="white">
           <h3 className="ds-h3" style={{ marginTop: 0 }}>Overall progress</h3>
-          <div className="sr-rings">
+          <div className="sr-rings bento-cols">
             <ReportRing label="Lessons" value={p?.lessons_pct ?? null} series={1} />
-            <ReportRing label="Quizzes" value={p?.quizzes_pct ?? null} series={2} />
-            <ReportRing label="Pre-test" value={p?.pre_score ?? null} series={2} />
-            <ReportRing label="Post-test" value={p?.post_score ?? null} series={4} />
+            <ReportRing label="Quizzes" value={p?.quizzes_done_pct ?? null} series={2} />
           </div>
         </Card>
         <Card variant="white">
-          <h3 className="ds-h3" style={{ marginTop: 0 }}>Scores by assessment</h3>
+          <h3 className="ds-h3" style={{ marginTop: 0 }}>Activities</h3>
           {rows.length > 0 && !anyAttempt && (
             <div className="sr-empty" data-slot="report-empty">
               <img src={reportEmptyArt} alt="" width={120} height={90} />
               <p className="ds-body" style={{ color: "var(--ds-muted)" }}>
-                No attempts yet — scores appear here once the student takes an assessment.
+                No attempts yet — open an activity to preview its test paper.
               </p>
             </div>
           )}
-          {rows.map((r) => (
-            <ScoreRow key={r.id} title={r.title} kind={r.kind}
-              score={r.score} released={r.released} />
+          {groups.map(([lesson, items]) => (
+            <div key={lesson} className="sr-act-group">
+              <p className="sr-act-lesson">{lesson}</p>
+              {items.map((r) => (
+                <button key={r.id} type="button" className="sr-act-row"
+                  onClick={() => setPaper(r)}>
+                  <span className="sr-act-name">{r.title}</span>
+                  <span className="sr-act-meta">
+                    {r.score == null
+                      ? <span className="ds-caption" style={{ color: "var(--ds-muted)" }}>Not taken</span>
+                      : <span className="sr-score-val">
+                          {r.points_total != null
+                            ? `${fmtPts(r.points_earned)}/${fmtPts(r.points_total)} pts`
+                            : `${Math.round(r.score)}%`}
+                        </span>}
+                    {r.score != null && !r.released && (
+                      <span className="sr-unreleased">Not released</span>
+                    )}
+                    <Icon name="chevron" size={16} color="var(--ds-muted)" />
+                  </span>
+                </button>
+              ))}
+            </div>
           ))}
           {rows.length === 0 && assessments.data && (
             <div className="sr-empty" data-slot="report-empty">
@@ -225,6 +240,15 @@ export default function StudentReport() {
           {String(assessments.error ?? lessons.error)}
         </p>
       ) : null}
+      <AttemptPaperModal
+        open={paper != null}
+        onClose={() => setPaper(null)}
+        assessmentId={paper?.id ?? null}
+        studentId={studentId}
+        studentName={name}
+        teacherName={teacherName}
+        released={paper?.released ?? true}
+      />
     </>
   );
 }

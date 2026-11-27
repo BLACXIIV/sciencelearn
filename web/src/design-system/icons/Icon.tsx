@@ -1,5 +1,5 @@
 import {
-  ArrowLeft, Atom, Award, BarChart3, BookOpen, Camera, Check, CheckCircle2,
+  ArrowDown, ArrowLeft, ArrowUp, Atom, Award, BarChart3, BookOpen, Camera, Check, CheckCircle2,
   ChevronRight, CircleAlert, ClipboardCheck, ClipboardList, Clock, CloudOff,
   Copy, Download, Ellipsis, ExternalLink, Eye, EyeOff, FlaskConical, Globe, GraduationCap,
   Home, Inbox,
@@ -25,7 +25,7 @@ const registry = {
   chevron: ChevronRight, alert: CircleAlert, openExternal: ExternalLink,
   copy: Copy, play: Play, add: Plus, tip: Lightbulb, pending: Timer,
   award: Award, delete: Trash2, search: Search, close: X, check: Check,
-  more: Ellipsis, export: Download,
+  more: Ellipsis, export: Download, up: ArrowUp, down: ArrowDown,
 } as const;
 
 export type IconName = keyof typeof registry;

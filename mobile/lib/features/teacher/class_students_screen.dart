@@ -38,7 +38,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
           style: DSText.body),
       actions: [
         DSButton(
-          variant: DSButtonVariant.ghost,
+          variant: DSButtonVariant.outline,
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Keep it'),
         ),
@@ -67,7 +67,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
           style: DSText.body),
       actions: [
         DSButton(
-          variant: DSButtonVariant.ghost,
+          variant: DSButtonVariant.outline,
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
         ),
@@ -103,8 +103,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 members.when(
-                  loading: () =>
-                      const Center(child: DSLoadingIndicator()),
+                  loading: () => const Center(child: DSLoadingIndicator()),
                   error: (e, _) => DSEmptyState(
                     icon: DSIconName.offline,
                     title: "Couldn't load this right now",

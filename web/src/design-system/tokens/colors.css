@@ -44,6 +44,11 @@
   --ds-error: #D9483B;
   --ds-error-surface: #FFD9D4;
 
+  /* status-ink text colors — darker tone variants for 12%-tint StatusBadges */
+  --ds-success-ink: #127A6B;
+  --ds-warning-ink: #9A6200;
+  --ds-neutral-ink: #5A6480;
+
   /* progress track */
   --ds-track: #E4E9FB;
 

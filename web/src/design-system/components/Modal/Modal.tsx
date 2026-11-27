@@ -14,6 +14,8 @@ export interface ModalProps {
   actions?: ReactNode;
   /** Accessible label override. */
   ariaLabel?: string;
+  /** "wide" = 760px scrollable body (documents, test papers). */
+  size?: "default" | "wide";
 }
 
 /**
@@ -21,7 +23,7 @@ export interface ModalProps {
  * backdrop. Esc / backdrop click close. Use for confirms and small forms;
  * for mobile-style flow containers prefer BottomSheet.
  */
-export function Modal({ open, onClose, title, children, actions, ariaLabel }: ModalProps) {
+export function Modal({ open, onClose, title, children, actions, ariaLabel, size = "default" }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -37,7 +39,7 @@ export function Modal({ open, onClose, title, children, actions, ariaLabel }: Mo
   return createPortal(
     <div className="ds-modal-backdrop" onClick={onClose}>
       <div
-        className="ds-modal"
+        className={`ds-modal${size === "wide" ? " ds-modal-wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel ?? title}

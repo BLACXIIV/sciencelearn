@@ -477,7 +477,9 @@ class _LessonCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(children: [
-                    _StatusPill(published: pub),
+                    DSStatusBadge(
+                        status:
+                            pub ? DSStatus.published : DSStatus.draft),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(subject,
@@ -541,27 +543,6 @@ class _LessonCard extends StatelessWidget {
             ]),
           ]),
         ),
-      ),
-    );
-  }
-}
-
-/// Mint / yellow status chip (top of the card's text column).
-class _StatusPill extends StatelessWidget {
-  final bool published;
-  const _StatusPill({required this.published});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: published ? DSColors.mint : DSColors.pastelYellow,
-        borderRadius: DSRadii.pillBr,
-      ),
-      child: Text(
-        published ? 'Published' : 'Draft',
-        style: DSText.label.copyWith(fontSize: 11),
       ),
     );
   }

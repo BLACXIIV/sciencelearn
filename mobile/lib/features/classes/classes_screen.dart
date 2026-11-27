@@ -132,8 +132,8 @@ class _MyClassesState extends ConsumerState<MyClassesScreen> {
                             title: Text('${e['classes']?['name'] ?? 'Class'}'),
                             subtitle:
                                 const Text('Waiting for teacher approval'),
-                            trailing: const DSBadge(
-                                tone: DSBadgeTone.sun, child: Text('Pending')),
+                            trailing: const DSStatusBadge(
+                                status: DSStatus.pending),
                           ),
                   ),
               ]);

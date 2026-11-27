@@ -38,6 +38,11 @@ abstract final class DSColors {
   static const error = Color(0xFFD9483B);
   static const errorSurface = Color(0xFFFFD9D4);
 
+  /// Status-ink text colors — darker tone variants for 12%-tint StatusBadges.
+  static const successInk = Color(0xFF127A6B);
+  static const warningInk = Color(0xFF9A6200);
+  static const neutralInk = muted;
+
   // progress track
   static const track = Color(0xFFE4E9FB);
 

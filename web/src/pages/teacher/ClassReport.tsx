@@ -182,7 +182,7 @@ export default function ClassReport() {
         </div>
       </div>
 
-      <div className="sr-grid">
+      <div className="bento">
         <Card variant="white">
           <div className="td-spread">
             <h3 className="ds-h3" style={{ margin: 0 }}>Class pre-test to post-test</h3>
@@ -194,7 +194,7 @@ export default function ClassReport() {
         </Card>
         <Card variant="white">
           <h3 className="ds-h3" style={{ marginTop: 0 }}>Class averages</h3>
-          <div className="sr-rings">
+          <div className="sr-rings bento-cols">
             <ReportRing label="Lessons" value={lessonsAvg} series={1} />
             <ReportRing label="Quizzes" value={quizAvg} series={2} />
             <ReportRing label="Pre-test" value={preAvg} series={2} />
@@ -242,7 +242,7 @@ export default function ClassReport() {
             </p>
           )}
         </Card>
-        <Card variant="white" className="cr-roster">
+        <Card variant="white" className="cr-roster bento-wide">
           <div className="td-spread">
             <h3 className="ds-h3" style={{ margin: 0 }}>Students</h3>
             <span className="ds-caption" style={{ color: "var(--ds-muted)" }}>

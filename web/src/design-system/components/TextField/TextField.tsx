@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, ReactNode, forwardRef, useId } from "react";
 import { Icon } from "../../icons/Icon";
+import { cleanChars } from "../../../utils/text";
 import "./TextField.css";
 
 export interface TextFieldProps
@@ -15,6 +16,8 @@ export interface TextFieldProps
   /** Content injected into the input wrapper's right side (e.g. eye toggle). */
   trailing?: ReactNode;
   id?: string;
+  /** Normalize pasted/typed text live (docx symbol glyphs, arrows, subscripts). */
+  clean?: boolean;
 }
 
 /**
@@ -24,7 +27,7 @@ export interface TextFieldProps
  * chrome in TextField.css.
  */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, helper, leading, trailing, id, className = "", ...rest },
+  { label, error, helper, leading, trailing, id, className = "", clean = false, onChange, ...rest },
   ref,
 ) {
   const uid = useId();
@@ -41,6 +44,10 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           aria-invalid={error ? true : undefined}
           aria-describedby={error || helper ? msgId : undefined}
           {...rest}
+          onChange={(e) => {
+            if (clean) e.target.value = cleanChars(e.target.value);
+            onChange?.(e);
+          }}
         />
         {trailing}
       </div>

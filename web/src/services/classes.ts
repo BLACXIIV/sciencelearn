@@ -11,6 +11,8 @@ export interface ClassRow {
   teacher_id: string;
   join_policy: "open" | "approval";
   enrollments: { status: string }[];
+  /** Teacher's profile via classes_teacher_id_fkey — used for the paper header. */
+  profiles: { full_name: string } | null;
 }
 
 export interface ClassMember {
@@ -33,7 +35,7 @@ export async function fetchMyClasses(): Promise<ClassRow[]> {
 export async function fetchClass(id: string): Promise<ClassRow> {
   const { data, error } = await supabase
     .from("classes")
-    .select("id, name, code, teacher_id, join_policy, enrollments(status)")
+    .select("id, name, code, teacher_id, join_policy, enrollments(status), profiles!classes_teacher_id_fkey(full_name)")
     .eq("id", id).single();
   if (error) throw error;
   return data as unknown as ClassRow;
@@ -89,9 +91,13 @@ export interface EnrolledClass {
 }
 
 export async function fetchEnrolledClasses(): Promise<EnrolledClass[]> {
+  // Own rows only — migration 0010's member-read policy returns the whole
+  // roster; without the filter the picker duplicates a card per classmate.
+  const uid = (await supabase.auth.getUser()).data.user?.id;
   const { data, error } = await supabase
     .from("enrollments")
-    .select("class_id, status, classes(name, code, profiles!classes_teacher_id_fkey(full_name), enrollments(status))");
+    .select("class_id, status, classes(name, code, profiles!classes_teacher_id_fkey(full_name), enrollments(status))")
+    .eq("student_id", uid ?? "");
   if (error) throw error;
   return (data ?? []) as unknown as EnrolledClass[];
 }
@@ -165,10 +171,14 @@ export interface ClassStudentProgress {
   class_id: string;
   student_id: string;
   full_name: string;
+  /** % of the class's published lessons finished (unopened counts as 0). */
   lessons_pct: number;
+  /** Average submitted score — "Quiz average", not completion. */
   quizzes_pct: number | null;
   pre_score: number | null;
   post_score: number | null;
+  /** % of the class's published assessments submitted. */
+  quizzes_done_pct: number;
 }
 
 export async function fetchClassStudentProgress(classId: string): Promise<ClassStudentProgress[]> {
@@ -207,8 +217,13 @@ export interface ReportAssessment {
   id: string;
   title: string;
   kind: string;
+  /** Owning lesson's title ("No lesson" when unattached). */
+  lessonTitle: string;
   /** Latest submitted score; null = "Not taken". */
   score: number | null;
+  /** Point totals from the same attempt; null on pre-points attempts. */
+  points_earned: number | null;
+  points_total: number | null;
   /** false when release is manual and scores_released is still false. */
   released: boolean;
 }
@@ -220,29 +235,120 @@ export async function fetchStudentAssessmentRows(
 ): Promise<ReportAssessment[]> {
   const [{ data: acts, error: e1 }, { data: atts, error: e2 }] = await Promise.all([
     supabase.from("assessments")
-      .select("id, title, kind, release_scores, scores_released, lessons!inner(class_id)")
+      .select("id, title, kind, release_scores, scores_released, lessons!inner(class_id, title)")
       .eq("lessons.class_id", classId).eq("is_published", true).order("created_at"),
     supabase.from("attempts")
-      .select("assessment_id, score, submitted_at")
+      .select("assessment_id, score, points_earned, points_total, submitted_at")
       .eq("student_id", studentId).not("submitted_at", "is", null)
       .order("submitted_at", { ascending: false }),
   ]);
   if (e1) throw e1;
   if (e2) throw e2;
-  const latest = new Map<string, number>();
-  for (const a of (atts ?? []) as { assessment_id: string; score: number | null }[]) {
-    if (a.score != null && !latest.has(a.assessment_id)) latest.set(a.assessment_id, a.score);
+  const latest = new Map<string, { score: number | null; points_earned: number | null; points_total: number | null }>();
+  for (const a of (atts ?? []) as {
+    assessment_id: string; score: number | null;
+    points_earned: number | null; points_total: number | null;
+  }[]) {
+    if (a.score != null && !latest.has(a.assessment_id)) {
+      latest.set(a.assessment_id, { score: a.score, points_earned: a.points_earned, points_total: a.points_total });
+    }
   }
   return ((acts ?? []) as unknown as {
     id: string; title: string; kind: string;
     release_scores: string; scores_released: boolean;
+    lessons: { title: string } | { title: string }[] | null;
   }[]).map((a) => ({
     id: a.id,
     title: a.title,
     kind: a.kind,
-    score: latest.get(a.id) ?? null,
+    lessonTitle: (Array.isArray(a.lessons) ? a.lessons[0] : a.lessons)?.title ?? "No lesson",
+    score: latest.get(a.id)?.score ?? null,
+    points_earned: latest.get(a.id)?.points_earned ?? null,
+    points_total: latest.get(a.id)?.points_total ?? null,
     released: a.release_scores !== "manual" || a.scores_released === true,
   }));
+}
+
+// ---------- attempt "test paper" (teacher reviewing one student's paper) ----------
+
+export interface PaperAnswer {
+  /** Student's payload: {i} mc, {b} tf, {t} text, {items} enum — null when skipped. */
+  answer: unknown;
+  is_correct: boolean | null;
+  earned: number | null;
+}
+
+export interface AttemptPaper {
+  assessmentTitle: string;
+  lessonTitle: string;
+  /** created_at — closest thing to a publish date on assessments. */
+  publishedAt: string;
+  parts: { id: string; title: string; directions: string; scored: boolean; points: number }[];
+  questions: {
+    id: string; part_id: string | null; qtype: string; prompt: string;
+    choices: string[] | null; correct_index: number | null;
+    answer: { correct?: boolean | number[]; accepted?: string[]; items?: string[];
+      ordered?: boolean;
+      indexes?: number[]; min?: number; max?: number; partial?: boolean;
+      buckets?: string[]; zones?: number[]; context?: string;
+      shuffle?: boolean } | null;
+  }[];
+  /** Latest submitted attempt; null = "Not taken". */
+  attempt: {
+    score: number | null; submitted_at: string;
+    /** null on attempts submitted before per-part points existed. */
+    points_earned: number | null; points_total: number | null;
+  } | null;
+  /** question_id -> the student's answer row. */
+  answers: Record<string, PaperAnswer>;
+}
+
+/** The student's paper for one assessment: full questions + keys + their picks.
+ *  Teachers read all of these under RLS ("teacher only" / "own read" policies). */
+export async function fetchAttemptPaper(
+  assessmentId: string, studentId: string,
+): Promise<AttemptPaper> {
+  const [{ data: a, error: e1 }, { data: parts, error: e2 }, { data: qs, error: e3 },
+         { data: att, error: e4 }] = await Promise.all([
+    supabase.from("assessments").select("title, created_at, lessons(title)").eq("id", assessmentId).single(),
+    supabase.from("assessment_parts").select("id, title, directions, scored, points")
+      .eq("assessment_id", assessmentId).order("position"),
+    supabase.from("questions")
+      .select("id, part_id, qtype, prompt, choices, correct_index, answer")
+      .eq("assessment_id", assessmentId).order("position"),
+    supabase.from("attempts")
+      .select("score, points_earned, points_total, submitted_at, attempt_answers(question_id, answer, is_correct, earned)")
+      .eq("assessment_id", assessmentId).eq("student_id", studentId)
+      .not("submitted_at", "is", null)
+      .order("submitted_at", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  if (e1) throw e1;
+  if (e2) throw e2;
+  if (e3) throw e3;
+  if (e4) throw e4;
+
+  const lesson = (a as { lessons?: { title: string } | { title: string }[] | null })?.lessons;
+  const attempt = att as {
+    score: number | null; submitted_at: string;
+    points_earned: number | null; points_total: number | null;
+    attempt_answers: { question_id: string; answer: unknown; is_correct: boolean | null; earned: number | null }[];
+  } | null;
+  const answers: Record<string, PaperAnswer> = {};
+  for (const r of attempt?.attempt_answers ?? []) {
+    answers[r.question_id] = { answer: r.answer, is_correct: r.is_correct, earned: r.earned };
+  }
+  return {
+    assessmentTitle: (a as { title: string }).title,
+    lessonTitle: (Array.isArray(lesson) ? lesson[0] : lesson)?.title ?? "No lesson",
+    publishedAt: (a as { created_at: string }).created_at,
+    parts: (parts ?? []) as AttemptPaper["parts"],
+    questions: (qs ?? []) as AttemptPaper["questions"],
+    attempt: attempt ? {
+      score: attempt.score, submitted_at: attempt.submitted_at,
+      points_earned: attempt.points_earned, points_total: attempt.points_total,
+    } : null,
+    answers,
+  };
 }
 
 export interface ReportLesson {

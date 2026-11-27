@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Avatar, Badge, Button, Card, CardPastel, CodeInput, Icon, IconName, ListItemCard, RingChart,
+  Avatar, Button, Card, CardPastel, CodeInput, Icon, IconName, ListItemCard, RingChart, StatusBadge,
 } from "../../design-system";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchEnrolledClasses, joinClass } from "../../services/classes";
@@ -48,7 +48,7 @@ function MyClasses() {
           </Button>
         </div>
         {msg && <p className={join.isError ? "sd-err" : "sd-ok"}>{msg}</p>}
-        {enrolled.isLoading && <p className="sd-dim">Loading…</p>}
+        {enrolled.isLoading && <p className="sd-dim">Loadingâ€¦</p>}
         {enrolled.data?.length === 0 && <p className="sd-dim">Not in any class yet. Get a code from your teacher.</p>}
       </Card>
       {enrolled.data?.map((e) => (
@@ -57,7 +57,7 @@ function MyClasses() {
           pending={e.status === "pending"}
           leading={<Avatar name={e.classes?.name ?? "?"} size={32} />}
           title={e.classes?.name}
-          trailing={e.status === "pending" ? <Badge tone="sun">Pending</Badge> : undefined}
+          trailing={e.status === "pending" ? <StatusBadge status="pending" /> : undefined}
         />
       ))}
     </>
@@ -87,7 +87,7 @@ export default function StudentHome() {
       />
 
       <h3 className="ds-h3">Quick Access</h3>
-      <div className="sd-tiles">
+      <div className="bento bento-fit bento-xs bento-gap-xs">
         {TILES.map((t) => (
           <Link key={t.to} to={t.to} className="sd-cardlink">
             <Card variant="pastel" pastelColor={t.pastel} tilt>
@@ -104,7 +104,7 @@ export default function StudentHome() {
       <MyClasses />
 
       <h3 className="ds-h3">Recent Activity</h3>
-      {recent.isLoading && <Card><p className="sd-dim">Loading…</p></Card>}
+      {recent.isLoading && <Card><p className="sd-dim">Loadingâ€¦</p></Card>}
       {recent.error && <Card><p className="sd-err">{String(recent.error)}</p></Card>}
       {recent.data?.length === 0 && (
         <Card><p className="sd-dim">No activity yet, open a lesson to get started.</p></Card>
@@ -120,7 +120,7 @@ export default function StudentHome() {
             />
           }
           title={r.lessons?.title ?? "Lesson"}
-          subtitle={`${r.percent === 100 ? "Completed" : "In progress"} · ${r.percent}%`}
+          subtitle={`${r.percent === 100 ? "Completed" : "In progress"} Â· ${r.percent}%`}
         />
       ))}
     </div>

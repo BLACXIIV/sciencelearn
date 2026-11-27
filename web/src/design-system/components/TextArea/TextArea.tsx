@@ -1,5 +1,6 @@
 import { TextareaHTMLAttributes, forwardRef, useId } from "react";
 import { Icon } from "../../icons/Icon";
+import { cleanChars } from "../../../utils/text";
 import "../TextField/TextField.css";
 
 export interface TextAreaProps
@@ -11,6 +12,8 @@ export interface TextAreaProps
   /** Muted helper line under the textarea (hidden when `error` is set). */
   helper?: string;
   id?: string;
+  /** Normalize pasted/typed text live (docx symbol glyphs, arrows, subscripts). */
+  clean?: boolean;
 }
 
 /**
@@ -18,7 +21,7 @@ export interface TextAreaProps
  * (radius 14, blue focus ring, error state), 96px minimum height.
  */
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function TextArea(
-  { label, error, helper, id, className = "", ...rest },
+  { label, error, helper, id, className = "", clean = false, onChange, ...rest },
   ref,
 ) {
   const uid = useId();
@@ -33,6 +36,10 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         aria-invalid={error ? true : undefined}
         aria-describedby={error || helper ? msgId : undefined}
         {...rest}
+        onChange={(e) => {
+          if (clean) e.target.value = cleanChars(e.target.value);
+          onChange?.(e);
+        }}
       />
       {error && (
         <p className="ds-field-msg" id={msgId}>

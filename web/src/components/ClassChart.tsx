@@ -21,7 +21,7 @@ export default function ClassChart({ students }: { students: StudentProgress[] }
       <p className="ds-caption" style={{ color: "var(--ds-muted)", marginTop: -6 }}>
         Rings fill as students take tests.
       </p>
-      <div className="td-rings">
+      <div className="td-rings bento-cols">
         {rings.map((r) => (
           <div key={r.label} className="td-ring">
             <RingChart

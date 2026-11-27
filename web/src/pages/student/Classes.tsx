@@ -1,6 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, CodeInput, EmptyState, Icon, ListItemCard } from "../../design-system";
+import { Button, Card, CodeInput, EmptyState, Icon, ListItemCard, StatusBadge } from "../../design-system";
 import { fetchEnrolledClasses, joinClass } from "../../services/classes";
 import "./student.css";
 
@@ -41,7 +41,7 @@ export default function StudentClasses() {
         {msg && <p className={msg.err ? "sd-err" : "sd-ok"}>{msg.text}</p>}
       </Card>
 
-      {classes.isLoading && <p className="sd-dim">Loading classes…</p>}
+      {classes.isLoading && <p className="sd-dim">Loading classesâ€¦</p>}
       {classes.error && <p className="sd-err">{String(classes.error)}</p>}
       {classes.data?.length === 0 && (
         <Card>
@@ -64,7 +64,7 @@ export default function StudentClasses() {
             leading={<Icon name="pending" size={22} color="var(--ds-muted)" />}
             title={e.classes?.name ?? "Class"}
             subtitle="Waiting for teacher approval"
-            trailing={<Badge tone="sun">Pending</Badge>}
+            trailing={<StatusBadge status="pending" />}
           />
         ),
       )}

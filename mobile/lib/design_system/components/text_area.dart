@@ -12,6 +12,8 @@ class DSTextArea extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final int minLines;
+  /// Normalize pasted/typed text live (docx symbol glyphs, arrows, subscripts).
+  final bool clean;
 
   const DSTextArea({
     super.key,
@@ -22,6 +24,7 @@ class DSTextArea extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.minLines = 4,
+    this.clean = false,
   });
 
   @override
@@ -35,6 +38,7 @@ class DSTextArea extends StatelessWidget {
       onChanged: onChanged,
       maxLines: minLines,
       keyboardType: TextInputType.multiline,
+      clean: clean,
     );
   }
 }

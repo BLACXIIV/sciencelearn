@@ -63,10 +63,18 @@ export type LessonWithProgress = Lesson & { lesson_progress: { percent: number }
 export type AssessmentKind =
   | "pre_test" | "post_test" | "topic_quiz" | "problem_solving" | "final_challenge" | "practice";
 
+/** Activity-level quiz mode picked at creation; presets each new question's type.
+ *  The first five are supported by the student runner today. */
+export type ActivityMode =
+  | "multiple_choice" | "true_false" | "fill_blank" | "identification" | "enumeration"
+  | "multi_select" | "classification" | "matching" | "ordering"
+  | "table_fill" | "hotspot" | "scenario";
+
 export interface Assessment {
   id: string;
   lesson_id: string | null;
   kind: AssessmentKind;
+  mode: ActivityMode;
   title: string;
   description: string;
   time_limit_sec: number | null;
@@ -75,30 +83,69 @@ export interface Assessment {
   release_scores: "immediate" | "manual";
   scores_released: boolean;
   created_at: string;
+  /** Teacher list embed — number of parts inside the activity. */
+  part_count?: number;
 }
 
-export type QuestionType = "multiple_choice" | "true_false" | "fill_blank" | "enumeration" | "identification";
+/** A part inside an activity (its own directions + quiz mode + items).
+ *  scored=false parts are practice/written work that don't count toward the score. */
+export interface AssessmentPart {
+  id: string;
+  assessment_id: string;
+  title: string;
+  directions: string;
+  mode: ActivityMode;
+  scored: boolean;
+  /** Points each item in this part is worth (1 = default). */
+  points: number;
+  position: number;
+}
+
+export type QuestionType =
+  "multiple_choice" | "multi_select" | "true_false" | "fill_blank"
+  | "enumeration" | "identification" | "classification" | "ordering";
 
 /** questions_public shape — answer keys are never exposed to students. */
 export interface QuizQuestion {
   id: string;
   assessment_id: string;
+  /** Which part this item belongs to; null = ungrouped (legacy flat quiz). */
+  part_id: string | null;
   qtype: QuestionType;
   prompt: string;
   choices: string[] | null;
-  meta: { n?: number };
+  /** n = enumeration blanks; min/max = multi_select required picks;
+   *  buckets = classification zone names; context = student-facing body;
+   *  shuffle = ordering re-shuffles per open (default true). */
+  meta: { n?: number; min?: number; max?: number; buckets?: string[];
+    context?: string; shuffle?: boolean };
   position: number;
 }
 
 /** Full questions row for the teacher builder — includes the answer key. */
 export interface Question extends QuizQuestion {
   correct_index: number | null;
-  answer: { correct?: boolean; accepted?: string[]; items?: string[]; ordered?: boolean; partial?: boolean } | null;
+  answer: {
+    /** true_false: the key. ordering: choice indexes in correct order —
+     *  one key name, disjoint qtypes. */
+    correct?: boolean | number[]; accepted?: string[]; items?: string[];
+    ordered?: boolean; partial?: boolean;
+    /** multi_select: indexes of correct choices + required pick range. */
+    indexes?: number[]; min?: number; max?: number;
+    /** classification: bucket names + correct bucket index per choice. */
+    buckets?: string[]; zones?: number[];
+    /** Student-facing body shown above the items (equations, a table, …). */
+    context?: string;
+    /** ordering: re-shuffle the shown order per open (default true). */
+    shuffle?: boolean;
+  } | null;
   explanation: string;
 }
 
 /** Student answer payload per question id, keyed by qtype. */
-export type AnswerValue = { i: number } | { b: boolean } | { t: string } | { items: string[] };
+export type AnswerValue =
+  { i: number } | { b: boolean } | { t: string } | { items: string[] }
+  | { sel: number[] } | { z: number[] } | { o: number[] };
 
 export interface AttemptResult {
   attempt_id: string;
@@ -106,6 +153,31 @@ export interface AttemptResult {
   score: number | null;
   total: number;
   released: boolean;
+  /** Point totals (sum of earned*part points / part points); null when all parts unscored. */
+  points_earned: number | null;
+  points_total: number | null;
+}
+
+/** review_attempt() payload (migration 0020): student's picks + answer keys,
+ *  only once scores are visible. */
+export interface ReviewItem {
+  question_id: string;
+  /** The question's answer key: {correct} tf, {accepted} text, {items,ordered} enum. */
+  key: Question["answer"];
+  correct_index: number | null;
+  student: AnswerValue | null;
+  is_correct: boolean | null;
+  earned: number | null;
+}
+
+export interface ReviewResult {
+  attempted: boolean;
+  released?: boolean;
+  score?: number | null;
+  total?: number;
+  points_earned?: number | null;
+  points_total?: number | null;
+  items?: ReviewItem[];
 }
 
 export interface RecentActivity {

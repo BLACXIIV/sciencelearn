@@ -38,6 +38,7 @@ export 'components/toast.dart';
 export 'components/chip.dart';
 export 'components/sticker_badge.dart';
 export 'components/badge.dart';
+export 'components/status_badge.dart';
 export 'components/progress_bar.dart';
 export 'components/ring_chart.dart';
 export 'components/stat_card.dart';

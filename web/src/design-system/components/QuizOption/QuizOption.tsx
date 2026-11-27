@@ -13,6 +13,8 @@ export interface QuizOptionProps {
   onClick?: () => void;
   /** Accessible label override. */
   ariaLabel?: string;
+  /** Custom badge content — replaces the letter box (e.g. multi-select tick). */
+  marker?: ReactNode;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface QuizOptionProps {
  * selected = blue border + pastel-blue fill; correct = mint fill + teal edge;
  * wrong = coral surface; disabled = faded, no edge. Whole row is a button.
  */
-export function QuizOption({ letter, children, state = "default", onClick, ariaLabel }: QuizOptionProps) {
+export function QuizOption({ letter, children, state = "default", onClick, ariaLabel, marker }: QuizOptionProps) {
   const icon = state === "correct" ? "check" : state === "wrong" ? "close" : null;
   return (
     <button
@@ -31,7 +33,7 @@ export function QuizOption({ letter, children, state = "default", onClick, ariaL
       aria-label={ariaLabel}
       aria-pressed={state === "selected"}
     >
-      <span className="ds-quiz-letter">{letter}</span>
+      {marker ?? <span className="ds-quiz-letter">{letter}</span>}
       <span className="ds-quiz-text">{children}</span>
       {icon && <Icon name={icon} size={20} className="ds-quiz-mark" />}
     </button>
